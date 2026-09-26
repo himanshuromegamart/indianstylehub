@@ -1,0 +1,112 @@
+{% extends "front/index.html" %}
+{%load static%}
+{%block body%}
+
+    <main>
+        <!-- BREADCRUMB SECTION START -->
+        <div class="ul-container">
+            <div class="ul-breadcrumb">
+                <h2 class="ul-breadcrumb-title">Wishlist</h2>
+                <div class="ul-breadcrumb-nav">
+                    <a href="/"><i class="flaticon-home"></i> Home</a>
+                    <i class="flaticon-arrow-point-to-right"></i>
+                    <span class="current-page">Wishlist</span>
+                </div>
+            </div>
+        </div>
+        <!-- BREADCRUMB SECTION END -->
+
+        <div class="ul-cart-container">
+            <div class="cart-top">
+                <div class="text-center">
+                    <!-- cart header -->
+                    <div class="ul-cart-header ul-wishlist-header">
+                        <div>Product</div>
+                        <div>Price</div>
+                        <div>Stock</div>
+                        <div>Remove</div>
+                    </div>
+
+                    <!-- cart body -->
+                    <div>
+                        <!-- single wishlist item -->
+                        <div class="ul-cart-item">
+                            <!-- product -->
+                            <div class="ul-cart-product">
+                                <a href="/shop-details" class="ul-cart-product-img"><img src="{%static 'assets/img/product-img-sm-6.jpg'%}" alt="Product"></a>
+                                <a href="/shop-details" class="ul-cart-product-title">Simple Things You to Save Book</a>
+                            </div>
+                            <!-- price -->
+                            <span class="ul-cart-item-price">$60.00</span>
+
+                            <!-- subtotal -->
+                            <span class="ul-cart-item-subtotal ul-wislist-item-stock green">in stock</span>
+
+                            <!-- remove -->
+                            <div class="ul-cart-item-remove">
+                                <button><i class="flaticon-close"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- single wishlist item -->
+                        <div class="ul-cart-item">
+                            <!-- product -->
+                            <div class="ul-cart-product">
+                                <a href="/shop-details" class="ul-cart-product-img"><img src="{%static 'assets/img/product-img-sm-6.jpg'%}" alt="Product"></a>
+                                <a href="/shop-details" class="ul-cart-product-title">Simple Things You to Save Book</a>
+                            </div>
+                            <!-- price -->
+                            <span class="ul-cart-item-price">$60.00</span>
+
+                            <!-- subtotal -->
+                            <span class="ul-cart-item-subtotal ul-wislist-item-stock red">Out of Stock</span>
+
+                            <!-- remove -->
+                            <div class="ul-cart-item-remove">
+                                <button><i class="flaticon-close"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- single wishlist item -->
+                        <div class="ul-cart-item">
+                            <!-- product -->
+                            <div class="ul-cart-product">
+                                <a href="/shop-details" class="ul-cart-product-img"><img src="{%static 'assets/img/product-img-sm-6.jpg'%}" alt="Product"></a>
+                                <a href="/shop-details" class="ul-cart-product-title">Simple Things You to Save Book</a>
+                            </div>
+                            <!-- price -->
+                            <span class="ul-cart-item-price">$60.00</span>
+
+                            <!-- subtotal -->
+                            <span class="ul-cart-item-subtotal ul-wislist-item-stock green">in stock</span>
+
+                            <!-- remove -->
+                            <div class="ul-cart-item-remove">
+                                <button><i class="flaticon-close"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- single wishlist item -->
+                        <div class="ul-cart-item">
+                            <!-- product -->
+                            <div class="ul-cart-product">
+                                <a href="/shop-details" class="ul-cart-product-img"><img src="{%static 'assets/img/product-img-sm-6.jpg'%}" alt="Product"></a>
+                                <a href="/shop-details" class="ul-cart-product-title">Simple Things You to Save Book</a>
+                            </div>
+                            <!-- price -->
+                            <span class="ul-cart-item-price">$60.00</span>
+
+                            <!-- subtotal -->
+                            <span class="ul-cart-item-subtotal ul-wislist-item-stock red">Out of Stock</span>
+
+                            <!-- remove -->
+                            <div class="ul-cart-item-remove">
+                                <button><i class="flaticon-close"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+{%endblock%}

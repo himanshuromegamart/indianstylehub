@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /blog-details/jollywood-bangalore-ticket-prices/
+Disallow: blog-details/loco-bear-bangalore/
+Sitemap: https://indianstylehub.com/sitemap.xml

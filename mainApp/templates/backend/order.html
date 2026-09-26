@@ -1,0 +1,402 @@
+{%extends 'superadmin/index.html'%}
+{%load static%}
+{%block body%}
+
+<!-- ============================================================== -->
+<div class="main-contentw-100">
+    <!-- Link to download shipping label -->
+    <style>
+        /* Center the container */
+        #shipping-label-container {
+            background-color: green;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            width: fit-content;
+            margin: 20px auto;
+        }
+
+        /* Style the link */
+        #shipping-label-link {
+            padding: 10px 20px;
+            margin: 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: darkgreen;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Hover effect for the link */
+        #shipping-label-link:hover {
+            background-color: limegreen;
+        }
+    </style>
+    {% if label %}
+    <div id="shipping-label-container">
+        <a href="{{ label }}" target="_blank" id="shipping-label-link">Download Shipping Label</a>
+    </div>
+{% endif %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var shippingLabelLink = document.getElementById("shipping-label-link");
+    if (shippingLabelLink) {
+        shippingLabelLink.addEventListener("click", function(event) {
+            // Prevent the default action to ensure the link opens in a new tab
+            event.preventDefault();
+
+            // Open the link in a new tab
+            window.open(shippingLabelLink.href, "_blank");
+
+            // Hide the link after opening it
+            var shippingLabelContainer = document.getElementById("shipping-label-container");
+            if (shippingLabelContainer) {
+                shippingLabelContainer.style.display = "none";
+            }
+        });
+    }
+});
+</script>
+
+
+<!-- pop for Dimension-->
+ <!-- B2B Modal -->
+ 
+
+
+
+
+    <h4 style="color:green;text-align:center;border:1px solid rgb(195, 187, 187);padding: 5px;background-color: rgb(248, 240, 255);margin-top:20px">Total Order </h4>
+        <div class="container-fluid">
+            <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-lg-3">
+                    <lable>Selected Seller</lable>
+                    <select name="seller" class="form-control">
+                        <option value="all">All Seller<option>
+                        {%for item in seller%}
+                        <option value="{{item.phone}}" {%if seller_phone == item.phone%}selected{%endif%}>{{item.company_name}}</option>
+                        {%endfor%}
+                        
+                    </select>
+                </div>
+                
+                <div class="col-lg-3">
+                    <lable>From</lable>
+                    <input type="date" name="from_date" class="form-control">
+                </div>
+                
+                <div class="col-lg-3">
+                    <lable>To</lable>
+                    <input type="date" name="to_date" class="form-control">
+                </div> 
+                <div class="col-lg-3">
+                    <input type="submit" value="Search"class="btn btn-primary mt-3">
+                </div>
+            </div>
+            </form>
+        </div>
+        
+    </div> 
+    <div class="mt-3" id="ord">
+        {%if seller_phone != "all"%}
+        <div class="container-fluid">
+            {%if url == "Pending"%}
+            <a href="/admin-seller-orders/all/Pending"  class="btn btn-outline-primary bg-primary">Pending({{pending}})</a>
+            {%else%}
+            <a href="/admin-seller-orders/all/Pending"  class="btn btn-outline-primary">Pending({{pending}})</a>
+            {%endif%}
+            {%if url == "ready-to-shipped"%}
+            <a href="/admin-seller-orders/{{seller_phone}}/ready-to-shipped" class="btn btn-outline-secondary bg-secondary text-light">Ready To Shipped({{rs}})</a>
+            {%else%}
+            <a href="/admin-seller-orders/{{seller_phone}}/ready-to-shipped" class="btn btn-outline-secondary">Ready To Shipped({{rs}})</a>
+            {%endif%}
+            <a href="/admin-seller-orders/{{seller_phone}}/shipped" class="btn btn-outline-success">Shipped({{shipped}})</a>
+            <a href="/admin-seller-orders/{{seller_phone}}/cancelled" class="btn btn-outline-danger">Cancelled({{cn}})</a>
+        </div>
+        {%else%}
+        <div class="container-fluid">
+            {%if url == "Pending"%}
+            <a href="/admin-seller-orders/all/Pending"  class="btn btn-outline-primary bg-primary text-light">Pending({{pending}})</a>
+            {%else%}
+            <a href="/admin-seller-orders/all/Pending"  class="btn btn-outline-primary">Pending({{pending}})</a>
+            {%endif%}
+            {%if url == "ready-to-shipped"%}
+            <a href="/admin-seller-orders/all/ready-to-shipped" class="btn btn-outline-secondary bg-secondary text-light">Ready To Shipped({{rs}})</a>
+            {%else%}
+            <a href="/admin-seller-orders/all/ready-to-shipped" class="btn btn-outline-secondary">Ready To Shipped({{rs}})</a>
+            {%endif%}
+            {%if url == "shipped"%}
+            <a href="/admin-seller-orders/all/shipped" class="btn btn-outline-success bg-success text-light">Shipped({{shipped}})</a>
+            {%else%}
+            <a href="/admin-seller-orders/all/shipped" class="btn btn-outline-success">Shipped({{shipped}})</a>
+            {%endif%}
+            {%if url == "cancelled"%}
+            <a href="/admin-seller-orders/all/cancelled" class="btn btn-outline-danger bg-danger text-light">Cancelled({{cn}})</a>
+            {%else%}
+            <a href="/admin-seller-orders/all/cancelled" class="btn btn-outline-danger">Cancelled({{cn}})</a>
+            {%endif%}
+        </div>
+        {%endif%}
+
+        <div class="row">
+            <div class="card">
+                <div>
+                    <div class="col-lg-12 mt-2">
+                        <div class="table-responsive">
+                               
+                                <table class="table align-middle  mb-0 table-bordered table-striped">
+                                    <thead class="table-light">
+                                        <tr>
+                                           
+                                            <th class="align-middle"> <input type="checkbox" id="opr" name="opr" onchange="toggleButtons()"></th>
+                                            <th class="align-middle"style="width:55%">Product Details</th>
+                                            
+                                            <th class="align-middle">Price</th>
+                                            <th class="align-middle">Qty</th>
+                                            <th class="align-middle">SKU</th>
+                                            
+                                            <th class="align-middle">Dispatct Date/SLA</th>
+                                            <th class="align-middle">Action</th>
+                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody >
+                                        {%for item in page_posts%}
+                                        <tr>
+                                            {%if item.product_order_status == "Pending"%}
+                                            <div id="buttons">
+                                                
+                                                <button onclick="acceptAll()" class="btn btn-primary btn-sm">Accept All</button>
+                                                <button onclick="cancelAll()" class="btn btn-danger btn-sm">Cancel All</button>
+                                            </div>
+                                            <script>
+                                                function toggleButtons() {
+                                                    var checkBox = document.getElementById("opr");
+                                                    
+                                                    var buttons = document.getElementById("buttons");
+                                                    if (checkBox.checked == true) {
+                                                        buttons.style.display = "block";
+                                                        document.getElementById("pch").checked;
+                                                    } else {
+                                                        buttons.style.display = "none";
+                                                    }
+                                                }
+                                        
+                                                function acceptAll() {
+                                                    // Logic to accept all
+                                                    window.location.href = "/seller-change-order-status/accept-all";
+                                                }
+                                        
+                                                function cancelAll() {
+                                                    // Logic to cancel all
+                                                    window.location.href = "/seller-change-order-status/cancel-all";
+                                                }
+                                            </script>
+                                        </tr>
+                                        {%endif%}
+                                        
+                                        <tr>
+                                            <style>
+                                                #buttons {
+                                                    display: none;
+                                                }
+                                                table tbody tbody tr:nth-child(odd){
+                                                    background-color: red !important; /* Color for odd rows */
+                                                }
+                                                
+                                            </style>
+                                            <td >
+                                                <input type="checkbox"id="pch">
+                                            </td>
+                                            <td>
+                                             <div class="row">
+                                                <div class="col-lg-2">
+                                                    {%if item.product_image%}
+                                                    <img src="{{item.product_image.url}}" style="height:50px;width:50px">
+                                                    {%endif%}
+                                                </div>
+                                                <div class="col-lg-10">
+                                                    <a href="/admin-order-details/{{item.id}}">
+                                                    {{item.product_name}}<br>
+                                                    Order ID: {{item.id}}</a>
+                                                </div>
+                                             </div>
+
+                                                
+                                            </td>
+                                            
+                                            <td>
+                                                
+                                                {{item.product_final}}
+                                            
+                                            </td>
+
+                                            
+                                            <td> {{item.product_qty}}</td>
+                                        </td>
+
+                                            
+                                        <td title="{{item.product_sku}}"> {{item.product_sku|slice:"20"}}</td>
+                                            <td>  {{item.date}} </td>
+                                            {%if item.product_order_status == "Pending"%}
+                                                <td style="display:flex;justify-content:space-between">
+                                                    <a class=" btn btn-success btn-sm" href="/admin-change-order-status/{{item.id}}/ready-to-shipped">Accept</a>
+                                                
+                                                    <a class="btn btn-danger btn-sm" href="/admin-change-order-status/{{item.id}}/cancelled">Cancel</a>
+                                                </td>
+                                               
+                                            {%endif%}
+                                            {%if item.product_order_status == "ready-to-shipped"%}
+                                            {%if item.label == "Pending" and item.api_type == "b2c"%}
+                                                <td>
+                                                    {% comment %} <a class=" btn btn-success btn-sm" href="/download-bill/{{item.id}}">Download Lable</a> {% endcomment %}
+                                                    <a class=" btn btn-warning btn-sm" href="/download-label/{{item.id}}">B2C Download Lable</a>
+                                                </td>
+                                            {%elif item.label == "Done" and item.api_type == "b2c" %}
+                                            <td>
+                                                {% comment %} <a class=" btn btn-success btn-sm" href="/download-bill/{{item.id}}">Download Lable</a> {% endcomment %}
+                                                <a class=" btn btn-success btn-sm" href="/download-shipping-labels/{{item.waybill}}/{{item.id}}">B2C Lable Downloaded</a>
+                                            </td>
+                                            {%elif item.label == "Pending" and item.api_type == "b2b" %}
+                                            <td>
+                                                <!-- POP for Dimension-->
+                                                <div class="modal fade" id="b2bModal" tabindex="-1" role="dialog" aria-labelledby="b2bModalLabel" aria-hidden="true">
+                                                    <div class="modal-dialog" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="b2bModalLabel">Enter Shipment Details</h5>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <form id="b2bForm" method="post" action="/create-b2b-manifest/">
+                                                                    {% csrf_token %}
+                                                                    <input type="hidden" name="order_id" id="order_id"value="{{item.id}}">
+                                                                    <div class="form-group">
+                                                                        <label for="length">Length (cm):</label>
+                                                                        <input type="number" class="form-control" id="length" name="length" placeholder="Length of Box" min="1" required>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label for="width">Width (cm):</label>
+                                                                        <input type="number" class="form-control" id="width" name="width" placeholder="Width of Box" min="1" required>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label for="height">Height (cm):</label>
+                                                                        <input type="number" class="form-control" id="height" name="height" placeholder="Height of Box" min="1" required>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label for="box">Box Count:</label>
+                                                                        <input type="number" class="form-control" id="box" name="box" placeholder="Total Number of Box" min="1" required step="1">
+                                                                    </div>
+                                                                    
+                                                                    <div class="text-center">
+                                                                        <button type="submit" class="btn btn-primary mt-2">Submit</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <!-- End pop-->
+                                                <button type="button" class="btn btn-primary btn-sm" data-id="{{ item.id }}" data-toggle="modal" data-target="#b2bModal">B2B Download Label</button>
+                                                
+                                            </td>
+                                            
+                                            {%elif item.label == "Done" and item.api_type == "b2b" %}
+                                            <td>
+                                                {% comment %} <a class=" btn btn-success btn-sm" href="/download-bill/{{item.id}}">Download Lable</a> {% endcomment %}
+                                                <a class=" btn btn-success btn-sm" href="/download-b2b-label/{{item.waybill}}/{{item.id}}">B2BLable Downloaded</a>
+                                            </td>
+                                            {%endif%}
+                                            {%endif%}
+                                            
+                                           
+                                        </tr>
+                                        {%endfor%}
+                                        {%if label%}
+                                        
+                                        <script>
+                                            if (confirm("Do you want to download the Invoice?")) {
+                                                // Create a temporary link element
+                                                var link = document.createElement("a");
+                                                link.href = "/invoice/{{ oid }}";
+                                                link.target = "_blank";
+                                                
+                                                // Append the link to the body (required for Firefox)
+                                                document.body.appendChild(link);
+                                                
+                                                // Programmatically click the link
+                                                link.click();
+                                                
+                                                // Remove the link from the document
+                                                document.body.removeChild(link);
+                                            }
+                                        </script>
+                                         
+                                        
+                                        {%endif%}
+                                        
+                                        
+                                    </tbody>
+                                </table>
+                                <!-- POP For Dimension-->
+                                
+                                
+                                
+                            </div>
+                            <!-- end table-responsive -->
+                        </div>
+                    </div>
+                </div>
+                <div class="blog-pagination">
+                    <nav>
+                        <ul class="pagination">
+                            <li class="page-item previtem {% if not page_posts.has_previous %}disabled{% endif %}">
+                                <a class="page-link"
+                                    href="{% if page_posts.has_previous %}?page={{ page_posts.previous_page_number }}{% endif %}">
+                                    <i class="fas fa-regular fa-arrow-left"></i> Prev
+                                </a>
+                            </li>
+                            <li class="justify-content-center pagination-center">
+                                <div class="pagelink">
+                                    <ul class="d-flex">
+                                        {% for page_num in page_range %}
+                                        <li
+                                            class="page-item {% if page_posts.number == page_num %}active{% endif %}">
+                                            <a class="page-link" href="?page={{ page_num }}">
+                                                {{ page_num }}
+                                                {% if page_posts.number == page_num %}
+                                                <span class="visually-hidden">(current)</span>
+                                                {% endif %}
+                                            </a>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </li>
+                            <li class="page-item nextlink {% if not page_posts.has_next %}disabled{% endif %}">
+                                <a class="page-link"
+                                    href="{% if page_posts.has_next %}?page={{ page_posts.next_page_number }}{% endif %}">
+                                    Next <i class="fas fa-regular fa-arrow-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+
+            </div>        
+        </div>
+
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+    {%endblock%}

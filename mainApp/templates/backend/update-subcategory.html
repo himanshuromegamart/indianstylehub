@@ -1,0 +1,176 @@
+{% extends 'backend/index.html' %}
+{% load static %}
+{% block body %}
+<script>
+    function validateForm() {
+        var name = document.getElementById("name").value.trim();
+        var currentCategory = "{{ data.category.name|escapejs }}";
+        var currentName = "{{ data.name|escapejs }}";
+
+        var existingNames = [];
+        {% for item in categories %}
+            existingNames.push("{{ item.name|escapejs }}");
+        {% endfor %}
+
+        console.log("Existing Names:", existingNames);
+        console.log("Entered Name:", name);
+
+        if (existingNames.includes(name)) {
+            alert("Subcategory with this name already exists under the selected category.");
+            return false;
+        }
+        return true;
+    }
+</script>
+
+{% if messages %}
+<div class="container bg-warning">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} mt-2" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="w-100">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-center">Update Subcategory</h4>
+                        <form method="post" enctype="multipart/form-data" onsubmit="return validateForm();">
+                            {% csrf_token %}
+                            <div class="row">
+                                <!-- Maincategory Selection -->
+                                <div class="col-lg-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">Maincategory<span class="text-danger">*</span></label>
+                                        <select id="maincategory-select" class="form-control" name="maincategory" title="Select Maincategory" required>
+                                            <option value="" disabled>Select Maincategory &#9660;</option>
+                                            {% for item in maincategories %}
+                                            <option value="{{ item.slug }}" {% if item.slug == data.category.maincategory.slug %}selected{% endif %}>
+                                                {{ item.name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-lg-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">Category<span class="text-danger">*</span></label>
+                                        <select id="subcategory-select" class="form-control" name="category" required onchange="updateCategorySpecification()">
+                                            <!-- Subcategories will be dynamically populated -->
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        var maincategorySelect = document.getElementById('maincategory-select');
+                                        var subcategorySelect = document.getElementById('subcategory-select');
+                                    
+                                        // Function to populate subcategories based on the selected main category
+                                        function populateSubcategories(maincategory, selectedSubcategory) {
+                                            subcategorySelect.innerHTML = ''; // Clear previous options
+                                    
+                                            // Placeholder option
+                                            var defaultOption = document.createElement('option');
+                                            defaultOption.value = '';
+                                            defaultOption.text = 'Select Category \u25BC';
+                                            defaultOption.disabled = true;
+                                            subcategorySelect.appendChild(defaultOption);
+                                    
+                                            var foundSelectedSubcategory = false; // Track if the selected subcategory is found
+                                    
+                                            {% for item in categories %}
+                                            if ('{{ item.maincategory.slug }}' === maincategory) {
+                                                var option = document.createElement('option');
+                                                option.value = '{{ item.slug }}';
+                                                option.text = '{{ item.name }}';
+                                                if ('{{ item.name }}' === selectedSubcategory) {
+                                                    option.selected = true; // Automatically select the subcategory
+                                                    foundSelectedSubcategory = true;
+                                                }
+                                                subcategorySelect.appendChild(option);
+                                            }
+                                            {% endfor %}
+                                    
+                                            // Set the placeholder option as selected if no matching subcategory is found
+                                            if (!foundSelectedSubcategory) {
+                                                defaultOption.selected = true;
+                                            }
+                                        }
+                                    
+                                        // Event listener for maincategory change
+                                        maincategorySelect.addEventListener('change', function () {
+                                            var maincategory = this.value;
+                                            populateSubcategories(maincategory, null); // No pre-selected subcategory on change
+                                        });
+                                    
+                                        // Initial population of subcategories based on the selected maincategory and pre-selected subcategory
+                                        var initialMaincategory = maincategorySelect.value;
+                                        var initialSelectedSubcategory = '{{ data.category.name }}'; // Pre-selected category
+                                        populateSubcategories(initialMaincategory, initialSelectedSubcategory);
+                                    });
+                                    
+                                </script>
+                                
+
+                                <!-- Subcategory Name -->
+                                <div class="col-lg-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">Name<span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="name" name="name" value="{{ data.name }}" required>
+                                    </div>
+                                </div>
+
+                                <!-- Image -->
+                                {% if data.image %}
+                                <div class="col-lg-1 mt-4">
+                                    <div class="mb-3">
+                                        <img src="{{ data.image }}" alt="Subcategory Image" class="img-thumbnail" width="100%">
+                                    </div>
+                                </div>
+                                {% endif %}
+                                <div class="col-lg-2">
+                                    <div class="mb-3">
+                                        <label class="form-label">Icon</label>
+                                        <input type="file" accept=".png,.jpg,.jpeg,.webp" class="form-control" name="image">
+                                    </div>
+                                </div>
+
+                                
+
+                                <!-- Meta Title -->
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Meta Title</label>
+                                        <input type="text" class="form-control" name="title" value="{{ data.title }}">
+                                    </div>
+                                </div>
+
+                                <!-- Meta Description -->
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Meta Description</label>
+                                        <textarea name="description" class="form-control" rows="2">{{ data.description }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary mt-4" style="padding: 2px 50px;">Update</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

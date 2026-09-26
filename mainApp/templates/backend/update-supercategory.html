@@ -1,0 +1,102 @@
+{% extends 'backend/index.html' %}
+{% load static %}
+{% block body %}
+
+<script>
+    function validateForm() {
+        var name = document.getElementById("name").value.trim();
+        var currentname = '{{data.name}}'
+
+        // Extract existing maincategories except the current one
+        var existingName = [];
+        {% for item in supercategories %}
+            if ('{{ item.name }}' !== currentname) {  // Exclude the current category from validation
+                existingName.push('{{ item.name }}');
+            }
+        {% endfor %}
+
+        // Check if the entered name already exists in the 'existingName' array
+        if (existingName.includes(name)) {
+            alert("Supercategory already exists.");
+            return false; // Prevent form submission
+        }
+        return true; // Allow form submission if all validations pass
+    }
+</script>
+
+
+<div class="main-contentw-100">
+    <div class="">
+        <div class="container-fluid">
+            <!-- end row -->
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="text-center">Update Supercategory</h4>
+                            <form method="post" enctype="multipart/form-data" onsubmit="return validateForm();">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-lg-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">Name<span class="text-danger">*</span></label>
+                                            <input type="text" id="name" class="form-control" placeholder="Enter Name" name="name" required value="{{ data.name }}">
+                                        </div>
+                                    </div>
+                                    {% if data.image %}
+                                    <div class="col-lg-1 mt-4">
+                                        <div class="mb-3">
+                                            <img 
+                                                src="https://via.placeholder.com/50" 
+                                                data-src="{{ data.image }}" 
+                                                alt="Maincategory Image" 
+                                                class="lazy-load img-thumbnail" 
+                                                width="50"
+                                                height="50">
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="col-lg-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">Icon<span class="text-danger">*</span></label>
+                                            <input type="file" accept=".png,.jpg,.jpeg" class="form-control" name="image">
+                                        </div>
+                                    </div>
+
+                                    {% if data.background_image %}
+                                    <div class="col-lg-1 mt-4">
+                                        <div class="mb-3">
+                                            <img 
+                                                src="https://via.placeholder.com/50" 
+                                                data-src="{{ data.background_image }}" 
+                                                alt="Image" 
+                                                class="lazy-load img-thumbnail" 
+                                                width="50"
+                                                height="50">
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="col-lg-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">Background Image(400x320px)<span class="text-danger">*</span></label>
+                                            <input type="file" accept=".png,.jpg,.jpeg" class="form-control" name="image2">
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary text-center mt-4" style="padding:2px 50px;">Update</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- end row -->
+        </div>
+    </div>
+    <!-- End Page-content -->
+</div>
+
+
+{% endblock %}

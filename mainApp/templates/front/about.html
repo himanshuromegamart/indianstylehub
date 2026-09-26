@@ -1,0 +1,207 @@
+{% extends "front/index.html" %}
+{% load static %}
+{% block body %}
+<main>
+    <!-- BREADCRUMB SECTION START -->
+    <div class="ul-container">
+        <div class="ul-breadcrumb">
+            <h2 class="ul-breadcrumb-title">About Us</h2>
+            <div class="ul-breadcrumb-nav">
+                <a href="/"><i class="flaticon-home"></i> Home</a>
+                <i class="flaticon-arrow-point-to-right"></i>
+                <span class="current-page">About Us</span>
+            </div>
+        </div>
+    </div>
+    <!-- BREADCRUMB SECTION END -->
+
+    <!-- ABOUT COVER AREA START -->
+    <div class="ul-container">
+        <div class="ul-about-cover-img">
+            <img src="{% static 'assets/img/about-cover-img.jpg' %}" alt="Cover Image">
+        </div>
+    </div>
+    <!-- ABOUT COVER AREA END -->
+
+    <!-- ABOUT SECTION START -->
+    <div class="ul-inner-page-container my-0">
+        <section class="ul-about">
+            <div class="row row-cols-md-2 row-cols-1 align-items-center ul-bs-row">
+                <!-- txt -->
+                <div class="col">
+                    <div class="ul-about-txt">
+                        <span class="ul-section-sub-title">About Us</span>
+                        <h2 class="ul-section-title">Celebrating Indian Fashion</h2>
+                        <p>At <strong>Indian Style Hub</strong>, we bring together the timeless beauty of Indian tradition with modern elegance. From handwoven sarees and intricate lehengas to casual ethnic wear and trendy fusion outfits, our platform is your go-to destination for authentic and stylish Indian clothing. We believe fashion is a powerful form of self-expression, and our collections are carefully curated to reflect the richness of Indian heritage with a contemporary twist.</p>
+                    </div>
+                </div>
+
+                <!-- img -->
+                <div class="col">
+                    <div class="ul-about-img"><img src="{% static 'assets/img/about-img-1.jpg' %}" alt="About Image"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- ABOUT SECTION END -->
+
+    <!-- HISTORY SECTION START -->
+    <div class="ul-inner-page-container my-0">
+        <section class="ul-about">
+            <div class="row row-cols-md-2 row-cols-1 align-items-center ul-bs-row">
+                <!-- img -->
+                <div class="col">
+                    <div class="ul-about-img"><img src="{% static 'assets/img/about-img-2.jpg' %}" alt="Our Journey"></div>
+                </div>
+
+                <!-- txt -->
+                <div class="col">
+                    <div class="ul-about-txt">
+                        <span class="ul-section-sub-title">Our Journey</span>
+                        <h2 class="ul-section-title">Since 2025</h2>
+                        <p>Founded in 2025, Indian Style Hub has evolved from a small family-owned boutique into a thriving online marketplace for Indian ethnic wear. Over the years, we’ve built strong relationships with artisans, weavers, and designers across India to ensure each piece reflects exceptional craftsmanship. Our journey has always been about celebrating diversity, empowering creators, and helping customers look their best while embracing their cultural roots.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- HISTORY SECTION END -->
+
+    <!-- MORE ABOUT US SECTION START -->
+    <div class="ul-inner-page-container mb-0">
+        <div class="ul-more-about">
+            <!-- heading -->
+            <div class="ul-more-about-heading">
+                <h2 class="ul-section-title">Why Choose Indian Style Hub?</h2>
+                <p class="ul-more-about-heading-descr">We aim to deliver more than just clothing — we offer a connection to culture, craftsmanship, and confidence.</p>
+            </div>
+
+            <!-- row -->
+            <div class="row row-cols-lg-3 row-cols-sm-2 row-cols-1 ul-more-about-row">
+                <!-- single point -->
+                <div class="col">
+                    <div class="ul-more-about-point">
+                        <h3 class="ul-more-about-point-title">Trend Meets Tradition</h3>
+                        <p class="ul-more-about-point-descr">We merge classic Indian silhouettes with modern designs to keep your style fresh yet rooted in tradition.</p>
+                    </div>
+                </div>
+
+                <!-- single point -->
+                <div class="col">
+                    <div class="ul-more-about-point">
+                        <h3 class="ul-more-about-point-title">Inclusive Sizing</h3>
+                        <p class="ul-more-about-point-descr">Fashion is for everyone. Our clothing comes in a wide range of sizes to fit and flatter every body type.</p>
+                    </div>
+                </div>
+
+                <!-- single point -->
+                <div class="col">
+                    <div class="ul-more-about-point">
+                        <h3 class="ul-more-about-point-title">Quality Guaranteed</h3>
+                        <p class="ul-more-about-point-descr">We prioritize quality fabrics, detailed craftsmanship, and long-lasting designs that stand out season after season.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MORE ABOUT US SECTION END -->
+
+    <!-- REVIEWS SECTION START -->
+    <section class="ul-reviews overflow-hidden">
+        <div class="ul-section-heading text-center justify-content-center">
+            <div>
+                <span class="ul-section-sub-title">Customer Love</span>
+                <h2 class="ul-section-title">What Our Customers Say</h2>
+                <p class="ul-reviews-heading-descr">We are proud to be a trusted part of your wardrobe and your stories.</p>
+            </div>
+        </div>
+
+        <!-- slider -->
+        <div class="ul-reviews-slider swiper">
+            <div class="swiper-wrapper">
+                <!-- Review 1 -->
+                <div class="swiper-slide">
+                    <div class="ul-review">
+                        <div class="ul-review-rating">
+                            <i class="flaticon-star"></i><i class="flaticon-star"></i><i class="flaticon-star"></i><i class="flaticon-star"></i><i class="flaticon-star-3"></i>
+                        </div>
+                        <p class="ul-review-descr">Absolutely loved the saree I bought! It looked exactly like the picture and the fabric was so soft and premium. Delivered on time for my cousin’s wedding!</p>
+                        <div class="ul-review-bottom">
+                            <div class="ul-review-reviewer">
+                                <div class="reviewer-image"><img src="{% static 'assets/img/review-author-1.png' %}" alt="Reviewer"></div>
+                                <div>
+                                    <h3 class="reviewer-name">Anjali Verma</h3>
+                                    <span class="reviewer-role">Mumbai, India</span>
+                                </div>
+                            </div>
+                            <div class="ul-review-icon"><i class="flaticon-left"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Review 2 -->
+                <div class="swiper-slide">
+                    <div class="ul-review">
+                        <div class="ul-review-rating">
+                            <i class="flaticon-star"></i><i class="flaticon-star"></i><i class="flaticon-star"></i><i class="flaticon-star"></i><i class="flaticon-star-3"></i>
+                        </div>
+                        <p class="ul-review-descr">Great variety and amazing prices! I ordered a kurta set for Diwali and received so many compliments. Will definitely shop again.</p>
+                        <div class="ul-review-bottom">
+                            <div class="ul-review-reviewer">
+                                <div class="reviewer-image"><img src="{% static 'assets/img/review-author-2.png' %}" alt="Reviewer"></div>
+                                <div>
+                                    <h3 class="reviewer-name">Rohit Sharma</h3>
+                                    <span class="reviewer-role">Bangalore, India</span>
+                                </div>
+                            </div>
+                            <div class="ul-review-icon"><i class="flaticon-left"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Review 3 -->
+                <div class="swiper-slide">
+                    <div class="ul-review">
+                        <div class="ul-review-rating">
+                            <i class="flaticon-star"></i><i class="flaticon-star"></i><i class="flaticon-star"></i><i class="flaticon-star"></i><i class="flaticon-star"></i>
+                        </div>
+                        <p class="ul-review-descr">Indian Style Hub never disappoints! The lehenga I bought for my sister’s engagement was beautifully embroidered and exactly my size. Thank you for the timely delivery!</p>
+                        <div class="ul-review-bottom">
+                            <div class="ul-review-reviewer">
+                                <div class="reviewer-image"><img src="{% static 'assets/img/review-author-3.png' %}" alt="Reviewer"></div>
+                                <div>
+                                    <h3 class="reviewer-name">Pooja Mehta</h3>
+                                    <span class="reviewer-role">Ahmedabad, India</span>
+                                </div>
+                            </div>
+                            <div class="ul-review-icon"><i class="flaticon-left"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Review 4 -->
+                <div class="swiper-slide">
+                    <div class="ul-review">
+                        <div class="ul-review-rating">
+                            <i class="flaticon-star"></i><i class="flaticon-star"></i><i class="flaticon-star"></i><i class="flaticon-star"></i><i class="flaticon-star-3"></i>
+                        </div>
+                        <p class="ul-review-descr">Loved the fabric and fit of the kurta set I received! It’s hard to find stylish ethnic wear in my size, but Indian Style Hub had so many options. Fast shipping too!</p>
+                        <div class="ul-review-bottom">
+                            <div class="ul-review-reviewer">
+                                <div class="reviewer-image"><img src="{% static 'assets/img/review-author-4.png' %}" alt="Reviewer"></div>
+                                <div>
+                                    <h3 class="reviewer-name">Siddharth Rao</h3>
+                                    <span class="reviewer-role">Hyderabad, India</span>
+                                </div>
+                            </div>
+                            <div class="ul-review-icon"><i class="flaticon-left"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <!-- REVIEWS SECTION END -->
+</main>
+{% endblock %}

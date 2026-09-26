@@ -1,0 +1,77 @@
+{% extends 'backend/index.html' %}
+{% load static %}
+{% block body %}
+
+<div class="main- w-100">
+    <div class="">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12 mt-2">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title mb-4 text-center border p-2 text-primary">Enquiry Details</h4>
+                            <div class="row">
+                                <div class="col-lg-5">
+                                    <a href="/product-details/{{data.product.name|slugify}}/{{data.product.id}}" target="_blank">
+                                        <div>
+                                    <img src="{{ data.product.image1 }}" height="300px" class="img-fluid rounded">
+                                    <h5 class="mt-4">Name: {{data.product.name}}</h5>
+                                    <h4>Price: {{data.product.price}}</h4>
+                                        </div>
+                                </a>
+                                </div>
+                                <div class="col-lg-7">
+                                    <div class="table-responsive">
+                                        <table class="table align-middle table-bordered">
+                                            <tbody>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <td>{{ data.date|date:"Y-m-d H:i" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <td>{{ data.name }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Phone</th>
+                                                    <td>{{ data.phone }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Email</th>
+                                                    <td>{{ data.email }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>City</th>
+                                                    <td>{{ data.city }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>State</th>
+                                                    <td>{{ data.state }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Address</th>
+                                                    <td>{{ data.address }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Pin Code</th>
+                                                    <td>{{ data.pincode }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Product</th>
+                                                    <td>{{ data.product.name }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- end row -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

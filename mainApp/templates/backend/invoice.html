@@ -1,0 +1,175 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .invoice-box {
+            max-width: 800px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            font-size: 16px;
+            line-height: 24px;
+            color: #555;
+        }
+        .invoice-box table {
+            width: 100%;
+            line-height: inherit;
+            text-align: left;
+        }
+        .invoice-box table td {
+            padding: 5px;
+            vertical-align: top;
+        }
+        .invoice-box table tr td:nth-child(2) {
+            text-align: right;
+        }
+        .invoice-box table tr.top table td {
+            padding-bottom: 20px;
+        }
+        .invoice-box table tr.top table td.title {
+            font-size: 45px;
+            line-height: 45px;
+            color: #333;
+        }
+        .invoice-box table tr.information table td {
+            padding-bottom: 40px;
+        }
+        .invoice-box table tr.heading td {
+            background: #eee;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+        }
+        .invoice-box table tr.details td {
+            padding-bottom: 20px;
+        }
+        .invoice-box table tr.item td {
+            border-bottom: 1px solid #eee;
+        }
+        .invoice-box table tr.item.last td {
+            border-bottom: none;
+        }
+        .invoice-box table tr.total td:nth-child(2) {
+            border-top: 2px solid #eee;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-box">
+        <table cellpadding="0" cellspacing="0">
+            <tr class="top">
+                <td colspan="2">
+                    <table>
+                        <tr>
+                            <td class="title" style="width:50%">
+                                <img src="{% static 'images/romegamart.png' %}" alt="Company logo" style="width:100%; max-width:300px;">
+                            </td>
+                            <td style="text-align:right">
+                                Invoice #: RO-{{ order.id }}<br>
+                                Date: {{ order.date }}<br>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr class="information">
+                <td colspan="2">
+                    <table>
+                        <tr>
+                            <td style="width:50%">
+                                <h4>BILL FROM</h4>
+                                <address>{{ seller.name }}</address>
+                                <address style="font-size:13px">{{ seller.address }}<br>{{ seller.city }},{{ seller.state }}, {{ seller.pin }}</address>
+                                {% if seller.gst %}
+                                <address style="font-size:13px">GST No: {{ seller.gst }}</address>
+                                {% endif %}
+                            </td>
+                            <td style="text-align:left; float:right">
+                                <h4>BILLING ADDRESS</h4>
+                                <address>{{ order.name }}</address>
+                                <address style="font-size:13px">{{ order.address }}<br>{{ order.city }}, {{ order.state }}, {{ order.pin }}</address>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr class="heading">
+                <td>SHIPPING ADDRESS</td>
+                <td></td>
+            </tr>
+            <tr class="details">
+                <td>
+                    {{ order.name }}<br>
+                    {{ order.address }}<br>{{ order.city }}, {{ order.state }}, {{ order.pin }}<br>
+                </td>
+            </tr>
+            <tr class="heading">
+                <td>Item</td>
+                <td>Price</td>
+            </tr>
+            <tr class="item">
+                <td>{{ order.product_name }} X {{ order.product_qty }}</td>
+                <td>&#8377;{{ order.product_price }}</td>
+            </tr>
+            <tr class="item">
+                <td>Shipping Amount</td>
+                <td>&#8377;{{ order.product_shipping }}</td>
+            </tr>
+            <tr class="item last">
+                <td>TAX Amount</td>
+                <td>&#8377;{{ order.tax }}</td>
+            </tr>
+            <tr class="total">
+                <td></td>
+                <td>Total: &#8377;{{ order.product_final }}</td>
+            </tr>
+            <p>Note: Please put the invoice in order box</p>
+        </table>
+    </div>
+    <button id="download-pdf">Download PDF</button>
+
+    <script>
+      document.getElementById('download-pdf').addEventListener('click', function() {
+        const { jsPDF } = window.jspdf;
+
+        html2canvas(document.querySelector('.invoice-box')).then(function(canvas) {
+          const imgData = canvas.toDataURL('image/png');
+          const pdf = new jsPDF();
+          const imgWidth = 210; // A4 width in mm
+          const pageHeight = 295; // A4 height in mm
+          const imgHeight = canvas.height * imgWidth / canvas.width;
+          let heightLeft = imgHeight;
+
+          let position = 0;
+
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+
+          while (heightLeft >= 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+          }
+
+          pdf.save('invoice.pdf');
+        }).catch(function(error) {
+          console.error('Error generating PDF:', error);
+        });
+      });
+    </script>
+</body>
+</html>

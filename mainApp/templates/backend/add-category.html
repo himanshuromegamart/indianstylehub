@@ -1,0 +1,121 @@
+{% extends 'backend/index.html' %}
+{% load static %}
+{% block body %}
+
+
+
+<div class="w-100">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-center">Add Category</h4>
+                        <form method="post" enctype="multipart/form-data" >
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-lg-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">Maincategory Name<span class="text-danger">*</span></label>
+                                        <select name="maincategory" class="form-control" required>
+                                            <option value="">Select Maincategory</option>
+                                            {% for item in mcat %}
+                                            <option value="{{ item.name }}">{{ item.name }}</option> <!-- Ensure value is the ID -->
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                    
+                                <div class="col-lg-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">Category Name<span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" placeholder="Enter Name" name="name" id="name" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-lg-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">Icon(400x400px)<span class="text-danger">*</span></label>
+                                        <input type="file" accept=".png,.jpg,.jpeg,.webp" class="form-control" name="image" required>
+                                    </div>
+                                </div>
+                                
+
+                                <div class="col-lg-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">App Background(400x320px)<span class="text-danger">*</span></label>
+                                        <input type="file" accept=".png,.jpg,.jpeg,.webp" class="form-control" name="app_background" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Category Specifications <span class="text-danger">*</span></label>
+                                        <table class="table table-bordered" id="specificationsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Key</th>
+                                                    <th>Value</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><input type="text" name="spec_key[]" class="form-control" placeholder="Enter Key"></td>
+                                                    <td><input type="text" name="spec_value[]" class="form-control" placeholder="Enter Value"></td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-success btn-sm" onclick="addSpecificationRow()">+</button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <script>
+                                    function addSpecificationRow() {
+                                        const table = document.getElementById('specificationsTable').querySelector('tbody');
+                                        const newRow = document.createElement('tr');
+                                        newRow.innerHTML = `
+                                            <td><input type="text" name="spec_key[]" class="form-control" placeholder="Enter Key"></td>
+                                            <td><input type="text" name="spec_value[]" class="form-control" placeholder="Enter Value"></td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger btn-sm" onclick="removeSpecificationRow(this)">-</button>
+                                            </td>
+                                        `;
+                                        table.appendChild(newRow);
+                                    }
+                                
+                                    function removeSpecificationRow(button) {
+                                        button.closest('tr').remove();
+                                    }
+                                </script>
+                                
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Meta Title</label>
+                                        <input type="text" class="form-control" id="colorpicker-default" placeholder="Enter Meta Title" name="title">
+                                    </div>
+                                 </div>
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Meta Description</label>
+                                        <input type="text" class="form-control" placeholder="Enter Meta Description" name="description">
+                                    </div>
+                                </div>
+
+                                <div id="error-message" class="text-danger mb-3" style="display: none;"></div>
+
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary text-center mt-4" style="padding:2px 50px;">Add</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end row -->
+    </div> 
+</div>
+
+{% endblock %}

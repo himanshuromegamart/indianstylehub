@@ -1,0 +1,15 @@
+# BharatShop - Django e-commerce project
+# Generated from the imports/settings used in the code.
+# Install with: pip install -r requirements.txt
+
+# Core framework (settings.py, manage.py, wsgi.py, asgi.py, models, views, backend)
+Django==5.2.16
+
+# Rich-text editor for Blog.description (INSTALLED_APPS: 'tinymce'; tinymce.models.HTMLField)
+django-tinymce==5.0.0
+
+# JSONRenderer / JSONParser used by the API views in mainApp/backend.py
+djangorestframework==3.17.1
+
+# Outbound HTTP calls to the external image-upload server (mainApp/backend.py)
+requests==2.34.2

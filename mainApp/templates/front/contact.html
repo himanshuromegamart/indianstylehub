@@ -1,0 +1,106 @@
+{% extends "front/index.html" %}
+{%load static%}
+{%block body%}
+
+    <main>
+        <!-- BREADCRUMB SECTION START -->
+        <div class="ul-container">
+            <div class="ul-breadcrumb">
+                <h2 class="ul-breadcrumb-title">Contact Us</h2>
+                <div class="ul-breadcrumb-nav">
+                    <a href="/"><i class="flaticon-home"></i> Home</a>
+                    <i class="flaticon-arrow-point-to-right"></i>
+                    <span class="current-page">Contact Us</span>
+                </div>
+            </div>
+        </div>
+        <!-- BREADCRUMB SECTION END -->
+
+
+        <!-- CONTACT INFO SECTION START -->
+        <section class="ul-contact-infos">
+            <!-- single contact info -->
+            <div class="ul-contact-info">
+                <div class="icon"><i class="flaticon-location"></i></div>
+                <div class="txt">
+                    <h6 class="title">Our Address</h6>
+                    <p class="descr mb-0">New Delhi, Delhi - 110027</p>
+                </div>
+            </div>
+
+            <!-- single contact info -->
+            <div class="ul-contact-info">
+                <div class="icon"><i class="flaticon-email"></i></div>
+                <div class="txt">
+                    <h6 class="title">Email Address</h6>
+                    <p class="descr mb-0">
+                        <a href="mailto:info@indianstylehub.com">info@indianstylehub.com</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- single contact info -->
+            <div class="ul-contact-info">
+                <div class="icon"><i class="flaticon-stop-watch-1"></i></div>
+                <div class="txt">
+                    <h6 class="title">Hours of Operation</h6>
+                    <p class="descr mb-0">
+                        <span>Sunday-Fri: 9 AM – 6 PM</span><br>
+                        <span>Saturday: 9 AM – 4 PM</span>
+                    </p>
+                </div>
+            </div>
+        </section>
+        <!-- CONTACT INFO SECTION END -->
+
+
+
+        <div class="ul-contact-from-">
+            <div class="ul-contact-form-container">
+                <h3 class="ul-contact-form-container__title">Get in Touch</h3>
+                {%if msg%}
+                
+                    <div class="alert alert-success">
+                        {{msg}}
+                    </div>
+                {%endif%}
+                <form method="post" class="ul-contact-form">
+                    {% csrf_token %}
+                    <div class="grid">
+                        <!-- firstname -->
+                        <div class="form-group">
+                            <div class="position-relative">
+                                <input type="text" name="name" id="name" placeholder="Your Name" required>
+                                <span class="field-icon"><i class="flaticon-user"></i></span>
+                            </div>
+                        </div>
+
+                        <!-- phone -->
+                        <div class="form-group">
+                            <div class="position-relative">
+                                <input type="tel" name="phone" id="phone-number" placeholder="Your Phone" required oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,10);">
+                                <span class="field-icon"><i class="flaticon-user"></i></span>
+                            </div>
+                        </div>
+                        <!-- email -->
+                        <div class="form-group">
+                            <div class="position-relative">
+                                <input type="email" name="email" id="email" placeholder="Your Email Address" required>
+                                <span class="field-icon"><i class="flaticon-email"></i></span>
+                            </div>
+                        </div>
+                        <!-- message -->
+                        <div class="form-group">
+                            <div class="position-relative">
+                                <textarea name="message" id="message" placeholder="Write Message..." required></textarea>
+                                <span class="field-icon"><i class="flaticon-edit"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- submit btn -->
+                    <button type="submit">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </main>
+{%endblock%}

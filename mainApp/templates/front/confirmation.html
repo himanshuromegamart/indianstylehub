@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Order Confirmed</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f4f8fb;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .confirmation-box {
+      text-align: center;
+      background: #fff;
+      padding: 40px 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      animation: fadeInUp 1s ease-out;
+    }
+
+    .confirmation-box .checkmark {
+      font-size: 70px;
+      color: #28a745;
+      animation: popIn 0.5s ease-out;
+    }
+
+    .confirmation-box h1 {
+      margin: 20px 0 10px;
+      color: #333;
+      font-size: 28px;
+    }
+
+    .confirmation-box p {
+      color: #666;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .confirmation-box .btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 25px;
+      background: #28a745;
+      color: #fff;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.3s ease;
+    }
+
+    .confirmation-box .btn:hover {
+      background: #218838;
+    }
+
+    @keyframes popIn {
+      0% {
+        transform: scale(0.4);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="confirmation-box">
+    <div class="checkmark">✔️</div>
+    <h1>Thank You!</h1>
+    <p>Your order has been confirmed.<br>
+       A confirmation email has been sent to your inbox.</p>
+    <a href="/" class="btn">Continue Shopping</a>
+  </div>
+</body>
+</html>

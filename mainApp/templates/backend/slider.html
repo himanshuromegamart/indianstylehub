@@ -1,0 +1,79 @@
+{% extends 'backend/index.html' %}
+{% load static %}
+{% block body %}
+
+<div class="w-100">
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4 text-center bg-light p-2">Upload Home Page Main Slider</h4>
+
+                        <!-- Upload Form -->
+                        <form method="post" enctype="multipart/form-data" class="bg-warning p-3 text-dark mb-3">
+                            {% csrf_token %}
+                            <div class="row">
+                                <!-- File Input -->
+                                <div class="col-lg-3 mb-3">
+                                    <label>Slider Image<span class="text-danger">*</span></label>
+                                    <input type="file" name="sliderImage" accept=".jpg, .png, .jpeg, .webp"
+                                        class="form-control" required>
+                                </div>
+
+                                
+                                <!-- Slider Value Input -->
+                                <div class="col-lg-3 mb-3">
+                                    <label>Link<span class="text-danger">*</span></label>
+                                    <input type="text" name="link" class="form-control"
+                                        placeholder="Enter Link" required>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="col-lg-3 mb-3 mt-4">
+                                    <button type="submit" class="btn btn-primary w-100">Upload</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- Slider Items -->
+                        <div class="row border">
+                            <h4 class="text-center">Current Slider</h4>
+                            {% for item in slider %}
+                            {% if item.image %}
+                            <div class="col-lg-2 text-center mb-4">
+                                <!-- Slider Image -->
+                                <div class="position-relative">
+                                    <img src="{{ item.image }}" alt="Slider Image" class="img-fluid rounded lazy"
+                                        style="height: 50px; width: auto; object-fit: cover;">
+
+                                    <!-- Delete Button -->
+                                    <a href="#" onclick="confirmDelete({{ item.id }})"
+                                        class="btn btn-sm btn-danger position-absolute" style="top: 5px; right: 5px;">
+                                        &times;
+                                    </a>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <script>
+                            // Confirm delete function
+                            function confirmDelete(sliderId) {
+                                if (confirm("Are you sure you want to delete this item?")) {
+                                    // Redirect or perform AJAX to delete the slider item
+                                    window.location.href = `/delete-slider/${sliderId}`;
+                                }
+                            }
+                        </script>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

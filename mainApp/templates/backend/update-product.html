@@ -1,0 +1,537 @@
+{%extends 'backend/index.html'%}
+{%load static%}
+{%block body%}
+<!-- ============================================================== -->
+<div class="main-contentw-100">
+    <div class="page-nt">
+        <div class="container-fluid">
+            
+            <!-- end row -->
+            {%if msg%}
+            <script>
+                alert("Product Added Successfully...")
+                window.location.href = "/product/"; 
+            </script>
+            {%endif%}
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-body">
+
+                            <h4 style="color:green;text-align:center;border:1px solid rgb(195, 187, 187);padding: 5px;background-color: rgb(248, 240, 255);">Update Your Product </h4>
+                            <form method="post" enctype="multipart/form-data">
+                                {%csrf_token%}
+                                <div class="row">
+                                 
+
+                                    <div class="col-lg-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">Maincategory<span class="text-danger">*</span></label>
+                                            <select id="maincategory-select" class="form-control" name="maincategory" title="Select Maincategory" required>
+                                                <option value="" disabled>Select Maincategory &#9660;</option>
+                                                {% for item in maincategories %}
+                                                <option value="{{ item.slug }}" {% if item.slug == data.maincategory.slug %}selected{% endif %}>
+                                                    {{ item.name }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-lg-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">Category<span class="text-danger">*</span></label>
+                                            <select id="subcategory-select" class="form-control" name="category" required onchange="updateCategorySpecification()">
+                                                <!-- Subcategories will be dynamically populated -->
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            var maincategorySelect = document.getElementById('maincategory-select');
+                                            var categorySelect = document.getElementById('subcategory-select');
+                                            var subcategorySelect = document.querySelector('[name="subcategory"]'); // Subcategory dropdown
+                                    
+                                            // Function to populate categories based on selected maincategory
+                                            function populateCategories(maincategory, selectedCategory) {
+                                                categorySelect.innerHTML = ''; // Clear previous options
+                                    
+                                                var defaultOption = document.createElement('option');
+                                                defaultOption.value = '';
+                                                defaultOption.text = 'Select Category \u25BC';
+                                                defaultOption.disabled = true;
+                                                categorySelect.appendChild(defaultOption);
+                                    
+                                                var foundSelectedCategory = false;
+                                    
+                                                {% for item in categories %}
+                                                if ('{{ item.maincategory.slug }}' === maincategory) {
+                                                    var option = document.createElement('option');
+                                                    option.value = '{{ item.slug }}';
+                                                    option.text = '{{ item.name }}';
+                                                    if ('{{ item.slug }}' === selectedCategory) {
+                                                        option.selected = true;
+                                                        foundSelectedCategory = true;
+                                                    }
+                                                    categorySelect.appendChild(option);
+                                                }
+                                                {% endfor %}
+                                    
+                                                if (!foundSelectedCategory) {
+                                                    defaultOption.selected = true;
+                                                }
+                                    
+                                                // Trigger population of subcategories for the selected category
+                                                populateSubcategories(selectedCategory, null);
+                                            }
+                                    
+                                            // Function to populate subcategories based on selected category
+                                            function populateSubcategories(category, selectedSubcategory) {
+                                                subcategorySelect.innerHTML = ''; // Clear previous options
+                                    
+                                                var defaultOption = document.createElement('option');
+                                                defaultOption.value = '';
+                                                defaultOption.text = 'Select Subcategory \u25BC';
+                                                defaultOption.disabled = true;
+                                                subcategorySelect.appendChild(defaultOption);
+                                    
+                                                var foundSelectedSubcategory = false;
+                                    
+                                                {% for item in subcategories %}
+                                                if ('{{ item.category.slug }}' === category) {
+                                                    var option = document.createElement('option');
+                                                    option.value = '{{ item.slug }}';
+                                                    option.text = '{{ item.name }}';
+                                                    if ('{{ item.slug }}' === selectedSubcategory) {
+                                                        option.selected = true;
+                                                        foundSelectedSubcategory = true;
+                                                    }
+                                                    subcategorySelect.appendChild(option);
+                                                }
+                                                {% endfor %}
+                                    
+                                                if (!foundSelectedSubcategory) {
+                                                    defaultOption.selected = true;
+                                                }
+                                            }
+                                    
+                                            // Event listener for maincategory change
+                                            maincategorySelect.addEventListener('change', function () {
+                                                var maincategory = this.value;
+                                                populateCategories(maincategory, null); // Reset category and subcategory on maincategory change
+                                            });
+                                    
+                                            // Event listener for category change
+                                            categorySelect.addEventListener('change', function () {
+                                                var category = this.value;
+                                                populateSubcategories(category, null); // Reset subcategory on category change
+                                            });
+                                    
+                                            // Initial population on page load
+                                            var initialMaincategory = maincategorySelect.value;
+                                            var initialSelectedCategory = '{{ data.category.slug }}';
+                                            var initialSelectedSubcategory = '{{ data.subcategory.slug }}';
+                                    
+                                            populateCategories(initialMaincategory, initialSelectedCategory);
+                                            populateSubcategories(initialSelectedCategory, initialSelectedSubcategory);
+                                        });
+                                    </script>
+                                    
+                                    
+                                    <div class="col-lg-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">Subcategorty<span class="text-danger">*</span></label>
+                                            <select type="text" class="form-control"  name="subcategory" required>
+                                                <option value="" disabled selected>Select Subcategorty &#9660;</option>
+                                                {%for item in subcategories%}
+                                                <option value="{{item.slug}}" {% if item.name == data.subcategory.name %}selected{% endif %}>{{item.name}}</option>
+                                                {%endfor%}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">Brand<span class="text-danger">(Optional)</span></label>
+                                            <select type="text" class="form-control"  name="brand" >
+                                                <option value="" disabled selected>Select Brand &#9660;</option>
+                                                {%for item in brands%}
+                                                <option value="{{item.name}}" {% if item.name == data.brand.name %}selected{% endif %}>{{item.name}}</option>
+                                                {%endfor%}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <h6 style="color:black;text-align:center;border:1px solid rgb(224, 219, 219);padding: 3px;background-color: rgb(248, 240, 255);">Product Image</h6>
+                                     <!-- Image -->
+                                     {% if data.image1 %}
+                                     <div class="col-lg-1">
+                                         <div class="mb-3">
+                                             <img 
+                                                 src="https://via.placeholder.com/50" 
+                                                 data-src="{{ data.image1 }}" 
+                                                 alt="Maincategory Image" 
+                                                 class="lazy-load img-thumbnail" 
+                                                 width="100%"
+                                                 height="100%">
+                                         </div>
+                                     </div>
+                                     {% endif %}
+                                    <div class="col-lg-2">
+                                        <div class="mb-3">
+                                            <label class="form-label"> Product Image-1<span class="text-danger">*</span></label>
+                                            <input type="file" class="form-control" name="image1" accept="image/jpeg, image/png, image/jpg" >
+                                        </div>
+                                    </div>
+                                     <!-- Image -->
+                                     {% if data.image2 %}
+                                     <div class="col-lg-1">
+                                         <div class="mb-3">
+                                             <img 
+                                                 src="https://via.placeholder.com/50" 
+                                                 data-src="{{ data.image2 }}" 
+                                                 alt="Maincategory Image" 
+                                                 class="lazy-load img-thumbnail" 
+                                                 width="100%"
+                                                 height="100%">
+                                         </div>
+                                     </div>
+                                     {% endif %}
+                                    <div class="col-lg-2">
+                                        <div class="mb-3">
+                                            <label class="form-label"> Product Image-2</label>
+                                            <input type="file" class="form-control" accept="image/jpeg, image/png, image/jpg" name="image2" >
+                                        </div>
+                                    </div>
+                                     <!-- Image -->
+                                     {% if data.image3 %}
+                                     <div class="col-lg-1 ">
+                                         <div class="mb-3">
+                                             <img 
+                                                 src="https://via.placeholder.com/50" 
+                                                 data-src="{{ data.image3 }}" 
+                                                 alt="Maincategory Image" 
+                                                 class="lazy-load img-thumbnail" 
+                                                 width="100%"
+                                                 height="100%">
+                                         </div>
+                                     </div>
+                                     {% endif %}
+                                    <div class="col-lg-2">
+                                        <div class="mb-3">
+                                            <label class="form-label"> Product Image-3</label>
+                                            <input type="file" class="form-control" accept="image/jpeg, image/png, image/jpg" name="image3" >
+                                        </div>
+                                    </div>
+                                     <!-- Image -->
+                                     {% if data.image4 %}
+                                     <div class="col-lg-1">
+                                         <div class="mb-3">
+                                             <img 
+                                                 src="https://via.placeholder.com/50" 
+                                                 data-src="{{ data.image4 }}" 
+                                                 alt="Maincategory Image" 
+                                                 class="lazy-load img-thumbnail" 
+                                                 width="100%"
+                                                 height="100%">
+                                         </div>
+                                     </div>
+                                     {% endif %}
+                                     <div class="col-lg-2">
+                                        <div class="mb-3">
+                                            <label class="form-label"> Product Image-4</label>
+                                            <input type="file" class="form-control" accept="image/jpeg, image/png, image/jpg" name="image4" >
+                                        </div>
+                                    </div>
+                                    
+                                    
+                                <!--Seating Space-->
+                                <h6 style="color:black;text-align:center;border:1px solid rgb(224, 219, 219);padding: 3px;background-color: rgb(248, 240, 255);">Product Details</h6>
+                                <div class="col-lg-12">
+                                    <div class="mb-3">
+                                        <label class="form-label"> Name<span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" placeholder="Enter Name"name="name" required value="{{data.name}}">
+                                    </div>
+                                </div>
+                               
+                                <div class="col-lg-2">
+                                    <div class="mb-3">
+                                        <label class="form-label">Price<span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" placeholder="Price"name="price" step="any" value="{{data.base_price}}">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-2">
+                                    <div class="mb-3">
+                                        <label class="form-label"> Discount<span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" placeholder="Enter Discount"name="discount"value="{{data.discount}}" >
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-2">
+                                    <div class="mb-3">
+                                        <label class="form-label"> Quantity<span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" placeholder="Enter Quantity"name="quantity"value="{{data.quantity}}" >
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">Color<span class="text-danger">*</span></label>
+                                        <select type="text" class="form-control"  name="color" required>
+                                            <option value="" disabled selected>Select Color &#9660;</option>
+                                            {%for item in clr%}
+                                            <option value="{{item.name}}" {% if item.name == data.color %}selected{% endif %}>{{item.name}}</option>
+                                            {%endfor%}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">Size<span class="text-danger">(Optional)</span></label>
+                                        <select type="text" class="form-control"  name="size" >
+                                            <option value="" disabled selected>Select Size &#9660;</option>
+                                            {%for item in sz%}
+                                            <option value="{{item.name}}" {% if item.name == data.size %}selected{% endif %}>{{item.name}}</option>
+                                            {%endfor%}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-2">
+                                    <div class="mb-3">
+                                        <label class="form-label"> SKU<span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" placeholder="Enter  SKU"name="sku" value="{{data.sku}}" >
+                                    </div>
+                                </div>
+                            
+                                <div class="col-lg-2">
+                                    <div class="mb-3">
+                                        <label class="form-label"> Tax<span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" placeholder="Enter Tax"name="tax" value="{{data.tax}}">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-2">
+                                    <div class="mb-3">
+                                        <label class="form-label"> Weight(in Grams) <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" placeholder="Enter Weight" name="weight" value="{{data.weight}}"  min="0" step="1" oninput="validity.valid||(value='');" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-2">
+                                    <div class="mb-3">
+                                        <label class="form-label"> Length(in cm)<span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" placeholder="Length"name="length" step="any" value="{{data.length}}">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-2">
+                                    <div class="mb-3">
+                                        <label class="form-label"> Width(in cm)<span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" placeholder="Width"name="width" step="any" value="{{data.width}}">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-2">
+                                    <div class="mb-3">
+                                        <label class="form-label"> Height(in cm)<span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" placeholder="Height"name="height" step="any" value="{{data.height}}">
+                                    </div>
+                                </div>
+                          
+                                <div class="row">
+                                    <!-- Specifications Table -->
+                                    <div class="row">
+                                        <!-- Specifications Table -->
+                                        <div class="col-lg-12">
+                                            <div class="mb-3">
+                                                <label class="form-label">Product Specifications<span class='text-danger'>*</span></label>
+                                                <table class="table table-bordered" id="specificationsTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Key</th>
+                                                            <th>Value</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <!-- This table body will be dynamically updated -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    
+
+                                    <script>
+                                        const categoryData = [
+                                            {% for item in categories %}
+                                            {
+                                                subcategory: '{{ item.slug }}',
+                                                maincategory: '{{ item.maincategory.slug }}',
+                                                specifications: {{ item.specifications|safe }}
+                                            },
+                                            {% endfor %}
+                                        ];
+                                    
+                                        const productSpecifications = {{ data.specifications|safe }};
+                                    
+                                        function populateSpecificationsTable(specifications) {
+                                            const tableBody = document.getElementById('specificationsTable').querySelector('tbody');
+                                            tableBody.innerHTML = '';
+                                    
+                                            for (const [key, value] of Object.entries(specifications)) {
+                                                const row = `
+                                                    <tr>
+                                                        <td><input type="text" name="spec_key[]" value="${key}" class="form-control" placeholder="Enter Key"></td>
+                                                        <td><input type="text" name="spec_value[]" value="${value}" class="form-control" placeholder="Enter Value"></td>
+                                                        <td><button type="button" class="btn btn-danger btn-sm" onclick="removeSpecificationRow(this)">-</button></td>
+                                                    </tr>`;
+                                                tableBody.innerHTML += row;
+                                            }
+                                    
+                                            const emptyRow = `
+                                                <tr>
+                                                    <td><input type="text" name="spec_key[]" class="form-control" placeholder="Enter Key"></td>
+                                                    <td><input type="text" name="spec_value[]" class="form-control" placeholder="Enter Value"></td>
+                                                    <td><button type="button" class="btn btn-success btn-sm" onclick="addSpecificationRow()">+</button></td>
+                                                </tr>`;
+                                            tableBody.innerHTML += emptyRow;
+                                        }
+                                    
+                                        function updateCategorySpecification() {
+                                            const maincategoryValue = document.getElementById('maincategory-select').value;
+                                            const subcategoryValue = document.getElementById('subcategory-select').value;
+                                    
+                                            const matchedCategory = categoryData.find(cat =>
+                                                cat.subcategory === subcategoryValue && cat.maincategory === maincategoryValue
+                                            );
+                                    
+                                            if (matchedCategory) {
+                                                populateSpecificationsTable(matchedCategory.specifications);
+                                            } else {
+                                                populateSpecificationsTable(productSpecifications); // fallback to original specs
+                                            }
+                                        }
+                                    
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            populateSpecificationsTable(productSpecifications); // on load
+                                    
+                                            document.getElementById('subcategory-select').addEventListener('change', updateCategorySpecification);
+                                            document.getElementById('maincategory-select').addEventListener('change', updateCategorySpecification);
+                                    
+                                            window.addSpecificationRow = function () {
+                                                const tableBody = document.getElementById('specificationsTable').querySelector('tbody');
+                                                const newRow = `
+                                                    <tr>
+                                                        <td><input type="text" name="spec_key[]" class="form-control" placeholder="Enter Key"></td>
+                                                        <td><input type="text" name="spec_value[]" class="form-control" placeholder="Enter Value"></td>
+                                                        <td><button type="button" class="btn btn-danger btn-sm" onclick="removeSpecificationRow(this)">-</button></td>
+                                                    </tr>`;
+                                                tableBody.innerHTML += newRow;
+                                            };
+                                    
+                                            window.removeSpecificationRow = function (button) {
+                                                button.closest('tr').remove();
+                                            };
+                                        });
+                                    </script>
+                                    
+                                
+                                <div class="col-lg-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Product Description <span class="text-danger">*</span></label>
+                                        <textarea name="description" class="form-control" cols="30" rows="3" placeholder="Product Description" >{{data.description}}</textarea>
+                                    </div>
+                                </div>
+                               
+                                
+                              <!-- FAQ Section -->
+                              <div class="col-lg-12">
+                                <div class="mb-3">
+                                    <label class="form-label">FAQ <span class="text-danger">*</span></label>
+                                    <table class="table table-bordered" id="faqTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Question</th>
+                                                <th>Answer</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- This table body will be dynamically updated with pre-existing FAQs -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function () {
+                                    // Parse existing FAQs from data.faq
+                                    const existingFaqs = {{ data.faq|safe }}; // Ensure safe JSON data from Django template
+                            
+                                    // Populate the FAQ table with existing data
+                                    const tableBody = document.getElementById('faqTable').querySelector('tbody');
+                                    for (const [question, answer] of Object.entries(existingFaqs)) {
+                                        const row = document.createElement('tr');
+                                        row.innerHTML = `
+                                            <td><input type="text" name="faq_key[]" class="form-control" value="${question}" placeholder="Enter Question"></td>
+                                            <td><input type="text" name="faq_value[]" class="form-control" value="${answer}" placeholder="Enter Answer"></td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger btn-sm" onclick="removeFaqRow(this)">-</button>
+                                            </td>
+                                        `;
+                                        tableBody.appendChild(row);
+                                    }
+                            
+                                    // Add an empty row for new FAQs
+                                    const emptyRow = document.createElement('tr');
+                                    emptyRow.innerHTML = `
+                                        <td><input type="text" name="faq_key[]" class="form-control" placeholder="Enter Question"></td>
+                                        <td><input type="text" name="faq_value[]" class="form-control" placeholder="Enter Answer"></td>
+                                        <td>
+                                            <button type="button" class="btn btn-success btn-sm" onclick="addFaqRow()">+</button>
+                                        </td>
+                                    `;
+                                    tableBody.appendChild(emptyRow);
+                                });
+                            
+                                // Function to add a new FAQ row
+                                function addFaqRow() {
+                                    const table = document.getElementById('faqTable').querySelector('tbody');
+                                    const newRow = document.createElement('tr');
+                                    newRow.innerHTML = `
+                                        <td><input type="text" name="faq_key[]" class="form-control" placeholder="Enter Question"></td>
+                                        <td><input type="text" name="faq_value[]" class="form-control" placeholder="Enter Answer"></td>
+                                        <td>
+                                            <button type="button" class="btn btn-danger btn-sm" onclick="removeFaqRow(this)">-</button>
+                                        </td>
+                                    `;
+                                    table.appendChild(newRow);
+                                }
+                            
+                                // Function to remove a specific FAQ row
+                                function removeFaqRow(button) {
+                                    button.closest('tr').remove();
+                                }
+                            </script>
+                            
+                        <div class="text-center">
+                                <button type="submit" class="btn btn-primary text-center mt-4" style="padding:2px 50px;">Update</submit>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- end row -->
+        </div> 
+    </div>
+    <!-- End Page-content -->
+
+    {%endblock%}

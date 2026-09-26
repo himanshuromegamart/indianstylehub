@@ -1,0 +1,103 @@
+{%extends 'superadmin/index.html'%}
+{%load static%}
+{%block body%}
+<!-- ============================================================== -->
+<div class="main-contentw-">
+    <div class="">
+        <div class="">
+            <div class="row">
+                <div class="col-lg-12 ">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 style="color:green;text-align:center;border:1px solid rgb(195, 187, 187);padding: 5px;background-color: rgb(248, 240, 255);">Order Details </h4>
+                            <div class="table-responsive">
+                                <table class="table align-middle table-nowrap table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="align-middle">Product Name</th>
+                                            <td> <a href="/product-details/{{data.product_name|slugify}}-{{data.productid}}" target="_blank">{{data.product_name}}</a><td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle">Product Quantity</th>
+                                            <td> {{data.product_qty}}<td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle">Product Final </th>
+                                            <td> &#8377;{{data.product_final}}<td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <th class="align-middle">Order Status</th>
+                                            <td> {{data.product_order_status}}<td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle bg-danger">Buyer Details</th>
+                                            
+                                        </tr>
+                                        
+                                        <tr>
+                                            <th class="align-middle">Buyer Name</th>
+                                            <td> {{data.name}}<td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle">Buyer Phone</th>
+                                            <td> {{data.phone}}<td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle">Email</th>
+                                            <td> {{data.email}}<td>
+                                        </tr>
+                                        
+                                        
+                                        <tr>
+                                            <th class="align-middle">Address</th>
+                                            <td> {{data.address}}<td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <th class="align-middle">Locality </th>
+                                            <td> {{data.locality}}<td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle">City</th>
+                                            <td> {{data.city}}<td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle">State</th>
+                                            <td> {{data.state}}<td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle">PIN</th>
+                                            <td> {{data.pin}}<td>
+                                        </tr>
+                                        
+
+                                        <tr>
+                                            <th class="align-middle bg-danger">Seller Details</th>
+                                           
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle">Seller Name</th>
+                                            <td> {{data.seller_name}}<td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle">Seller Phone</th>
+                                            <td> {{data.seller_phone}}<td>
+                                        </tr>
+                                          
+                                    </thead>
+                                   
+                                </table>
+                            </div>
+                            <!-- end table-responsive -->
+                        </div>
+                    </div>
+                </div>
+                
+
+            </div>
+         </div> 
+    </div>
+    <!-- End Page-content -->
+
+    {%endblock%}

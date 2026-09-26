@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #00416a, #e4e5e6);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 30px 40px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        .login-container h1 {
+            margin-bottom: 20px;
+            font-size: 26px;
+            color: #00416a;
+        }
+        .login-container input[type="username"], 
+        .login-container input[type="password"], 
+        .login-container input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .login-container input[type="password"]:focus, 
+        .login-container input[type="text"]:focus {
+            border-color: #00416a;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 65, 106, 0.5);
+        }
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .password-wrapper input {
+            width: 100%;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top:10px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 16px;
+            background-color: #00416a;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .login-container button:hover {
+            background-color: #003154;
+            transform: translateY(-2px);
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <form method="post">
+            {% csrf_token %}
+            <h1>Admin Login</h1>
+            {% if messages %}
+            {% for message in messages %}
+                <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            {% endif %}
+            <input 
+            type="text"  name="username"  placeholder="Enter your Username"  required  value="{{ username }}"  style="width:370px"  oninput="this.value = this.value.replace(/[^a-z0-9@.]/g, '')"
+        >
+        
+
+            <div class="password-wrapper">
+                <input type="password" name="password" id="password" placeholder="Enter your password" required value="{{ password }}" >
+                <span class="toggle-password" onclick="togglePassword()">👁</span>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+    <script>
+        function togglePassword() {
+            const passwordField = document.getElementById('password');
+            const type = passwordField.type === 'password' ? 'text' : 'password';
+            passwordField.type = type;
+            passwordField.focus(); // Retain focus
+        }
+    </script>
+</body>
+</html>

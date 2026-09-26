@@ -1,0 +1,105 @@
+{%extends 'superadmin/index.html'%}
+{%load static%}
+{%block body%}
+<!-- ============================================================== -->
+<div class="main-contentw-100">
+    <div class="">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12 mt-2">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title mb-4 text-center"> Buyer Details </h4>
+                            <div class="table-responsive">
+                                <table class="table align-middle table-nowrap table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="align-middle">Name</th>
+                                            <td> {{data.name}}<td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <th class="align-middle">Email</th>
+                                            <td> {{data.email}}<td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle">Phone</th>
+                                            <td> {{data.phone}}<td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle">Address</th>
+                                            <td> {{data.address}}<td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle">City</th>
+                                            <td> {{data.city}}<td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle">State</th>
+                                            <td> {{data.state}}<td>
+                                        </tr>
+                                      
+                                        <tr>
+                                            <th class="align-middle">PIN</th>
+                                            <td> {{data.pin}}<td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle">PAN No.</th>
+                                            <td> {{data.pan_no}}<td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle">GST No.</th>
+                                            <td> {{data.gst_no}}<td>
+                                        </tr>
+                                        
+                                        
+                                        <tr>
+                                            <th class="align-middle">PAN Card</th>
+                                            {%if data.pan%}
+                                            <td> <a href="{{data.pan.url}}" target="_blank"><i class="fa fa-eye"></i>View document</a><td>
+                                            {%endif%}
+                                            </tr>
+                                        
+                                        <tr>
+                                            <th class="align-middle">GST Certificate</th>
+                                            {%if data.gst_certificate%}
+                                            <td> <a href="{{data.gst_certificate.url}}" target="_blank"><i class="fa fa-eye"></i>View document</a><td>
+                                            {%endif%}
+                                            </tr>
+                                        <tr>
+                                            <th class="align-middle">Visiting Card</th>
+                                            {%if data.visiting_card%}
+                                            <td> <a href="{{data.visiting_card.url}}" target="_blank"><i class="fa fa-eye"></i>View document</a><td>
+                                            {%endif%}
+                                            </tr>
+                                        
+                                        <tr>
+                                            <th class="align-middle">Registration Date</th>
+                                            <td> {{data.date}}<td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle">Verification</th>
+                                            {%if data.verification == "Pending"%}
+                                            <td class="bg-danger text-light"> {{data.verification}}<span style="float:right;"><a href="/admin-verify-buyer/{{data.id}}" class="btn btn-primary btn-sm">Verify Now</a></span><td>
+                                                {%else%}
+                                                <td class="bg-success text-light"> {{data.verification}}<td>
+                                                {%endif%}
+                                        </tr>
+                                        <span style="float:right"><a href="/admin-update-user/{{data.id}}">UPDATE</a> </span>
+                                            
+                                    </thead>
+                                   
+                                </table>
+                            </div>
+                            <!-- end table-responsive -->
+                        </div>
+                    </div>
+                </div>
+                
+
+            </div>
+         </div> 
+    </div>
+    <!-- End Page-content -->
+
+    {%endblock%}

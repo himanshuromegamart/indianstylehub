@@ -1,0 +1,287 @@
+{%extends 'superadmin/index.html'%}
+{%load static%}
+{%block body%}
+<div class="position-relative">
+    <div class="position-relative container">
+        
+        <section>
+            <div class="container">
+                <div class="row ">
+                    
+                    <!-- My Account Tab Content Start -->
+                    <div class="col-lg-12 col-12 ">
+                        <div class="tab-content">
+                            <h2 class="text-center">Update Buyer Profile</h2>
+        
+                            <div class="">  
+                                <form  class="form-control" method="POST" enctype="multipart/form-data"  onsubmit="return validateForm();" >
+                                    {%csrf_token%}
+                                    <div class="row">
+                                    <div class="col-lg-4 mt-3">
+                                        <label for="name">Full Name <span
+                                                class="text-primary">*</span></label>
+                                        <input type="text" class="form-control" required 
+                                            placeholder="Full Name" name="name" required value="{{data.name}}">
+                                    </div>
+
+                                    <!-- Email or Phone -->
+                                    <!-- Email or Phone -->
+                                    <div class="col-lg-4 mt-3">
+                                        <label for="phone">Phone <span
+                                            class="text-primary">*</span></label>
+                                        <input type="tel" id="phone-code" class="form-control"
+                                        value="{{data.phone}}"  name="phone" autocomplete="off"
+                                            minlength="10" maxlength="10" placeholder="Enter Phone" readonly>
+                                    </div>
+
+                                    <div class="col-lg-4 mt-3">
+                                        <label for="email">Email<span
+                                            class="text-primary">*</span></label>
+                                        <input type="email" class="form-control " required
+                                            placeholder="Email" name="email" autocomplete="off"value="{{data.email}}">
+                                    </div>
+
+                                    <div class="col-lg-12 mt-3">
+                                        <label for="address">Address <span
+                                                class="text-primary">*</span></label>
+                                        <input type="text" class="form-control" placeholder="Address"
+                                            name="address" id="address" autocomplete="off" required value="{{data.address}}">
+                                    </div>
+
+                                    <div class="col-lg-3 mt-3">
+                                        <div class="mb-3">
+                                           
+                                            <label for="state">State</label>
+                                            <select id="state" name="state" class="form-control">
+                                              <option value="">Select State</option>
+                                              <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                              <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                              <option value="Assam">Assam</option>
+                                              <option value="Bihar">Bihar</option>
+                                              <option value="Chhattisgarh">Chhattisgarh</option>
+                                              <option value="Goa">Goa</option>
+                                              <option value="Delhi">Delhi</option>
+                                              <option value="Gujarat">Gujarat</option>
+                                              <option value="Haryana">Haryana</option>
+                                              <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                              <option value="Jharkhand">Jharkhand</option>
+                                              <option value="Karnataka">Karnataka</option>
+                                              <option value="Kerala">Kerala</option>
+                                              <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                              <option value="Maharashtra">Maharashtra</option>
+                                              <option value="Manipur">Manipur</option>
+                                              <option value="Meghalaya">Meghalaya</option>
+                                              <option value="Mizoram">Mizoram</option>
+                                              <option value="Nagaland">Nagaland</option>
+                                              <option value="Odisha">Odisha</option>
+                                              <option value="Punjab">Punjab</option>
+                                              <option value="Rajasthan">Rajasthan</option>
+                                              <option value="Sikkim">Sikkim</option>
+                                              <option value="Tamil Nadu">Tamil Nadu</option>
+                                              <option value="Telangana">Telangana</option>
+                                              <option value="Tripura">Tripura</option>
+                                              <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                              <option value="Uttarakhand">Uttarakhand</option>
+                                              <option value="West Bengal">West Bengal</option>
+                                              <option value="Chandigarh">Chandigarh</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                   
+                                    
+                                   <div class="col-lg-3 mt-3">
+                                        <div class="mb-3">
+                                            <label class="form-label"> City<span class="text-danger">*</span></label>
+                                            <select id="city" name="city" class="form-control">
+                                                <option value="">Select City</option>
+                                              </select>
+                                        </div>
+                                    </div>
+                                   
+                                        <script>
+                                          const citySelect = document.getElementById("city");
+                                          const stateSelect = document.getElementById("state");
+                                        
+                                          // Mock data for preselected state and city
+                                          const preSelectedState = "{{data.state}}"; // Replace with server data
+                                          const preSelectedCity = "{{data.city}}"; // Replace with server data
+                                        
+                                          // Fetch and populate cities based on the selected state
+                                          function fetchCities(stateName) {
+                                            const url = 'https://countriesnow.space/api/v0.1/countries/state/cities';
+                                            const data = new URLSearchParams({
+                                              country: "India",
+                                              state: stateName
+                                            });
+                                        
+                                            fetch(url, {
+                                              method: 'POST',
+                                              headers: {
+                                                'Content-Type': 'application/x-www-form-urlencoded',
+                                              },
+                                              body: data
+                                            })
+                                              .then(response => response.json())
+                                              .then(result => {
+                                                if (result.data) {
+                                                  citySelect.innerHTML = `<option value="">Select City</option>`;
+                                                  result.data.forEach(city => {
+                                                    const option = document.createElement("option");
+                                                    option.value = city;
+                                                    option.textContent = city;
+                                                    if (city === preSelectedCity) {
+                                                      option.selected = true;
+                                                    }
+                                                    citySelect.appendChild(option);
+                                                  });
+                                                } else {
+                                                  console.error('No cities found:', result.error);
+                                                }
+                                              })
+                                              .catch(error => console.error('Error fetching cities:', error));
+                                          }
+                                      
+                                          // Initialize pre-selected state and fetch its cities
+                                          if (preSelectedState) {
+                                            stateSelect.value = preSelectedState;
+                                            fetchCities(preSelectedState);
+                                          }
+                                      
+                                          // Event listener for state selection
+                                          stateSelect.addEventListener("change", () => {
+                                            const selectedState = stateSelect.value;
+                                            citySelect.innerHTML = `<option value="">Select City</option>`;
+                                            if (selectedState) {
+                                              fetchCities(selectedState);
+                                            }
+                                          });
+                                        </script>
+
+                                    <div class="col-lg-3 mt-3">
+                                        <label for="postal_code">Pincode
+                                            <span class="text-primary">*</span></label>
+                                        <input type="number" class="form-control"
+                                            placeholder="Pincode" name="pin" id="postal_code"
+                                            autocomplete="off" required value="{{data.pin}}">
+
+                                    </div>
+                                    <div class="col-lg-3 mt-3">
+                                        <label for="postal_code">PAN No.
+                                            <span class="text-primary">(Optional)</span></label>
+                                        <input type="text" class="form-control"
+                                            placeholder="PAN No." name="pan_no" id="pan_no"
+                                            autocomplete="off"  value="{{data.pan_no}}">
+
+                                    </div>
+                                    <div class="col-lg-3 mt-3">
+                                        <label for="postal_code">GST No.
+                                            <span class="text-primary">(Optional)</span></label>
+                                        <input type="text" class="form-control"
+                                            placeholder="GST No." name="gst_no" id="gst_no"
+                                            autocomplete="off"  value="{{data.gst_no}}">
+
+                                    </div>
+                                    <style>
+                                        .udoc{
+                                            margin-top:30px;
+                                        }
+                                    </style>
+                                    {%if data.verification == "Pending"%}
+                                    {%if data.pan%}
+                                    <div class="col-lg-1 udoc">
+                                        <div class="">
+                                            <div class="input-group">
+                                                <img src="{{data.pan.url}}"style="height:50px;width:50px"  class="form-control" value="{{data.pan}}">
+                                                <span class="input-group-btn">
+                                                    <a href="/admin-delete-user-image/{{data.id}}/pan" class="btn btn-danger btn-sm" style="position:absolute;height:20px;width:20px;padding:1px">X</a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {%endif%}
+                                    <div class=" col-lg-2 mt-3">
+                                        <label for="email">Pan Card <span
+                                                class="text-primary">*</span></label>
+                                        <input type="file" class="form-control"
+                                            accept=".pdf,.jpg,.png"   placeholder="Pan Card"
+                                            name="pan" >
+                                    </div>
+                                    
+                                    {%if data.gst_certificate%}
+                                    <div class="col-lg-1 udoc">
+                                        <div class="">
+                                            <div class="input-group">
+                                                <img src="{{data.gst_certificate.url}}"style="height:50px;width:50px"  class="form-control" value="{{data.gst_certificate}}">
+                                                <span class="input-group-btn">
+                                                    <a href="/admin-delete-user-image/{{data.id}}/gst_certificate" class="btn btn-danger btn-sm" style="position:absolute;height:20px;width:20px;padding:1px">X</a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                   {%endif%}
+                                    <div class=" col-lg-2 mt-3">
+                                        <label for="email">GST Certificate
+                                            <span class="text-primary">*</span></label>
+                                            
+                                        <input type="file" class="form-control"
+                                            accept=".pdf,.jpg,.png" 
+                                            placeholder="Cancelled Check" name="gst_certificate"
+                                            >
+
+                                    </div>
+                                    
+                                    {%if data.visiting_card%}
+                                    <div class="col-lg-1 udoc">
+                                        <div class="">
+                                            <div class="input-group">
+                                                <img src="{{data.visiting_card.url}}"style="height:50px;width:50px"  class="form-control" value="{{data.visiting_card}}">
+                                                <span class="input-group-btn">
+                                                    <a href="/admin-delete-user-image/{{data.id}}/visiting_card" class="btn btn-danger btn-sm" style="position:absolute;height:20px;width:20px;padding:1px">X</a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                   {%endif%}
+                                    <div class=" col-lg-2 mt-3">
+                                        <label for="email">Visiting Card
+                                            <span class="text-primary">*</span></label>
+                                            
+                                        <input type="file" class="form-control"
+                                            accept=".pdf,.jpg,.png" 
+                                            placeholder="Cancelled Check" name="visiting_card"
+                                            >
+
+                                    </div>
+                                    {%endif%}
+                                    <div class="col-lg-3 mt-3">
+                                        <div class="mb-3">
+                                            <label class="form-label"> Verification<span class="text-danger">*</span></label>
+                                            <select name="verification" class="form-control">
+                                                <option value="Pending"{%if data.verification == 'Pending'%}selected {%endif%}>Pending</option>
+                                                <option value="Done"{%if data.verification == 'Done'%}selected {%endif%}>Done</option>
+                                            </select>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                              
+                                    <div class="mb-4 mt-4 text-center">
+                                        <button type="submit" class="btn btn-primary p-3">Update</button>
+                                    </div>
+
+                                </form>
+
+                                <!-- Social Login -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </section>
+        
+    </div>
+</div>
+
+{%endblock%}

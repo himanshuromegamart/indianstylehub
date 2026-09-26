@@ -1,0 +1,378 @@
+{% extends "front/index.html" %}
+{%load static%}
+{%block title%}{{data.name}}{%endblock%}
+{%block description%}
+        <meta name="description" content="{{data.description}}">
+    {%endblock%}
+{%block body%}
+<main>
+    <!-- MAIN CONTENT SECTION START -->
+    <div class="ul-inner-page-container">
+        <div class="ul-product-details">
+            <div class="ul-product-details-top">
+                <div class="row ul-bs-row row-cols-lg-2 row-cols-1 align-items-center">
+                    <!-- img -->
+                    <div class="col">
+                        <div class="ul-product-details-img">
+                            <div class="ul-product-details-img-slider swiper">
+                                <div class="swiper-wrapper">
+                                    <!-- single img -->
+                                    <div class="swiper-slide"><img src="{{data.image1}}" alt="Product Image"></div>
+                                    <!-- single img -->
+                                    {%if data.image2%}
+                                    <div class="swiper-slide"><img src="{{data.image2}}" alt="Product Image"></div>
+                                    {%endif%}
+                                    {%if data.image3%}
+                                    <div class="swiper-slide"><img src="{{data.image3}}" alt="Product Image"></div>
+                                    {%endif%}
+                                    {%if data.image4%}
+                                    <div class="swiper-slide"><img src="{{data.image4}}" alt="Product Image"></div>
+                                    {%endif%}
+                                </div>
+
+                                <div class="ul-product-details-img-slider-nav" id="ul-product-details-img-slider-nav">
+                                    <button class="prev"><i class="flaticon-left-arrow"></i></button>
+                                    <button class="next"><i class="flaticon-arrow-point-to-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- txt -->
+                    <div class="col">
+                        <div class="ul-product-details-txt">
+                            <!-- product rating -->
+                            <div class="ul-product-details-rating">
+                                <span class="rating">
+                                    <i class="flaticon-star"></i>
+                                    <i class="flaticon-star"></i>
+                                    <i class="flaticon-star"></i>
+                                    <i class="flaticon-star"></i>
+                                    <i class="flaticon-star"></i>
+                                </span>
+                                <span class="review-number">(2 Customer Reviews)</span>
+                            </div>
+
+                            <!-- price -->
+                            <span class="ul-product-details-price">&#8377;{{data.price}}</span>
+
+                            <!-- product title -->
+                            <h3 class="ul-product-details-title">{{data.name}}</h3>
+
+                            <!-- product description -->
+                            <p class="ul-product-details-descr">{{data.description|slice:'200'}}</p>
+
+                            <!-- product options -->
+                            <div class="ul-product-details-options">
+                                <div class="ul-product-details-option ul-product-details-sizes">
+                                    <span class="title">Size</span>
+
+                                    <form class="variants">
+                                        {%for item in skuProductBySize%}
+                                        {%if item.size == data.size%}
+                                        <a href="/product-details/{{ item.name|slugify }}/{{ item.id }}"
+                                            class="color-option">
+                                            <span class="size-btn bg-danger text-light">{{item.size}}</span>
+                                        </a>
+                                        {%else%}
+                                        <a href="/product-details/{{ item.name|slugify }}/{{ item.id }}"
+                                            class="color-option">
+                                            <span class="size-btn">{{item.size}}</span>
+                                        </a>
+                                        {%endif%}
+                                        {%endfor%}
+                                    </form>
+                                </div>
+
+                                <div class="ul-product-details-option ul-product-details-colors">
+                                    <span class="title">Color</span>
+                                    <form action="#" class="variants">
+                                        {% for item in skuProductByColor %}
+                                        <a href="/product-details/{{ item.name|slugify }}/{{ item.id }}"
+                                            class="color-option">
+                                            <span class="color-btn"
+                                                style="background-color: {{ item.color }}; border: 1px solid gray; 
+                                                        {% if item.color == data.color %} border: 2px solid red; {% endif %}">
+                                            </span>
+                                        </a>
+                                        {% endfor %}
+                                    </form>
+                                </div>
+
+                            </div>
+
+                            <!-- product quantity -->
+                            <div class="ul-product-details-option ul-product-details-quantity">
+                                <span class="title">Quantity</span>
+                                <form action="#" class="ul-product-quantity-wrapper">
+                                    <input type="number" name="product-quantity" id="ul-product-details-quantity"
+                                        class="ul-product-quantity" value="{{data.quantity}}" min="1" readonly>
+                                    <div class="btns">
+                                        <button type="button" class="quantityIncreaseButton"><i
+                                                class="flaticon-plus"></i></button>
+                                        <button type="button" class="quantityDecreaseButton"><i
+                                                class="flaticon-minus-sign"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- product actions -->
+                            <div class="ul-product-details-actions">
+                                <div class="left">
+                                    <button class="add-to-cart" onclick="openEnquiryForm()">Add to Cart <span class="icon"><i
+                                                class="flaticon-cart"></i></span></button>
+                                    <button class="add-to-wishlist"><span class="icon"><i
+                                                class="flaticon-heart"></i></span> Add to wishlist</button>
+                                </div>
+                                <div class="share-options">
+                                    <button><i class="flaticon-facebook-app-symbol"></i></button>
+                                    <button><i class="flaticon-twitter"></i></button>
+                                    <button><i class="flaticon-linkedin-big-logo"></i></button>
+                                    <a href="#"><i class="flaticon-youtube"></i></a>
+                                </div>
+                            </div>
+
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ul-product-details-bottom">
+                <!-- description -->
+                <div class="ul-product-details-long-descr-wrapper">
+                    <div class="row">
+                        <div class="col-lg-4 col-12 border p-2">
+                            <h3 class="ul-product-details-inner-title">Item Specification</h3>
+                            <table class="specifications-table">
+                                {% for key, value in data.specifications.items %}
+                                <tr>
+                                    <td class="spec-key">{{ key }}</td>
+                                    <td class="spec-value">{{ value }}</td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                        <style>
+                            .specifications-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-top: 10px;
+                            }
+
+                            .specifications-table tr {
+                                border-bottom: 1px solid #ddd;
+                            }
+
+                            .spec-key {
+                                font-weight: 600;
+                                color: #333;
+                                padding: 8px 12px;
+                                text-align: left;
+                                width: 40%;
+                                background: #f9f9f9;
+                            }
+
+                            .spec-value {
+                                padding: 8px 12px;
+                                text-align: left;
+                            }
+                        </style>
+                        <div class="col-lg-8 col-12 ">
+                            <h3 class="ul-product-details-inner-title">Item Description</h3>
+                            <p>{{data.description}}</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Releated Products -->
+                <!-- PRODUCTS SECTION START -->
+                <div class="ul-container mt-5">
+                    <section class="ul-products">
+                        <div class="ul-inner-container">
+                            <div class="ul-section-heading text-center">
+                                <div class="w-100">
+                                    <h2 class="ul-section-title">Related Products</h2>
+                                </div>
+                            </div>
+
+                            <div class="row ul-bs-row">
+
+                                <div class="col-lg-12 col-md-12 col-12">
+                                    <!-- products grid -->
+                                    <div class="swiper ul-products-slider-1">
+                                        <div class="swiper-wrapper">
+                                            {%for item in similarProduct%}
+                                            <!-- product card -->
+                                            <div class="swiper-slide">
+                                                <div class="ul-product">
+                                                    <div class="ul-product-heading">
+                                                        <span class="ul-product-price">&#8377;{{item.price}}</span>
+                                                        <span class="ul-product-discount-tag">{{item.discount}}%
+                                                            Off</span>
+                                                    </div>
+
+                                                    <div class="ul-product-img">
+                                                        <img src="{{item.image1}}"
+                                                            style="height:250px;width:auto;border-radius:10px"
+                                                            alt="Product Image">
+                                                    </div>
+
+                                                    <div class="ul-product-txt">
+                                                        <h4 class="ul-product-title"><a
+                                                                href="/product-details/{{item.name|slugify}}/{{item.id}}">{{item.name}}</a>
+                                                        </h4>
+                                                        <h5 class="ul-product-category"><a
+                                                                href="/{{item.maincategory.slug}}">{{item.maincategory.name}}</a>
+                                                        </h5>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- product card -->
+                                            {%endfor%}
+
+                                        </div>
+                                    </div>
+
+                                    <!-- slider navigation -->
+                                    <div class="ul-products-slider-nav ul-products-slider-1-nav">
+                                        <button class="prev"><i class="flaticon-left-arrow"></i></button>
+                                        <button class="next"><i class="flaticon-arrow-point-to-right"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                        <!-- Pop for enquiry-->
+                      
+
+                        <!-- Pop-up Form -->
+                        <div id="enquiryPopup" class="popup">
+                          <div class="popup-content">
+                            <span class="close" onclick="closeEnquiryForm()">&times;</span>
+                            <h2>Product Enquiry</h2>
+                            <form method="POST" action="/add-enquiry/">
+                              {% csrf_token %}
+                              <div class="row">
+                                <div class="col-lg-6">
+                              <input type="hidden" name="productId" id="productIdInput" value="{{data.id}}">
+                            
+                              <label>Name:</label>
+                              <input type="text" name="name" required>
+                                </div>
+                                <div class="col-lg-6">
+                              <label>Phone:</label>
+                              <input type="text" name="phone" maxlength="10" required
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)">
+
+                            </div>
+                            <div class="col-lg-6">
+                              <label>Email:</label>
+                              <input type="email" name="email" required>
+                            </div>
+                            <div class="col-lg-6">
+                                <label>Pincode:</label>
+                                <input type="text" name="pincode" maxlength="6" required oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)">
+                              </div>
+                            <div class="col-lg-12">
+                              <label>Address:</label>
+                              <textarea name="address" required minlength="10"></textarea>
+                            </div>
+                            
+                            <div class="col-lg-6">
+                              <label>City:</label>
+                              <input type="text" name="city" required>
+                            </div>
+                            <div class="col-lg-6">
+                              <label>State:</label>
+                              <input type="text" name="state" required>
+                            </div>
+                           
+                              <button type="submit">Submit Enquiry</button>
+                            </div>
+                            </form>
+                          </div>
+                        </div>
+
+                        <!-- CSS -->
+                        <style>
+                          .popup {
+                            display: none;
+                            position: fixed;
+                            z-index: 999;
+                            padding-top: 60px;
+                            left: 0;
+                            top: 0;
+                            width: 100%;
+                            height: 100%;
+                            overflow: auto;
+                            background-color: rgba(0,0,0,0.6);
+                          }
+                      
+                          .popup-content {
+                            background-color: #fff;
+                            margin: auto;
+                            padding: 30px;
+                            border-radius: 8px;
+                            width: 90%;
+                            max-width: 500px;
+                            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+                          }
+                      
+                          .close {
+                            color: #aaa;
+                            float: right;
+                            font-size: 24px;
+                            cursor: pointer;
+                          }
+                      
+                          .popup-content input,
+                          .popup-content textarea {
+                            width: 100%;
+                            margin-bottom: 15px;
+                            padding: 10px;
+                            border-radius: 5px;
+                            border: 1px solid #ccc;
+                          }
+                      
+                          .popup-content button {
+                            width: 100%;
+                            padding: 10px;
+                            background-color: #1e88e5;
+                            color: white;
+                            border: none;
+                            border-radius: 5px;
+                            cursor: pointer;
+                          }
+                      
+                          .popup-content button:hover {
+                            background-color: #0d47a1;
+                          }
+                        </style>
+
+                        <!-- JS -->
+                        <script>
+                          function openEnquiryForm() {
+                            document.getElementById("enquiryPopup").style.display = "block";
+                            
+                          }
+                      
+                          function closeEnquiryForm() {
+                            document.getElementById("enquiryPopup").style.display = "none";
+                          }
+                        </script>
+                        
+                         <!--End Pop-->
+
+
+                </div>
+                <!-- PRODUCTS SECTION END -->
+            </div>
+        </div>
+    </div>
+    <!-- MAIN CONTENT SECTION END -->
+</main>
+{%endblock%}

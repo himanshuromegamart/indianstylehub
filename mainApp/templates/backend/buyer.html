@@ -1,0 +1,401 @@
+{%extends 'superadmin/index.html'%}
+{%load static%}
+{%block body%}
+<!-- ============================================================== -->
+<style>
+    /* Style for the search button */
+    .search-btn {
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    /* The Modal (background) */
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% 55%; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%; /* Could be more or less, depending on screen size */
+    }
+
+
+    /* Close button style */
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover, .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    /* Input field style */
+    .modal-content input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    /* Submit button */
+    .modal-content button {
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    .modal-content button:hover {
+        background-color: #45a049;
+    }
+</style>
+<div class="main-contentw-100">
+    <div class="">
+        <div class="container-fluid">
+            
+            <div class="row">
+                
+                <div class="col-lg-12 mt-2">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <form method="post" action="/admin-search-buyer/" class="d-flex align-items-center">
+                                        {%csrf_token%}
+                                        <div class="input-group">
+                                            <input type="text" name="name" class="form-control" placeholder="Search Here..." aria-label="Search" required>
+                                            <button type="submit" class="btn btn-primary btn-sm">Search</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                
+                                
+                                <div class="col-lg-6">
+                            <h4 class="card-title mb-4 text-center">
+                                <button id="searchBtn" class="search-btn btn-sm">Filter</button>
+
+                                <!-- The Modal -->
+                                <div id="searchModal" class="modal">
+                                
+                                    <!-- Modal content -->
+                                    <div class="modal-content">
+                                        <span class="close">&times;</span>
+                                        <h2>Filter Buyer</h2>
+                                
+                                        <!-- Search form -->
+                                        <form method="POST" action="/admin-filter-buyer/">
+                                            {% csrf_token %}
+                                            <div class="row">
+                                                <div class="col-lg-6 col-12">
+                                                    <input type="date" name="from_date" value="{{from_date}}">
+                                                </div>
+                                                <div class="col-lg-6 col-12">
+                                            <input type="date" name="to_date" value="{{to_date}}" >
+                                        </div>
+                                        <div class="col-lg-4 col-12">
+                                            <select name="seller_type" class="form-control">
+                                                <option value="" selected  disabled>Select Buyer Type</option>
+                                                    <option value="Shopkeeper" {%if seller_type == "Shopkeeper"%} selected {%endif%}>Shopkeeper</option>
+                                                    <option value="Technician" {%if seller_type == "Technician"%} selected {%endif%}>Technician</option>
+                                                    <option value="Salesman" {%if seller_type == "Salesman"%} selected {%endif%}>Salesman</option>
+                                                    <option value="Wholesaler" {%if seller_type == "Wholesaler"%} selected {%endif%}>Wholesaler</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-4 col-12">
+                                            <select name="verification" class="form-control">
+                                                <option value="" selected  disabled>Select Verification</option>
+                                                <option value="Pending" {%if verification == "Pending"%} selected {%endif%}>Pending</option>
+                                                <option value="Done" {%if verification == "Done"%} selected {%endif%}>Done</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-4 col-12 ">
+                                            <select name="status" class="form-control">
+                                                <option value="" selected  disabled>Select Status</option>
+                                                <option value="Active"  {%if status == "Active"%} selected {%endif%}>Active</option>
+                                                <option value="Deactive"  {%if status == "Deactive"%} selected {%endif%}>Deactive</option>
+                                            </select>
+                                        </div>
+                                            <button type="submit" class="mt-4">Search</button>
+                                        </form>
+                                    </div>
+                                    </div>
+                                
+                                </div>
+                                
+                                <script>
+                                    // Get the modal
+                                    var modal = document.getElementById("searchModal");
+                                
+                                    // Get the button that opens the modal
+                                    var btn = document.getElementById("searchBtn");
+                                
+                                    // Get the <span> element that closes the modal
+                                    var span = document.getElementsByClassName("close")[0];
+                                
+                                    // When the user clicks the button, open the modal 
+                                    btn.onclick = function() {
+                                        modal.style.display = "block";
+                                    }
+                                
+                                    // When the user clicks on <span> (x), close the modal
+                                    span.onclick = function() {
+                                        modal.style.display = "none";
+                                    }
+                                
+                                    // When the user clicks anywhere outside of the modal, close it
+                                    window.onclick = function(event) {
+                                        if (event.target == modal) {
+                                            modal.style.display = "none";
+                                        }
+                                    }
+                                </script>
+                                Total Buyer( {{buy}} )</h4>
+                            </div>
+                        </div>
+                            <div class="table-responsive">
+                                <table class="table align-middle table-nowrap mb-0" id="productTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="align-middle">Date</th>
+                                            <th class="align-middle">Type</th>
+                                            <th class="align-middle">Name</th>
+                                            <th class="align-middle">Email</th>
+                                            <th class="align-middle">Phone</th>
+                                            <th class="align-middle">Address</th>
+                                            <th class="align-middle">Login</th>
+                                            <th class="align-middle">Transfer</th>
+                                            <th class="align-middle">Verification</th>
+                                            <th class="align-middle">Status</th>
+                                            <th class="align-middle">View</th>
+                                            <th class="align-middle">Order</th>
+                                            <th class="align-middle">Delete</th>
+                                            <th class="align-middle">Notes</th>
+                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {%for item in page_posts%}
+                                        <tr>
+                                            
+                                            <td> {{item.date}}</td>
+                                            <td> {{item.user_subtype}}</td>
+                                            <td> {{item.name|slice:"50"}}</td>
+                                            <td>
+                                                
+                                                {{item.email}}
+                                            
+                                            </td>
+                                            <td>
+                                                {{item.phone}}</td>
+                                                
+                                            <td title="{{item.address}}">
+                                                {{item.address|slice:"60"}}
+                                            </td> 
+
+                                            <td>
+                                                <!-- Login as a Seller Section -->
+                                                <div class="">
+                                                    <form method="post" action="/users/login/" onsubmit="return confirmSubmission1()">
+                                                        {%csrf_token%}
+                                                        <input type="hidden" name="phone" value="{{ item.phone }}">
+                                                        <input type="hidden" name="password" value="{{ item.password }}">
+                                                        <button type="submit" class="btn btn-success ">Login</button>
+                                                    </form>
+                                                </div>
+                            
+                                                <script>
+                                                    function confirmSubmission1() {
+                                                        return confirm("Are you sure you want to login as a buyer?");
+                                                    }
+                                                </script>
+                                                </td>
+
+                                            <td>
+                                                <!-- Become Seller Section -->
+                                            <div class="">
+                                                <form method="post" action="/convert-buyer-into-seller/" onsubmit="return confirmSubmission()">
+                                                    {%csrf_token%}
+                                                    <input type="hidden" name="phone" value="{{ item.phone }}">
+                                                    <button type="submit" class="btn btn-warning ">Transfer as a Seller</button>
+                                                </form>
+                                            </div>
+                        
+                                            <script>
+                                                function confirmSubmission() {
+                                                    return confirm("Are you sure you want to transfer as a seller?");
+                                                }
+                                            </script>
+                                            </td>
+                                            <td>
+                                                {{item.verification}}
+                                            </td>
+                                            <td>
+                                                <div class="dropdown" >
+                                                    {%if item.status == "Active"%}
+                                                    <button class="btn btn-success btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                      {{item.status}}
+                                                    </button>
+                                                    {%else%}
+                                                    <button class="btn btn-danger btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        {{item.status}}
+                                                      </button>
+                                                    {%endif%}
+                                                    <ul class="dropdown-menu">
+                                                      <li><a class="dropdown-item" href="/admin-buyer-status/{{item.id}}/Active">Active</a></li>
+                                                      <li><a class="dropdown-item" href="/admin-buyer-status/{{item.id}}/Deactive">Deactive</a></li>
+                                                     
+                                                    </ul>
+                                                  </div>
+                                            </td>
+                                            <td>
+                                                <a href="/admin-view-buyer/{{item.id}}"><i class="fa fa-eye"></i></a>
+                                            </td>
+
+                                            <td>
+                                                <a href="/admin-view-buyer-order/{{item.phone}}"><i class="fa fa-eye"></i></a>
+                                            </td>
+
+                                            <td>
+                                                <a href="#" onclick="confirmDelete('{{item.id}}')"><i class="fa fa-trash text-danger"></i></a>
+                                            </td>
+                                            <script>
+                                                function confirmDelete(id){
+                                                    if(confirm("Are You Sure?")){
+                                                     window.location.href="/admin-delete-buyer/"+id;
+                                                    }
+                                                    else {
+                                                        return false;
+                                                    }
+                                                }
+                                            </script>
+                                            {% if item.notes %}
+                                            <td>
+                                                <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling-{{item.id}}" aria-controls="offcanvasScrolling">Notes</button>
+                                            </td>
+                                            {% else %}
+                                            <td>
+                                                <!-- Link to trigger the modal to add notes -->
+                                                <button class="btn btn-warning btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling-{{item.id}}" aria-controls="offcanvasScrolling">Add</button>
+                                            </td>
+                                            {% endif %}
+                                            <div class="offcanvas offcanvas-start bg-dark text-light" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling-{{item.id}}" aria-labelledby="offcanvasScrollingLabel">
+                                                <div class="offcanvas-header">
+                                                    <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Seller Notes:</h5>
+                                                    <button type="button" class="btn-close text-light" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                                                </div>
+                                                <div class="offcanvas-body overflow-auto">
+                                                    {%if item.notes%}
+                                                    <div class="border p-2" style="white-space: normal; word-wrap: break-word;">
+                                                       <span class="text-warning">{{item.notes_date}}</span><br>{{item.notes}}
+                                                    </div>
+                                                   {%endif%}
+                                                    <div class="mt-2">
+                                                        <form method="post" action="/admin-update-buyer-notes/{{item.id}}/">
+                                                            {% csrf_token %}
+                                                            <textarea rows="3" cols="10" name="notes" placeholder="Enter New Notes" class="form-control" required></textarea>
+                                                            <div class="text-center">
+                                                                <button type="submit" class="btn btn-light mt-2">Update</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </tr>
+                                        {%endfor%}
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- end table-responsive -->
+                        </div>
+                    </div>
+                </div>
+                {%if page_posts%}
+                <div class="blog-pagination">
+                    <nav>
+                        <ul class="pagination">
+                            <li class="page-item previtem {% if not page_posts.has_previous %}disabled{% endif %}">
+                                <a class="page-link" href="{% if page_posts.has_previous %}?page={{ page_posts.previous_page_number }}&name={{ search_query }}{% endif %}">
+                                    <i class="fas fa-regular fa-arrow-left"></i> Prev
+                                </a>
+                            </li>
+                            <li class="justify-content-center pagination-center">
+                                <div class="pagelink">
+                                    <ul class="d-flex">
+                                        {% for page_num in page_range %}
+                                        <li class="page-item {% if page_posts.number == page_num %}active{% endif %}">
+                                            <a class="page-link" href="?page={{ page_num }}&name={{ search_query }}">
+                                                {{ page_num }}
+                                                {% if page_posts.number == page_num %}
+                                                <span class="visually-hidden">(current)</span>
+                                                {% endif %}
+                                            </a>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </li>
+                            <li class="page-item nextlink {% if not page_posts.has_next %}disabled{% endif %}">
+                                <a class="page-link" href="{% if page_posts.has_next %}?page={{ page_posts.next_page_number }}&name={{ search_query }}{% endif %}">
+                                    Next <i class="fas fa-regular fa-arrow-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                
+                {%endif%}
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const searchInput = document.getElementById('searchInput');
+                        const tableRows = document.querySelectorAll('#productTable tbody tr');
+                
+                        searchInput.addEventListener('input', function() {
+                            const searchTerm = searchInput.value.trim().toLowerCase();
+                
+                            tableRows.forEach(row => {
+                                const nameColumn = row.querySelector('td:nth-child(5)');
+                                if (nameColumn) {
+                                    const textContent = nameColumn.textContent.trim().toLowerCase();
+                                    if (textContent.includes(searchTerm)) {
+                                        row.style.display = '';
+                                    } else {
+                                        row.style.display = 'none';
+                                    }
+                                }
+                            });
+                        });
+                    });
+                </script>
+            </div> 
+        </div> 
+            
+    </div>
+    <!-- End Page-content -->
+
+{%endblock%}

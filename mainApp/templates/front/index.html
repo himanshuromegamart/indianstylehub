@@ -1,0 +1,956 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {%block title%}Indian Style Hub &mdash; Shop Your Dream{%endblock%}
+    </title>
+    {%block description%}
+        <meta name="description" content="Indian Style Hub is your one-stop destination for trendy and traditional Indian fashion. We offer a wide range of clothing, including sarees, kurtis, lehengas, and Indo-western wear, blending rich heritage with modern styles. Our mission is to bring high-quality, affordable fashion to everyone while celebrating India's vibrant culture.">
+    {%endblock%}
+    <!-- libraries CSS -->
+    <link rel="stylesheet" href="{%static 'assets/icon/flaticon_glamer.css'%}">
+    <link rel="stylesheet" href="{%static 'assets/vendor/bootstrap/bootstrap.min.css'%}">
+    <link rel="stylesheet" href="{%static 'assets/vendor/splide/splide.min.css'%}">
+    <link rel="stylesheet" href="{%static 'assets/vendor/swiper/swiper-bundle.min.css'%}">
+    <link rel="stylesheet" href="{%static 'assets/vendor/slim-select/slimselect.css'%}">
+    <link rel="stylesheet" href="{%static 'assets/vendor/animate-wow/animate.min.css'%}">
+    <!-- custom CSS -->
+    <link rel="stylesheet" href="{%static 'assets/css/style.css'%}">
+    <link rel="icon" type="image/png" href="{%static 'assets/img/favicon.webp'%}">
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5SEN03E30"></script>
+
+
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z5SEN03E30');
+</script>
+</head>
+
+<body>
+    <div class="preloader" id="preloader">
+        <div class="loader"></div>
+    </div>
+
+    <!-- SIDEBAR SECTION START -->
+    <div class="ul-sidebar">
+        <!-- header -->
+        <div class="ul-sidebar-header">
+            <div class="ul-sidebar-header-logo">
+                <a href="/">
+                    <img src="{%static 'assets/img/logo.webp'%}"  alt="logo" class="logo">
+                </a>    
+            </div>
+            <!-- sidebar closer -->
+            <button class="ul-sidebar-closer"><i class="flaticon-close"></i></button>
+        </div>
+
+        <div class="ul-sidebar-header-nav-wrapper d-block d-lg-none"></div>
+
+        <div class="ul-sidebar-about d-none d-lg-block">
+            <span class="title">About Indian Style Hub</span>
+            <p class="mb-0">Indian Style Hub is your one-stop destination for trendy and traditional Indian fashion. We offer a wide range of clothing, including sarees, kurtis, lehengas, and Indo-western wear, blending rich heritage with modern styles. Our mission is to bring high-quality, affordable fashion to everyone while celebrating India's vibrant culture.<br>
+
+                We collaborate with skilled artisans to craft unique designs that reflect elegance and comfort. With a seamless shopping experience, secure payments, and fast delivery, we ensure customer satisfaction. Shop with Indian Style Hub and embrace the perfect fusion of tradition and style!</p>
+        </div>
+
+
+        {% comment %} <!-- product slider -->
+        <div class="ul-sidebar-products-wrapper d-none d-lg-flex">
+            <div class="ul-sidebar-products-slider swiper">
+                <div class="swiper-wrapper">
+                    {%for item in products%}
+                    <!-- product card -->
+                    <div class="swiper-slide">
+                        <div class="ul-product">
+                            <div class="ul-product-heading">
+                                <span class="ul-product-price">&#8377;{{item.price}}</span>
+                                <span class="ul-product-discount-tag">{{item.discount}}% Off</span>
+                            </div>
+
+                            <div class="ul-product-img">
+                                <img src="{{item.image1}}" alt="Product Image">
+
+                                <div class="ul-product-actions">
+                                    <a href="/product-details/{{item.name|slugify}}/{{item.id}}"><i class="flaticon-hide"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="ul-product-txt">
+                                <h4 class="ul-product-title"><a href="/product-details/{{item.name|slugify}}/{{item.id}}">{{item.name}}</a></h4>
+                                <h5 class="ul-product-category"><a href="/{{item.maincategory.slug}}">{{item.maincategory.name}}</a></h5>
+                            </div>
+                        </div>
+                    </div>
+                    {%endfor%}
+                </div>
+            </div>
+
+            <div class="ul-sidebar-products-slider-nav flex-shrink-0">
+                <button class="prev"><i class="flaticon-left-arrow"></i></button>
+                <button class="next"><i class="flaticon-arrow-point-to-right"></i></button>
+            </div>
+        </div> {% endcomment %}
+
+        <!-- sidebar footer -->
+        <div class="ul-sidebar-footer">
+            <span class="ul-sidebar-footer-title">Follow us</span>
+
+            <div class="ul-sidebar-footer-social">
+                <a href="#"><i class="flaticon-facebook-app-symbol"></i></a>
+                <a href="#"><i class="flaticon-twitter"></i></a>
+                <a href="#"><i class="flaticon-instagram"></i></a>
+                <a href="#"><i class="flaticon-youtube"></i></a>
+            </div>
+        </div>
+    </div>
+    <!-- SIDEBAR SECTION END -->
+
+
+    <!-- HEADER SECTION START -->
+    <header class="ul-header">
+        <!-- header top -->
+        <div class="ul-header-top">
+            <div class="ul-header-top-slider splide">
+                <div class="splide__track">
+                    <ul class="splide__list">
+                        <li class="splide__slide">
+                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
+                        </li>
+                        <li class="splide__slide">
+                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
+                        </li>
+                        <li class="splide__slide">
+                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
+                        </li>
+                        <li class="splide__slide">
+                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
+                        </li>
+                        <li class="splide__slide">
+                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
+                        </li>
+                        <li class="splide__slide">
+                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
+                        </li>
+                        <li class="splide__slide">
+                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
+                        </li>
+                        <li class="splide__slide">
+                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
+                        </li>
+                        <li class="splide__slide">
+                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
+                        </li>
+                        <li class="splide__slide">
+                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- header bottom -->
+        <div class="ul-header-bottom">
+            <div class="ul-container">
+                <div class="ul-header-bottom-wrapper">
+                    <!-- header left -->
+                    <div class="header-bottom-left">
+                        <div class="logo-container">
+                            <a href="/" class="d-inline-block"><img src="{%static 'assets/img/logo.webp'%}" alt="logo" class="logo"></a>
+                        </div>
+
+                        <!-- search form -->
+                        <div class="ul-header-search-form-wrapper flex-grow-1 flex-shrink-0">
+                            <form action="/search/" class="ul-header-search-form">
+                                <div class="ul-header-search-form-right">
+                                    <input type="search" name="query" id="ul-header-search" placeholder="Search Here" value="{{query}}">
+                                    <button type="submit"><span class="icon"><i class="flaticon-search-interface-symbol"></i></span></button>
+                                </div>
+                            </form>
+
+                            <button class="ul-header-mobile-search-closer d-xxl-none"><i class="flaticon-close"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- header nav -->
+                    <div class="ul-header-nav-wrapper">
+                        <div class="to-go-to-sidebar-in-mobile">
+                            <nav class="ul-header-nav">
+                                <a href="/">Home</a>
+                                <a href="/all">Shop</a>
+                                <a href="/all">Women</a>
+                                <a href="/all">Men's</a>
+                                <a href="/all">Kids</a>
+                                <a href="/blog">Blog</a>
+
+                                <div class="has-sub-menu has-mega-menu">
+                                    <a role="button">Pages</a>
+                                    <div class="ul-header-submenu ul-header-megamenu">
+                                        {%for mcat in maincategories%}
+                                        <div class="single-col">
+                                            <span class="single-col-title">{{mcat.name}}</span>
+                                            <ul>
+                                                {%for cat in categories%}
+                                                {%if mcat.slug == cat.maincategory.slug%}
+                                                <li><a href="/filter/?min_price=0&max_price=10000&maincategory={{mcat.id}}&category%5B%5D={{cat.id}}">{{cat.name}}</a></li>
+                                                {%endif%}
+                                                {%endfor%}
+                                            </ul>
+                                        </div>
+                                        {%endfor%}
+                                    </div>
+                                </div>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <!-- actions -->
+                    <div class="ul-header-actions">
+                        <button class="ul-header-mobile-search-opener d-xxl-none"><i class="flaticon-search-interface-symbol"></i></button>
+                        <button><i class="flaticon-user"></i></button>
+                        <a href="#!"><i class="flaticon-heart"></i></a>
+                        <a href="#!"><i class="flaticon-shopping-bag"></i></a>
+                    </div>
+
+                    <!-- sidebar opener -->
+                    <div class="d-inline-flex">
+                        <button class="ul-header-sidebar-opener"><i class="flaticon-hamburger"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- HEADER SECTION END -->
+
+    {%block body%}
+    <main>
+        <!-- BANNER SECTION START -->
+        <div class="overflow-hidden">
+            <div class="ul-container">
+                <section class="ul-banner">
+                    <div class="ul-banner-slider-wrapper">
+                        <div class="ul-banner-slider swiper">
+                            <div class="swiper-wrapper">
+                                {%for item in slider%}
+                                <!-- single slide -->
+                                <div class="swiper-slide ul-banner-slide">
+                                    <div class="ul-banner-slide-img">
+                                        <img src="{{item.image}}" alt="Banner Image">
+                                    </div>
+                                    <div class="ul-banner-slide-txt">
+                                        <a href="{{item.link}}" class="ul-btn" target="_blank">SHOP NOW <i class="flaticon-up-right-arrow"></i></a>
+                                    </div>
+                                </div>
+                            {%endfor%}  
+                            </div>
+
+                            <!-- slider navigation -->
+                            <div class="ul-banner-slider-nav-wrapper">
+                                <div class="ul-banner-slider-nav">
+                                    <button class="prev"><span class="icon"><i class="flaticon-down"></i></span></button>
+                                    <button class="next"><span class="icon"><i class="flaticon-down"></i></span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ul-banner-img-slider-wrapper">
+                        <div class="ul-banner-img-slider swiper overflow-visible">
+                            <div class="swiper-wrapper">
+                                {%for item in slider%}
+                                <div class="swiper-slide">
+                                    <img src="{{item.image}}" alt="Banner Image">
+                                </div>
+                                {%endfor%}
+                                
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <!-- BANNER SECTION END -->
+
+
+        <!-- CATEGORY SECTION START -->
+        <div class="ul-container">
+            <section class="ul-categories">
+                <div class="ul-inner-container">
+                    <div class="row row-cols-lg-4 row-cols-md-3 row-cols-2 row-cols-xxs-1 ul-bs-row">
+                        {%for item in maincategories%}
+                        <!-- single category -->
+                        <div class="col">
+                            <a class="ul-category" href="/{{item.slug}}">
+                                <div class="ul-category-img">
+                                    <img src="{{item.image}}" alt="Category Image">
+                                </div>
+                                <div class="ul-category-txt">
+                                    <span>{{item.name}}</span>
+                                </div>
+                                <div class="ul-category-btn">
+                                    <span><i class="flaticon-arrow-point-to-right"></i></span>
+                                </div>
+                            </a>
+                        </div>
+                        {%endfor%}
+
+                        
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- CATEGORY SECTION END -->
+
+
+        <!-- PRODUCTS SECTION START -->
+        <div class="ul-container">
+            <section class="ul-products">
+                <div class="ul-inner-container">
+                    <div class="ul-section-heading">
+                        <div class="left">
+                            <span class="ul-section-sub-title">Latest collection</span>
+                            <h2 class="ul-section-title">Our Latest Product</h2>
+                        </div>
+
+                        <div class="right"><a href="#" class="ul-btn">More Collection <i class="flaticon-up-right-arrow"></i></a></div>
+                    </div>
+
+
+                    <div class="row ul-bs-row">
+                        <div class="col-lg-3 col-md-4 col-12">
+                            <!-- sub bannner -->
+                            <div class="ul-products-sub-banner">
+                                <div class="ul-products-sub-banner-img">
+                                    <img src="{%static 'assets/img/products-sub-banner-2.jpg'%}" alt="Sub Banner Image">
+                                </div>
+                                <div class="ul-products-sub-banner-txt">
+                                    <h3 class="ul-products-sub-banner-title">Latest Collection For You</h3>
+                                    <a href="/all" class="ul-btn">Shop Now <i class="flaticon-up-right-arrow"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-9 col-md-8 col-12">
+                            <!-- products grid -->
+                            <div class="swiper ul-products-slider-1">
+                                <div class="swiper-wrapper">
+                                    {%for item in products%}
+                                    <!-- product card -->
+                                    <div class="swiper-slide">
+                                        <div class="ul-product">
+                                            <div class="ul-product-heading">
+                                                <span class="ul-product-price">&#8377;{{item.price}}</span>
+                                                <span class="ul-product-discount-tag">{{item.discount}}% Off</span>
+                                            </div>
+
+                                            <div class="ul-product-img">
+                                                <img src="{{item.image1}}" style="height:250px;width:250px" alt="Product Image">
+
+                                                <div class="ul-product-actions">
+                                                    <a href="/product-details/{{item.name|slugify}}/{{item.id}}"><i class="flaticon-hide"></i></a>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="ul-product-txt">
+                                                <h4 class="ul-product-title"><a href="/product-details/{{item.name|slugify}}/{{item.id}}">{{item.name}}</a></h4>
+                                                <h5 class="ul-product-category"><a href="/{{item.maincategory.slug}}">{{item.maincategory.name}}</a></h5>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- product card -->
+                                     {%endfor%}
+                                    
+
+                                    
+                                </div>
+                            </div>
+
+                            <!-- slider navigation -->
+                            <div class="ul-products-slider-nav ul-products-slider-1-nav">
+                                <button class="prev"><i class="flaticon-left-arrow"></i></button>
+                                <button class="next"><i class="flaticon-arrow-point-to-right"></i></button>
+                            </div>
+                        </div>
+
+                        
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- PRODUCTS SECTION END -->
+
+
+        <!-- AD SECTION START -->
+        <div class="ul-container  mt-4 mb-4 p-3 rounded-3 bg-light text-center">
+            <a href="#">
+            <img src="https://image.indianstylehub.com/media/website_front_image/India_Style_Hub_Banner_2.jpg" alt="Ad Image"> 
+            </a>    
+        </div>
+        <!-- AD SECTION END -->
+
+
+        <!-- MOST SELLING START -->
+        <div class="ul-container">
+            <section class="ul-products ul-most-selling-products">
+                <div class="ul-inner-container">
+                    <div class="ul-section-heading flex-lg-row flex-column text-md-start text-center">
+                        <div class="left">
+                            <span class="ul-section-sub-title">most selling items</span>
+                            <h2 class="ul-section-title">Top selling Categories This Week</h2>
+                        </div>
+
+                        <div class="right">
+                            <div class="ul-most-sell-filter-navs">
+                                <button type="button" data-filter="all">All Products</button>
+                                {%for item in maincategories%}
+                                <button type="button" data-filter=".{{item.slug}}">{{item.name}}</button>
+                                {%endfor%}
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- products grid -->
+                    <div class="ul-bs-row row row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-1 ul-filter-products-wrapper">
+                        {%for item in filteredProduct%}
+                        <!-- product card -->
+                        <div class="mix col {{item.maincategory.slug}}">
+                            <div class="ul-product-horizontal">
+                                <div class="ul-product-horizontal-img">
+                                    <img src="{{item.image1}}" style="height:100px;width:100px" alt="Product Image">
+                                </div>
+
+                                <div class="ul-product-horizontal-txt">
+                                    <span class="ul-product-price">&#8377;{{item.price}}</span>
+                                    <h4 class="ul-product-title"><a href="/product-details/{{item.name|slugify}}/{{item.id}}">{{item.name|slice:"18"}}...</a></h4>
+                                    <h5 class="ul-product-category"><a href="/{{item.maincategory.slug}}">{{item.maincategory.name}}</a></h5>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        {%endfor%}
+
+                        
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- MOST SELLING END -->
+
+
+        <!-- VIDEO SECTION START -->
+        <div class="ul-container">
+            <div class="ul-video">
+                <div>
+                    <img src="https://img.freepik.com/free-photo/close-up-woman-front-clothing-pile_23-2150950851.jpg?uid=R189317073&ga=GA1.1.1725747204.1721378766&semt=ais_hybrid&w=740" alt="Video Banner" class="ul-video-cover">
+                </div>
+                <a href="https://www.youtube.com/watch?v=1gTvEIpl8K0&ab_channel=IndraIbrahim" data-fslightbox="video" class="ul-video-btn"><i class="flaticon-play-button-arrowhead"></i></a>
+            </div>
+        </div>
+        <!-- VIDEO SECTION END -->
+
+
+        <!-- SUB BANNER SECTION START -->
+        <div class="ul-container">
+            <section class="ul-sub-banners">
+                <div class="ul-inner-container">
+                    <div class="row ul-bs-row row-cols-md-3 row-cols-sm-2 row-cols-1">
+                        <!-- single sub banner -->
+                        <div class="col">
+                            <div class="ul-sub-banner ">
+                                <div class="ul-sub-banner-txt">
+                                    <div class="top">
+                                        <span class="ul-ad-sub-title">Trending Products</span>
+                                        <h3 class="ul-sub-banner-title">Women's collections</h3>
+                                        <p class="ul-sub-banner-descr">Up to 22% off Gimbals</p>
+                                    </div>
+
+                                    <div class="bottom">
+                                        <a href="/all" class="ul-sub-banner-btn">Collection <i class="flaticon-up-right-arrow"></i></a>
+                                    </div>
+                                </div>
+
+                                <div class="ul-sub-banner-img">
+                                    <img src="{%static 'assets/img/sub-banner-1.png'%}" alt="Sub Banner Image">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- single sub banner -->
+                        <div class="col">
+                            <div class="ul-sub-banner ul-sub-banner--2">
+                                <div class="ul-sub-banner-txt">
+                                    <div class="top">
+                                        <span class="ul-ad-sub-title">Trending Products</span>
+                                        <h3 class="ul-sub-banner-title">Men's collections</h3>
+                                        <p class="ul-sub-banner-descr">Up to 22% off Gimbals</p>
+                                    </div>
+
+                                    <div class="bottom">
+                                        <a href="/all" class="ul-sub-banner-btn">Collection <i class="flaticon-up-right-arrow"></i></a>
+                                    </div>
+                                </div>
+
+                                <div class="ul-sub-banner-img">
+                                    <img src="{%static 'assets/img/sub-banner-2.png'%}" alt="Sub Banner Image">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- single sub banner -->
+                        <div class="col">
+                            <div class="ul-sub-banner ul-sub-banner--3">
+                                <div class="ul-sub-banner-txt">
+                                    <div class="top">
+                                        <span class="ul-ad-sub-title">Trending Products</span>
+                                        <h3 class="ul-sub-banner-title">Kid's collections</h3>
+                                        <p class="ul-sub-banner-descr">Up to 22% off Gimbals</p>
+                                    </div>
+
+                                    <div class="bottom">
+                                        <a href="/all" class="ul-sub-banner-btn">Collection <i class="flaticon-up-right-arrow"></i></a>
+                                    </div>
+                                </div>
+
+                                <div class="ul-sub-banner-img">
+                                    <img src="{%static 'assets/img/sub-banner-3.png'%}" alt="Sub Banner Image">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- SUB BANNER SECTION END -->
+
+
+        <!-- FLASH SALE SECTION START -->
+        <div class="overflow-hidden">
+            <div class="ul-container">
+                <div class="ul-flash-sale">
+                    <div class="ul-inner-container">
+                        <!-- heading -->
+                        <div class="ul-section-heading ul-flash-sale-heading">
+                            <div class="left">
+                                <span class="ul-section-sub-title">New Collection</span>
+                                <h2 class="ul-section-title">Trending Flash Sell</h2>
+                            </div>
+
+                            <div class="ul-flash-sale-countdown-wrapper">
+                                <div class="ul-flash-sale-countdown">
+                                    <div class="days-wrapper">
+                                        <div class="days number">00</div>
+                                        <span class="txt">Days</span>
+                                    </div>
+                                    <div class="hours-wrapper">
+                                        <div class="hours number">00</div>
+                                        <span class="txt">Hours</span>
+                                    </div>
+                                    <div class="minutes-wrapper">
+                                        <div class="minutes number">00</div>
+                                        <span class="txt">Min</span>
+                                    </div>
+                                    <div class="seconds-wrapper">
+                                        <div class="seconds number">00</div>
+                                        <span class="txt">Sec</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <a href="/all" class="ul-btn">View All Collection <i class="flaticon-up-right-arrow"></i></a>
+                        </div>
+
+                        <!-- produtcs slider -->
+                        <div class="ul-flash-sale-slider swiper overflow-visible">
+                            <div class="swiper-wrapper">
+                                {%for item in filteredProduct%}
+                                <!-- single product -->
+                                <div class="swiper-slide">
+                                    <div class="ul-product">
+                                        <div class="ul-product-heading">
+                                            <span class="ul-product-price">&#8377;{{item.price}}</span>
+                                            <span class="ul-product-discount-tag">{{item.discount}}% Off</span>
+                                        </div>
+
+                                        <div class="ul-product-img">
+                                            <img src="{{item.image1}}" style="height:250px;width:250px" alt="Product Image">
+
+                                            <div class="ul-product-actions">
+                                                <button><i class="flaticon-shopping-bag"></i></button>
+                                                <a href="#"><i class="flaticon-hide"></i></a>
+                                                <button><i class="flaticon-heart"></i></button>
+                                            </div>
+                                        </div>
+
+                                        <div class="ul-product-txt">
+                                            <h4 class="ul-product-title"><a href="/product-details/{{item.name|slugify}}/{{item.id}}">{{item.name}}</a></h4>
+                                            <h5 class="ul-product-category"><a href="/{{item.maincategory.slug}}">{{item.maincategory.name}}</a></h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                {%endfor%}
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- FLASH SALE SECTION END -->
+
+
+        <!-- REVIEWS SECTION START -->
+        <section class="ul-reviews overflow-hidden">
+            <div class="ul-section-heading text-center justify-content-center">
+                <div>
+                    <span class="ul-section-sub-title">Customer Reviews</span>
+                    <h2 class="ul-section-title">Product Reviews</h2>
+                    <p class="ul-reviews-heading-descr">Our references are very valuable, the result of a great effort...</p>
+                </div>
+            </div>
+
+            <!-- slider -->
+            <div class="ul-reviews-slider swiper">
+                <div class="swiper-wrapper">
+                    <!-- single review -->
+                    <div class="swiper-slide">
+                        <div class="ul-review">
+                            <div class="ul-review-rating">
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star-3"></i>
+                            </div>
+                            <p class="ul-review-descr">Praesent ut lacus a velit tincidunt aliquam a eget urna. Sed ullamcorper tristique nisl at pharetra turpis accumsan et etiam eu sollicitudin eros. In imperdiet accumsan.</p>
+                            <div class="ul-review-bottom">
+                                <div class="ul-review-reviewer">
+                                    <div class="reviewer-image"><img src="{%static 'assets/img/review-author-1.png'%}" alt="reviewer image"></div>
+                                    <div>
+                                        <h3 class="reviewer-name">Esther Howard</h3>
+                                        <span class="reviewer-role">Web Designer</span>
+                                    </div>
+                                </div>
+
+                                <!-- icon -->
+                                <div class="ul-review-icon"><i class="flaticon-left"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- single review -->
+                    <div class="swiper-slide">
+                        <div class="ul-review">
+                            <div class="ul-review-rating">
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star-3"></i>
+                            </div>
+                            <p class="ul-review-descr">Praesent ut lacus a velit tincidunt aliquam a eget urna. Sed ullamcorper tristique nisl at pharetra turpis accumsan et etiam eu sollicitudin eros. In imperdiet accumsan.</p>
+                            <div class="ul-review-bottom">
+                                <div class="ul-review-reviewer">
+                                    <div class="reviewer-image"><img src="{%static 'assets/img/review-author-2.png'%}" alt="reviewer image"></div>
+                                    <div>
+                                        <h3 class="reviewer-name">Wade Warren</h3>
+                                        <span class="reviewer-role">Marketing Coordinator</span>
+                                    </div>
+                                </div>
+
+                                <!-- icon -->
+                                <div class="ul-review-icon"><i class="flaticon-left"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- single review -->
+                    <div class="swiper-slide">
+                        <div class="ul-review">
+                            <div class="ul-review-rating">
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star-3"></i>
+                            </div>
+                            <p class="ul-review-descr">Praesent ut lacus a velit tincidunt aliquam a eget urna. Sed ullamcorper tristique nisl at pharetra turpis accumsan et etiam eu sollicitudin eros. In imperdiet accumsan.</p>
+                            <div class="ul-review-bottom">
+                                <div class="ul-review-reviewer">
+                                    <div class="reviewer-image"><img src="{%static 'assets/img/review-author-3.png'%}" alt="reviewer image"></div>
+                                    <div>
+                                        <h3 class="reviewer-name">Esther Howard</h3>
+                                        <span class="reviewer-role">Nursing Assistant</span>
+                                    </div>
+                                </div>
+
+                                <!-- icon -->
+                                <div class="ul-review-icon"><i class="flaticon-left"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- single review -->
+                    <div class="swiper-slide">
+                        <div class="ul-review">
+                            <div class="ul-review-rating">
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star-3"></i>
+                            </div>
+                            <p class="ul-review-descr">Praesent ut lacus a velit tincidunt aliquam a eget urna. Sed ullamcorper tristique nisl at pharetra turpis accumsan et etiam eu sollicitudin eros. In imperdiet accumsan.</p>
+                            <div class="ul-review-bottom">
+                                <div class="ul-review-reviewer">
+                                    <div class="reviewer-image"><img src="{%static 'assets/img/review-author-4.png'%}" alt="reviewer image"></div>
+                                    <div>
+                                        <h3 class="reviewer-name">John Doe</h3>
+                                        <span class="reviewer-role">Medical Assistant</span>
+                                    </div>
+                                </div>
+
+                                <!-- icon -->
+                                <div class="ul-review-icon"><i class="flaticon-left"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- single review -->
+                    <div class="swiper-slide">
+                        <div class="ul-review">
+                            <div class="ul-review-rating">
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star"></i>
+                                <i class="flaticon-star-3"></i>
+                            </div>
+                            <p class="ul-review-descr">Praesent ut lacus a velit tincidunt aliquam a eget urna. Sed ullamcorper tristique nisl at pharetra turpis accumsan et etiam eu sollicitudin eros. In imperdiet accumsan.</p>
+                            <div class="ul-review-bottom">
+                                <div class="ul-review-reviewer">
+                                    <div class="reviewer-image"><img src="{%static 'assets/img/review-author-2.png'%}" alt="reviewer image"></div>
+                                    <div>
+                                        <h3 class="reviewer-name">Leslie Alexander</h3>
+                                        <span class="reviewer-role">Medical Assistant</span>
+                                    </div>
+                                </div>
+
+                                <!-- icon -->
+                                <div class="ul-review-icon"><i class="flaticon-left"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- REVIEWS SECTION END -->
+
+
+        <!-- NEWSLETTER SUBSCRIPTION SECTION START -->
+        <div class="ul-container">
+            <section class="ul-nwsltr-subs">
+                <div class="ul-inner-container">
+                    <!-- heading -->
+                    <div class="ul-section-heading justify-content-center text-center">
+                        <div>
+                            <span class="ul-section-sub-title text-white">GET NEWSLETTER</span>
+                            <h2 class="ul-section-title text-white text-white">Sign Up to Newsletter</h2>
+                        </div>
+                    </div>
+
+                    <!-- form -->
+                    <div class="ul-nwsltr-subs-form-wrapper">
+                        <div class="icon"><i class="flaticon-airplane"></i></div>
+                        <form action="#" class="ul-nwsltr-subs-form">
+                            <input type="email" name="nwsltr-subs-email" id="nwsltr-subs-email" placeholder="Enter Your Email">
+                            <button type="submit">Subscribe Now <i class="flaticon-up-right-arrow"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- NEWSLETTER SUBSCRIPTION SECTION END -->
+
+
+        <!-- BLOG SECTION START -->
+        <div class="ul-container">
+            <section class="ul-blogs">
+                <div class="ul-inner-container">
+                    <!-- heading -->
+                    <div class="ul-section-heading">
+                        <div class="left">
+                            <span class="ul-section-sub-title">News & Blog</span>
+                            <h2 class="ul-section-title">Latest News & Blog</h2>
+                        </div>
+
+                        <div>
+                            <a href="/blog" class="ul-blogs-heading-btn">View All BLog <i class="flaticon-up-right-arrow"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- blog grid -->
+                    <div class="row ul-bs-row row-cols-md-3 row-cols-2 row-cols-xxs-1">
+                        <!-- single blog -->
+                         {%for item in blogs%}
+                        <div class="col">
+                            <div class="ul-blog">
+                                <div class="ul-blog-img">
+                                    <img src="{{item.image}}" alt="Image">
+                                </div>
+
+                                <div class="ul-blog-txt">
+                                    <div class="ul-blog-infos flex gap-x-[30px] mb-[16px]">
+                                        <!-- single info -->
+                                        <div class="ul-blog-info">
+                                            <span class="icon"><i class="flaticon-user-2"></i></span>
+                                            <span class="text font-normal text-[14px] text-etGray">By Admin</span>
+                                            <span class="text font-normal text-[14px] text-etGray">on {{item.date}}</span>
+                                        </div>
+                                    </div>
+
+                                    <h3 class="ul-blog-title"><a href="blog-details/{{item.slug}}">{{item.title}}</a></h3>
+                                    <p class="ul-blog-descr">{{item.meta_description}}</p>
+
+                                    <a href="blog-details/{{item.slug}}" class="ul-blog-btn">Read More <span class="icon"><i class="flaticon-up-right-arrow"></i></span></a>
+                                </div>
+                            </div>
+                        </div>
+                        {%endfor%}
+                        
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- BLOG SECTION END -->
+
+
+        <!-- GALLERY SECTION START -->
+        <div class="ul-gallery overflow-hidden mx-auto">
+            <div class="ul-gallery-slider swiper">
+                <div class="swiper-wrapper">
+                    {%for item in gallery%}
+                    <!-- single gallery item -->
+                    <div class="ul-gallery-item swiper-slide">
+                        <img src="{{item.image}}" alt="Gallery Image">
+                        <div class="ul-gallery-item-btn-wrapper">
+                            <a href="{{item.url}}" target="_blank"><i class="flaticon-instagram"></i></a>
+                        </div>
+                    </div>
+                    {%endfor%}
+                </div>
+            </div>
+        </div>
+        <!-- GALLERY SECTION END -->
+    </main>
+
+    {%endblock%}
+
+    <!-- FOOTER SECTION START -->
+    <footer class="ul-footer">
+        <div class="ul-inner-container">
+            <div class="ul-footer-top">
+                <!-- single links column -->
+                <div class="ul-footer-top-widget">
+                    <h3 class="ul-footer-top-widget-title">Maincategories</h3>
+
+                    <div class="ul-footer-top-widget-links">
+                        {%for item in maincategories|slice:"5"%}
+                        <a href="/{{item.slug}}">{{item.name}}</a>
+                        {%endfor%}
+                    </div>
+
+                </div>
+
+                <!-- single links column -->
+                <div class="ul-footer-top-widget">
+                    <h3 class="ul-footer-top-widget-title">Categories</h3>
+
+                    <div class="ul-footer-top-widget-links">
+                        {%for item in categories|slice:"5"%}
+                        <a href="/search/?query={{item.name}}">{{item.name}}</a>
+                        {%endfor%}
+                    </div>
+
+                </div>
+                <!-- single links column -->
+                <div class="ul-footer-top-widget">
+                    <h3 class="ul-footer-top-widget-title">Brands</h3>
+
+                    <div class="ul-footer-top-widget-links">
+                        {%for item in brands|slice:"5"%}
+                        <a href="/search/?query={{item.name}}">{{item.name}}</a>
+                        {%endfor%}
+                    </div>
+
+                </div>
+
+
+                <!-- single links column -->
+                <div class="ul-footer-top-widget">
+                    <h3 class="ul-footer-top-widget-title">Products</h3>
+
+                    <div class="ul-footer-top-widget-links">
+                        {%for item in filteredProduct|slice:"5"%}
+                        <a href="/product-details/{{item.name|slugify}}/{{item.id}}">{{item.name}}</a>
+                        {%endfor%}
+                    </div>
+                </div>
+
+                <!-- single links column --> 
+                <div class="ul-footer-top-widget">
+                    <h3 class="ul-footer-top-widget-title">Policies</h3>
+
+                    <div class="ul-footer-top-widget-links">
+                        <a href="#">Policy</a>
+                        <a href="#">Dressy Inside</a>
+                        <a href="/about-us">About Us</a>
+                        <a href="#">Company</a>
+                        <a href="#">Careers</a>
+                    </div>
+                </div>
+
+                <!-- single links column -->
+                <div class="ul-footer-top-widget">
+                    <h3 class="ul-footer-top-widget-title">Help</h3>
+
+                    <div class="ul-footer-top-widget-links">
+                        <a href="/contact">Contact us</a>
+                        <a href="/about-us">About us</a>
+                        <a href="/faq">FAQ</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Refund policy</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class=" text-center">
+                <p class="copyright-txt text-center text-light">Copyright @2025 By <a href="/" class="ul-footer-bottom-link" target="_blank">Indian Style Hub</a> |  Design and Developed by  <a href="https://www.plumint.com/" class="ul-footer-bottom-link" target="_blank">Plumint</a></p>
+                
+            </div>
+        </div>
+    </footer>
+    <!-- FOOTER SECTION END -->
+
+    <!-- libraries JS -->
+    <script src="{%static 'assets/vendor/bootstrap/bootstrap.bundle.min.js'%}"></script>
+    <script src="{%static 'assets/vendor/splide/splide.min.js'%}"></script>
+    <script src="{%static 'assets/vendor/splide/splide-extension-auto-scroll.min.js'%}"></script>
+    <script src="{%static 'assets/vendor/swiper/swiper-bundle.min.js'%}"></script>
+    <script src="{%static 'assets/vendor/slim-select/slimselect.min.js'%}"></script>
+    <script src="{%static 'assets/vendor/animate-wow/wow.min.js'%}"></script>
+    <script src="{%static 'assets/vendor/splittype/index.min.js'%}"></script>
+    <script src="{%static 'assets/vendor/mixitup/mixitup.min.js'%}"></script>
+    <script src="{%static 'assets/vendor/fslightbox/fslightbox.js'%}"></script>
+    <!-- custom JS -->
+    <script src="{%static 'assets/js/main.js'%}"></script>
+    <script src="{%static 'assets/js/countdown.js'%}"></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+{% extends "front/index.html" %}
+{%load static%}
+{%block body%}
+
+    <main>
+        <!-- BREADCRUMB SECTION START -->
+        <div class="ul-container">
+            <div class="ul-breadcrumb">
+                <h2 class="ul-breadcrumb-title">Blog</h2>
+                <div class="ul-breadcrumb-nav">
+                    <a href="/"><i class="flaticon-home"></i> Home</a>
+                    <i class="flaticon-arrow-point-to-right"></i>
+                    <span class="current-page">Blog</span>
+                </div>
+            </div>
+        </div>
+        <!-- BREADCRUMB SECTION END -->
+
+
+        <!-- BLOG SECTION START -->
+        <section>
+            <div class="ul-inner-page-container">
+                <div class="row ul-bs-row row-cols-md-3 row-cols-2 row-cols-xxs-1">
+                    <!-- single blog -->
+                    {%for item in page_posts%}
+                    <div class="col">
+                        <div class="ul-blog">
+                            <div class="ul-blog-img">
+                                <img src="{{item.image}}" alt="Image">
+                            </div>
+
+                            <div class="ul-blog-txt">
+                                <div class="ul-blog-infos flex gap-x-[30px] mb-[16px]">
+                                    <!-- single info -->
+                                    <div class="ul-blog-info">
+                                        <span class="icon"><i class="flaticon-user-2"></i></span>
+                                        <span class="text font-normal text-[14px] text-etGray">By Admin</span>
+                                        <span class="text font-normal text-[14px] text-etGray">on {{item.date}}</span>
+                                    </div>
+                                </div>
+
+                                <h3 class="ul-blog-title"><a href="/blog-details/{{item.slug}}">{{item.title}}</a></h3>
+                                <p class="ul-blog-descr">{{item.meta_description}}</p>
+
+                                <a href="/blog-details/{{item.slug}}" class="ul-blog-btn">Read More <span class="icon"><i class="flaticon-up-right-arrow"></i></span></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    {%endfor%}
+                </div>
+
+                <!-- pagination -->
+                <div class="ul-pagination pt-0 border-0">
+                    <ul>
+                        {% if page_posts.has_previous %}
+                            <li>
+                                <a href="?page={{ page_posts.previous_page_number }}"><i class="flaticon-left-arrow"></i></a>
+                            </li>
+                        {% else %}
+                            <li><span class="disabled"><i class="flaticon-left-arrow"></i></span></li>
+                        {% endif %}
+                        
+                        <li class="pages">
+                            {% for num in page_range %}
+                                {% if num == page_posts.number %}
+                                    <a href="?page={{ num }}" class="active">{{ num|add:"0"|stringformat:"02d" }}</a>
+                                {% else %}
+                                    <a href="?page={{ num }}">{{ num|add:"0"|stringformat:"02d" }}</a>
+                                {% endif %}
+                            {% endfor %}
+                        </li>
+                    
+                        {% if page_posts.has_next %}
+                            <li>
+                                <a href="?page={{ page_posts.next_page_number }}"><i class="flaticon-arrow-point-to-right"></i></a>
+                            </li>
+                        {% else %}
+                            <li><span class="disabled"><i class="flaticon-arrow-point-to-right"></i></span></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+        <!-- BLOG SECTION END -->
+    </main>
+
+{%endblock%}

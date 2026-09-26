@@ -1,0 +1,720 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Admin Dashboard </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="romegamart " name="description" />
+    <meta content="Romegamart" name="author" />
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="{%static 'admin-assets/images/favicon.ico'%}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Bootstrap Css -->
+    <link href="{%static 'admin-assets/css/bootstrap.min.css'%}" rel="stylesheet" type="text/css" />
+    <!-- Icons Css -->
+    <link href="{%static 'admin-assets/css/icons.min.css'%}" rel="stylesheet" type="text/css" />
+    <!-- App Css-->
+    <link href="{%static 'admin-assets/css/app.min.css'%}" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tiny.cloud/1/ymxhqwkbtam431m9hdcl6yyh07yevy2xaxyure5ypa2dnhym/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+    <!--Start Firebase Link-->
+    <script src="https://www.gstatic.com/firebasejs/8.2.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.0/firebase-messaging.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_xWf2ll2VGaRkFifvcgdKv_KJ7JB8bwI",
+            authDomain: "alert-301c6.firebaseapp.com",
+            projectId: "alert-301c6",
+            storageBucket: "alert-301c6.appspot.com",
+            messagingSenderId: "748950024046",
+            appId: "1:748950024046:web:8b2bd867f2613774a9db7f",
+            measurementId: "G-25Z0J5VN5H"
+        };
+    
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
+    
+        // Request permission for notifications
+        messaging.requestPermission()
+            .then(() => messaging.getToken({ vapidKey: 'BFnY5-yfJm0lltInbssENb6k54MLQK3awjZ3wQ0lcEpZ7dKoWg1ozVB1K-no8CuwXJ4zc68E6qjbn_5tNDPiBuI' }))
+            .then(token => {
+                console.log('FCM Token:', token);
+                saveDeviceToken(token);
+            })
+            .catch(err => console.error('Permission or token retrieval error:', err));
+    
+        // Save device token to the backend
+        function saveDeviceToken(token) {
+            fetch('/save-device-token/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken') // Include CSRF token for Django
+                },
+                body: JSON.stringify({
+                    token: token,
+                    device_type: 'web'
+                })
+            })
+            .then(response => response.json())
+            .then(data => console.log('Token saved:', data))
+            .catch(error => console.error('Error saving token:', error));
+        }
+    
+        // Get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie) {
+                const cookies = document.cookie.split(';');
+                cookies.forEach(cookie => {
+                    const trimmedCookie = cookie.trim();
+                    if (trimmedCookie.startsWith(`${name}=`)) {
+                        cookieValue = decodeURIComponent(trimmedCookie.split('=')[1]);
+                    }
+                });
+            }
+            return cookieValue;
+        }
+    
+        // Handle foreground notifications
+        messaging.onMessage(payload => {
+            console.log('Message received:', payload);
+            const { title, body, icon, image } = payload.notification;
+            const url = payload.data?.url; // Extract the URL from the data payload
+            showNotification(title, body, icon, image, url);
+        });
+    
+        // Display browser notification with click handling for the URL
+        function showNotification(title, body, icon, image, url) {
+            if (Notification.permission === 'granted') {
+                const notification = new Notification(title, {
+                    body: body,
+                    icon: icon || '/default-icon.png',
+                    image: image || ''
+                });
+    
+                // Open the URL if the notification is clicked
+                notification.onclick = function(event) {
+                    event.preventDefault(); // Prevent the default behavior
+                    if (url) {
+                        window.open(url, '_blank'); // Open the URL in a new tab
+                    }
+                };
+            }
+        }
+    
+        // Manually trigger notification via button
+        document.getElementById('sendNotificationBtn').addEventListener('click', () => {
+            fetch('/send')  // Replace with correct server endpoint
+                .then(response => response.text())
+                .then(data => alert('Notification sent: ' + data))
+                .catch(error => console.error('Error sending notification:', error));
+        });
+    
+        // Update token if refreshed
+        messaging.onTokenRefresh(() => {
+            messaging.getToken({ vapidKey: 'BFnY5-yfJm0lltInbssENb6k54MLQK3awjZ3wQ0lcEpZ7dKoWg1ozVB1K-no8CuwXJ4zc68E6qjbn_5tNDPiBuI' })
+                .then(newToken => {
+                    console.log('New FCM Token:', newToken);
+                    saveDeviceToken(newToken);
+                })
+                .catch(err => console.error('Error refreshing token:', err));
+        });
+    </script>
+    
+    <!-- End Firebase Link-->
+<body data-sidebar="dark" data-layout-mode="light">
+    <!-- Begin page -->
+
+    <div id="layout-wrapper">
+
+        <header id="page-topbar">
+            <div class="navbar-header">
+                <div class="d-flex">
+
+                    <!-- LOGO -->
+                    <div class="navbar-brand-box">
+                        <a href="/" target="_blank" class="logo logo-dark">
+                            <span class="logo-sm">
+                                <img src="{%static 'images/255dmYMPtjS23fvgqcrfDDjvhXzI45RRu71Elpai.jpg'%}" alt="" height="22">
+                            </span>
+                            <span class="logo-lg">
+                                <img src="{%static 'images/255dmYMPtjS23fvgqcrfDDjvhXzI45RRu71Elpai.jpg'%}" alt="" height="17">
+                            </span>
+                        </a>
+
+                        <a href="/" target="_blank" class="logo logo-light">
+                            <span class="logo-sm">
+                                <img src="{%static 'images/255dmYMPtjS23fvgqcrfDDjvhXzI45RRu71Elpai.jpg'%}" alt="" height="22">
+                            </span>
+                            <span class="logo-lg">
+                                <img src="{%static 'images/255dmYMPtjS23fvgqcrfDDjvhXzI45RRu71Elpai.jpg'%}" alt="" height="60">
+                            </span>
+                        </a>
+                    </div>
+
+                    <button type="button" class="btn btn-sm px-3 font-size-16 header-item waves-effect"
+                        id="vertical-menu-btn">
+                        <i class="fa fa-fw fa-bars"></i>
+                    </button>
+
+                    <!-- App Search-->
+                    <form class="app-search d-none d-lg-block" method="post" action="/admin-search/">
+                        {% csrf_token %}
+                        <div class="position-relative">
+                            <input type="text" class="form-control" placeholder="Search..." id="searchInput" name="name" value="{{ search_query }}">
+                            <span class="bx bx-search-alt"></span>
+                        </div>
+                    </form>
+                    
+                </div>
+
+                <div class="d-flex">
+
+                    <div class="dropdown d-inline-block d-lg-none ms-2">
+                        <button type="button" class="btn header-item noti-icon waves-effect"
+                            id="page-header-search-dropdown" data-bs-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false">
+                            <i class="mdi mdi-magnify"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
+                            aria-labelledby="page-header-search-dropdown">
+
+                            <form class="p-3">
+                                <div class="form-group m-0">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" placeholder="Search ..."
+                                            aria-label="Recipient's username">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary" type="submit"><i
+                                                    class="mdi mdi-magnify"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="dropdown d-none d-lg-inline-block ms-1">
+                        <button type="button" class="btn header-item noti-icon waves-effect"
+                            data-bs-toggle="fullscreen">
+                            <i class="bx bx-fullscreen"></i>
+                        </button>
+                    </div>
+
+                    <div class="dropdown d-inline-block">
+                        <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <img class="rounded-circle sheader-profile-user"
+                                src="{%static 'images/255dmYMPtjS23fvgqcrfDDjvhXzI45RRu71Elpai.jpg'%}" style="height:30px"alt="Header Avatar">
+                            <span class="d-none d-xl-inline-block ms-1" key="t-henry">{{request.user.username}}</span>
+                            <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <!-- item-->
+                            <a class="dropdown-item text-danger" href="/admin-logout"><i class="bx bx-power-off font-size-16 align-middle me-1 text-danger"></i> <span key="t-logout">Logout</span></a>
+                        </div>
+                    </div>
+
+                    <div class="dropdown d-inline-block">
+                        <button type="button" class="btn header-item noti-icon right-bar-toggle waves-effect">
+                            <i class="bx bx-cog bx-spin"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </header>
+
+        <!-- ========== Left Sidebar Start ========== -->
+        <div class="vertical-menu">
+            <div data-simplebar class="h-100">
+                <!--- Sidemenu -->
+                <div id="sidebar-menu">
+                    <!-- Left Menu Start -->
+                    <ul class="metismenu list-unstyled" id="side-menu">
+                        <li class="menu-title" key="t-menu">Menu</li>
+                        <li> <a href="/admin-dashboard"><i class="bx bx-home"></i>Dashboard </a></li>
+                        <li> <a href="/slider"> Slider </a></li>
+                        <li> <a href="/supercategory"> Supercategory </a></li>
+                        <li> <a href="/maincategory"> Maincategory </a></li>
+                        <li> <a href="/category"> Category </a></li>
+                        <li> <a href="/subcategory"> Subcategory </a></li>
+                        <li> <a href="/brand"> Brand </a></li>
+                        <li> <a href="/color"> Color </a></li>
+                        <li> <a href="/size"> Size </a></li>
+                        <li> <a href="/product"> Product </a></li>
+                        <li> <a href="/admin-buyer">Our Buyer</a></li>
+                        <li> <a href="/admin-enquiry">Enquiry</a></li>
+                        <li> <a href="/admin-blog">Blog</a></li>
+                        <li> <a href="/gallery">Gallery</a></li>
+                        
+                    </ul>
+                </div>
+                <!-- Sidebar -->
+            </div>
+        </div>
+        <!-- Left Sidebar End -->
+       
+
+        <div class="main-content">
+            <div class="page-content">
+                <div class="container-fluid">
+
+                    <!-- start page title -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                                <h4 class="mb-sm-0 font-size-18">Dashboard</h4>
+
+                                <div class="page-title-right">
+                                    <ol class="breadcrumb m-0">
+                                        
+                                        <li class="breadcrumb-item active">Dashboard</li>
+                                    </ol>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end page title -->
+
+                    <div class="row glowing-voucher">
+                        
+                            <style>
+                                .glowing-voucher {
+                                    padding: 20px;
+                                    border-radius: 10px;
+                                    background: linear-gradient(to right, rgba(206, 116, 13, 0.88), rgb(21, 45, 153), rgb(199, 95, 16));
+                                    box-shadow: 0px 0px 15px rgba(255, 165, 0, 0.6);
+                                    animation: glow 1.5s infinite alternate;
+                                }
+
+                                @keyframes glow {
+                                    0% {
+                                        box-shadow: 0px 0px 15px rgba(255, 165, 0, 0.6);
+                                    }
+
+                                    100% {
+                                        box-shadow: 0px 0px 25px rgba(255, 165, 0, 1);
+                                    }
+                                }
+                            </style>
+
+                        <!-- Products Card -->
+                        <div class="col-md-4">
+                            <a href="/admin-products/all">
+                                <div class="card mini-stats-wid">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted fw-bold text-center">Products</p>
+                                                <h4 class="mb-0 text-center">{{ prod }}</h4>
+                                            </div>
+                                            <div class="flex-shrink-0">
+                                                <div class="mini-stat-icon avatar-sm rounded-circle bg-success">
+                                                    <span class="avatar-title">
+                                                        <i class="bx bx-cube-alt font-size-24"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    
+                        <!-- Orders Card -->
+                        <div class="col-md-4">
+                            <a href="/admin-order">
+                                <div class="card mini-stats-wid">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted fw-bold text-center">Orders</p>
+                                                <h4 class="mb-0 text-center">{{ ord }}</h4>
+                                            </div>
+                                            <div class="flex-shrink-0">
+                                                <div class="mini-stat-icon avatar-sm rounded-circle bg-warning">
+                                                    <span class="avatar-title">
+                                                        <i class="bx bx-shopping-bag font-size-24"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    
+                        <!-- Seller Card -->
+                        <div class="col-md-4">
+                            <a href="/admin-seller">
+                                <div class="card mini-stats-wid">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted fw-bold text-center">Seller</p>
+                                                <h4 class="mb-0 text-center">1</h4>
+                                            </div>
+                                            <div class="flex-shrink-0">
+                                                <div class="mini-stat-icon avatar-sm rounded-circle bg-info">
+                                                    <span class="avatar-title">
+                                                        <i class="bx bx-user-circle font-size-24"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    
+                        <!-- Pending Orders Card -->
+                        <div class="col-md-4">
+                            <a href="/admin-filter-product-by-status/Pending">
+                                <div class="card mini-stats-wid">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted fw-bold text-center">Pending</p>
+                                                <h4 class="mb-0 text-center">{{ pen }}</h4>
+                                            </div>
+                                            <div class="flex-shrink-0">
+                                                <div class="mini-stat-icon avatar-sm rounded-circle bg-danger">
+                                                    <span class="avatar-title">
+                                                        <i class="bx bx-time-five font-size-24"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    
+                        <!-- Active Products Card -->
+                        <div class="col-md-4">
+                            <a href="/admin-filter-product-by-status/Done">
+                                <div class="card mini-stats-wid">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted fw-bold text-center">Active Products</p>
+                                                <h4 class="mb-0 text-center">{{ act }}</h4>
+                                            </div>
+                                            <div class="flex-shrink-0">
+                                                <div class="mini-stat-icon avatar-sm rounded-circle bg-primary">
+                                                    <span class="avatar-title">
+                                                        <i class="bx bx-check-circle font-size-24"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    
+                        <!-- Out of Stock Card -->
+                        <div class="col-md-4">
+                            <a href="/admin-filter-product-by-stock">
+                                <div class="card mini-stats-wid">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted fw-bold text-center">Out of Stock</p>
+                                                <h4 class="mb-0 text-center">{{ oos }}</h4>
+                                            </div>
+                                            <div class="flex-shrink-0">
+                                                <div class="mini-stat-icon avatar-sm rounded-circle bg-secondary">
+                                                    <span class="avatar-title">
+                                                        <i class="bx bx-box font-size-24"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    
+                    </div>
+                    
+                    {%block body%}
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="card-title mb-4 text-center">Total Product <span><a href="/add-product"> &nbsp;<i class="fa fa-plus" aria-hidden="true"></i></a>
+                                    </span></h4>
+                                    {%if page_posts%}
+                                    <div class="table-responsive">
+                                        <table class="table align-middle table-nowrap mb-0" id="productTable">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="align-middle">Name</th>
+                                                    <th class="align-middle">Price</th>
+                                                    <th class="align-middle">Qty</th>
+                                                    <th class="align-middle">Maincategory</th>
+                                                    <th class="align-middle">Category</th>
+                                                    <th class="align-middle">Subcategory</th>
+                                                    <th class="align-middle">Brand</th>
+                                                    <th class="align-middle">Offers</th>
+                                                    <th class="align-middle">View</th>
+                                                    <th class="align-middle">Edit</th>
+                                                    <th class="align-middle">Duplicate</th>
+                                                    <th class="align-middle">Delete</th>
+                                                    <th class="align-middle">Created On</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in page_posts %}
+                                                <tr>
+                                                    <td>{{ item.name|slice:"50" }}</td>
+                                                    <td>{{ item.base_price }}</td>
+                                                    <td>{{ item.quantity }}</td>
+                                                    <td>{{ item.maincategory }}</td>
+                                                    <td>{{ item.category }}</td>
+                                                    <td>{{ item.subcategory }}</td>
+                                                    <td>{{ item.brand }}</td>
+                                                    
+                                                    <td>
+                                                        <div class="dropdown">
+                                                            {%if item.offers%}
+                                                            <button class="btn btn-sm dropdown-toggle bg-primary text-light" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                               {{item.offers}}
+                                                            </button>
+                                                            {%else%}
+                                                            <button class="btn btn-sm dropdown-toggle bg-primary text-light" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                Select Offer
+                                                             </button>
+                                                            {%endif%}
+                                                            <ul class="dropdown-menu">
+                                                                {%for offer in offers%}
+                                                                <li><a class="dropdown-item" href="/update-product-offers/{{ item.id }}/{{offer.slug}}">{{offer.name}}</a></li>
+                                                                {%endfor%}
+                                                                
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                    <td><a href="/product-details/{{ item.name|slugify }}-{{ item.id }}" target="_blank"><i class="fa fa-eye"></i></a></td>
+                                                    <td><a href="/update-product/{{ item.id }}/{{page_posts.number }}"><i class="fa fa-edit"></i></a></td>
+                                                    <td><a href="/duplicate-product/{{ item.id }}/{{page_posts.number }}"><i class="fa fa-copy"></i></a></td>
+                                                    <td><a href="#" onclick="confirmDelete('{{ item.id }}', {{ page_posts.number }})"><i class="fa fa-trash text-danger"></i></a></td>
+                                                    <td>{{ item.created_on }}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                    <script>
+                                                        function confirmDelete(itemId, page) {
+                                                            if (confirm("Are you sure you want to delete this item?")) {
+                                                                window.location.href = "/admin-delete-product/" + itemId + "/" + page;
+                                                            } else {
+                                                                return false;
+                                                            }
+                                                        }
+                                                    </script>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    <!-- end table-responsive -->
+                                    {%else%}
+
+                                        <!-- Not found Start-->
+                                        <div class="text-center border p-4">
+                                           <img loading="lazy" src="{%static 'images/not-found.png'%}" alt="Image"><br>
+                                           <h3>Sorry, no results found!</h3>
+                                           <p>Please check the spelling or try searching for something else</p>
+                                        </div>
+                                        <!-- End Not Found-->
+                                        {%endif%}
+                                    </div>
+                                </div>
+                            </div>
+                            {%if page_posts%}
+                            <div class="blog-pagination">
+                                <nav>
+                                    <ul class="pagination">
+                                        <li class="page-item previtem {% if not page_posts.has_previous %}disabled{% endif %}">
+                                            <a class="page-link" href="{% if page_posts.has_previous %}?page={{ page_posts.previous_page_number }}&name={{ search_query }}{% endif %}">
+                                                <i class="fas fa-regular fa-arrow-left"></i> Prev
+                                            </a>
+                                        </li>
+                                        <li class="justify-content-center pagination-center">
+                                            <div class="pagelink">
+                                                <ul class="d-flex">
+                                                    {% for page_num in page_range %}
+                                                    <li class="page-item {% if page_posts.number == page_num %}active{% endif %}">
+                                                        <a class="page-link" href="?page={{ page_num }}&name={{ search_query }}">
+                                                            {{ page_num }}
+                                                            {% if page_posts.number == page_num %}
+                                                            <span class="visually-hidden">(current)</span>
+                                                            {% endif %}
+                                                        </a>
+                                                    </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </li>
+                                        <li class="page-item nextlink {% if not page_posts.has_next %}disabled{% endif %}">
+                                            <a class="page-link" href="{% if page_posts.has_next %}?page={{ page_posts.next_page_number }}&name={{ search_query }}{% endif %}">
+                                                Next <i class="fas fa-regular fa-arrow-right"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                            
+                            {%endif%}
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const searchInput = document.getElementById('searchInput');
+                                const tableRows = document.querySelectorAll('#productTable tbody tr');
+                        
+                                searchInput.addEventListener('input', function() {
+                                    const searchTerm = searchInput.value.trim().toLowerCase();
+                        
+                                    tableRows.forEach(row => {
+                                        const nameColumn = row.querySelector('td:first-child');
+                                        if (nameColumn) {
+                                            const textContent = nameColumn.textContent.trim().toLowerCase();
+                                            if (textContent.includes(searchTerm)) {
+                                                row.style.display = '';
+                                            } else {
+                                                row.style.display = 'none';
+                                            }
+                                        }
+                                    });
+                                });
+                            });
+                        </script> 
+                    </div>
+                </div>
+                <!-- container-fluid -->
+            </div> 
+            </div>
+            {%endblock%}
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Lazy loading for images
+                    const lazyImages = document.querySelectorAll('.lazy-load');
+                    const observer = new IntersectionObserver((entries, observer) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const img = entry.target;
+                                img.src = img.getAttribute('data-src');
+                                img.classList.remove('lazy-load');
+                                observer.unobserve(img);
+                            }
+                        });
+                    });
+                    lazyImages.forEach(img => observer.observe(img));
+                });
+            </script>
+            
+
+            <footer class="footer">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <script>document.write(new Date().getFullYear())</script> © Romegamart.
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="text-sm-end d-none d-sm-block">
+                                Design & Develop by <a href="https://www.plumint.com" target="_blank" style="display:none">Best B2C Plateform</a><span>Romegamart</a>                            </div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+        <!-- end main content-->
+
+    </div>
+    <!-- END layout-wrapper -->
+
+    <!-- Right Sidebar -->
+    <div class="right-bar">
+        <div data-simplebar class="h-100">
+            <div class="rightbar-title d-flex align-items-center px-3 py-4">
+
+                <h5 class="m-0 me-2">Settings</h5>
+
+                <a href="javascript:void(0);" class="right-bar-toggle ms-auto">
+                    <i class="mdi mdi-close noti-icon"></i>
+                </a>
+            </div>
+
+            <!-- Settings -->
+            <hr class="mt-0">
+            <h6 class="text-center mb-0">Choose Layouts</h6>
+
+                <div class="p-4">
+                <div class="mb-2">
+                    <img src="{%static 'admin-assets/images/layouts/layout-1.jpg'%}" class="img-thumbnail"
+                        alt="layout images">
+                </div>
+
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input theme-choice" type="checkbox" id="light-mode-switch" checked>
+                    <label class="form-check-label" for="light-mode-switch">Light Mode</label>
+                </div>
+
+                <div class="mb-2">
+                    <img src="{%static 'admin-assets/images/layouts/layout-2.jpg'%}" class="img-thumbnail"
+                        alt="layout images">
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input theme-choice" type="checkbox" id="dark-mode-switch">
+                    <label class="form-check-label" for="dark-mode-switch">Dark Mode</label>
+                </div>
+
+                <div class="mb-2">
+                    <img src="{%static 'admin-assets/images/layouts/layout-3.jpg'%}" class="img-thumbnail"
+                        alt="layout images">
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input theme-choice" type="checkbox" id="rtl-mode-switch">
+                    <label class="form-check-label" for="rtl-mode-switch">RTL Mode</label>
+                </div>
+
+                <div class="mb-2">
+                    <img src="{%static 'admin-assets/images/layouts/layout-4.jpg'%}" class="img-thumbnail"
+                        alt="layout images">
+                </div>
+                <div class="form-check form-switch mb-5">
+                    <input class="form-check-input theme-choice" type="checkbox" id="dark-rtl-mode-switch">
+                    <label class="form-check-label" for="dark-rtl-mode-switch">Dark RTL Mode</label>
+                </div>
+
+
+            </div>
+
+        </div> <!-- end slimscroll-menu-->
+    </div>
+    <!-- /Right-bar -->
+
+    <!-- Right bar overlay-->
+    <div class="rightbar-overlay"></div>
+
+    <!-- JAVASCRIPT -->
+    <script src="{%static 'admin-assets/libs/jquery/jquery.min.js'%}"></script>
+    <script src="{%static 'admin-assets/libs/bootstrap/js/bootstrap.bundle.min.js'%}"></script>
+    <script src="{%static 'admin-assets/libs/metismenu/metisMenu.min.js'%}"></script>
+    <script src="{%static 'admin-assets/libs/simplebar/simplebar.min.js'%}"></script>
+    <script src="{%static 'admin-assets/libs/node-waves/waves.min.js'%}"></script>
+
+    <!-- apexcharts -->
+    <script src="{%static 'admin-assets/libs/apexcharts/apexcharts.min.js'%}"></script>
+
+    <!-- dashboard init -->
+    <script src="{%static 'admin-assets/js/pages/dashboard.init.js'%}"></script>
+
+    <!-- App js -->
+    <script src="{%static 'admin-assets/js/app.js'%}"></script>
+   
+</body>
+</html>

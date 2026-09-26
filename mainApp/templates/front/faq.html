@@ -1,0 +1,122 @@
+{% extends "front/index.html" %}
+{% load static %}
+{% block body %}
+<main>
+    <!-- BREADCRUMB SECTION START -->
+    <div class="ul-container">
+        <div class="ul-breadcrumb">
+            <h2 class="ul-breadcrumb-title">FAQ</h2>
+            <div class="ul-breadcrumb-nav">
+                <a href="/"><i class="flaticon-home"></i> Home</a>
+                <i class="flaticon-arrow-point-to-right"></i>
+                <span class="current-page">FAQ</span>
+            </div>
+        </div>
+    </div>
+    <!-- BREADCRUMB SECTION END -->
+
+    <!-- FAQ SECTION START -->
+    <section class="ul-faq">
+        <div class="ul-inner-page-container">
+            <div class="ul-accordion">
+
+                <!-- Question 1 -->
+                <div class="ul-single-accordion-item">
+                    <div class="ul-single-accordion-item__header">
+                        <div class="left">
+                            <h3 class="ul-single-accordion-item__title">What is IndianStyleHub?</h3>
+                        </div>
+                        <span class="icon"><i class="flaticon-plus"></i></span>
+                    </div>
+                    <div class="ul-single-accordion-item__body">
+                        <p class="mb-0">IndianStyleHub is a clothing store offering a wide range of traditional, ethnic, and contemporary fashion for men, women, and kids. We bring the latest trends at affordable prices, delivered across India.</p>
+                    </div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="ul-single-accordion-item open">
+                    <div class="ul-single-accordion-item__header">
+                        <div class="left">
+                            <h3 class="ul-single-accordion-item__title">How can I track my order?</h3>
+                        </div>
+                        <span class="icon"><i class="flaticon-plus"></i></span>
+                    </div>
+                    <div class="ul-single-accordion-item__body">
+                        <p class="mb-0">Once your order is shipped, you will receive a tracking number via email or SMS. You can also log in to your account on IndianStyleHub and view your order history to track the status of your order.</p>
+                    </div>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="ul-single-accordion-item">
+                    <div class="ul-single-accordion-item__header">
+                        <div class="left">
+                            <h3 class="ul-single-accordion-item__title">How do I find the right size?</h3>
+                        </div>
+                        <span class="icon"><i class="flaticon-plus"></i></span>
+                    </div>
+                    <div class="ul-single-accordion-item__body">
+                        <p class="mb-0">We provide a detailed size chart on each product page. Please refer to the chart and measurements to choose the best fit. If you're still unsure, feel free to contact our customer care for guidance.</p>
+                    </div>
+                </div>
+
+                <!-- Question 4 -->
+                <div class="ul-single-accordion-item">
+                    <div class="ul-single-accordion-item__header">
+                        <div class="left">
+                            <h3 class="ul-single-accordion-item__title">Do you accept returns or exchanges?</h3>
+                        </div>
+                        <span class="icon"><i class="flaticon-plus"></i></span>
+                    </div>
+                    <div class="ul-single-accordion-item__body">
+                        <p class="mb-0">Yes, we accept returns and exchanges within 7 days of delivery. The item must be unused and in original packaging. Please visit our Return Policy page for complete details.</p>
+                    </div>
+                </div>
+
+                <!-- Question 5 -->
+                <div class="ul-single-accordion-item">
+                    <div class="ul-single-accordion-item__header">
+                        <div class="left">
+                            <h3 class="ul-single-accordion-item__title">How do I care for my clothes?</h3>
+                        </div>
+                        <span class="icon"><i class="flaticon-plus"></i></span>
+                    </div>
+                    <div class="ul-single-accordion-item__body">
+                        <p class="mb-0">We recommend following the wash care instructions mentioned on the label of each product. Most traditional and embroidered clothes should be dry cleaned or hand washed in cold water.</p>
+                    </div>
+                </div>
+
+                <!-- Question 6 -->
+                <div class="ul-single-accordion-item">
+                    <div class="ul-single-accordion-item__header">
+                        <div class="left">
+                            <h3 class="ul-single-accordion-item__title">Do you restock sold-out items?</h3>
+                        </div>
+                        <span class="icon"><i class="flaticon-plus"></i></span>
+                    </div>
+                    <div class="ul-single-accordion-item__body">
+                        <p class="mb-0">Some popular items are restocked regularly. You can click the "Notify Me" button on the product page to get an email when the item is back in stock.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const items = document.querySelectorAll('.ul-single-accordion-item');
+
+        items.forEach(item => {
+            item.querySelector('.ul-single-accordion-item__header').addEventListener('click', () => {
+                // Remove 'open' from all items
+                items.forEach(i => i.classList.remove('open'));
+
+                // Toggle 'open' on the clicked one
+                item.classList.toggle('open');
+            });
+        });
+    });
+</script>
+
+    <!-- FAQ SECTION END -->
+</main>
+{% endblock %}

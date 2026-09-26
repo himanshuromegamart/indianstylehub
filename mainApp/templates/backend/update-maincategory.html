@@ -1,0 +1,174 @@
+{% extends 'backend/index.html' %}
+{% load static %}
+{% block body %}
+
+<script>
+    function validateForm() {
+        var name = document.getElementById("name").value.trim();
+        var currentname = '{{data.name}}'
+
+        // Extract existing maincategories except the current one
+        var existingName = [];
+        {% for item in maincategories %}
+            if ('{{ item.name }}' !== currentname) {  // Exclude the current category from validation
+                existingName.push('{{ item.name }}');
+            }
+        {% endfor %}
+
+        // Check if the entered name already exists in the 'existingName' array
+        if (existingName.includes(name)) {
+            alert("Maincategory already exists.");
+            return false; // Prevent form submission
+        }
+        return true; // Allow form submission if all validations pass
+    }
+</script>
+
+
+<div class="main-contentw-100">
+    <div class="">
+        <div class="container-fluid">
+            <!-- end row -->
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="text-center">Update Maincategory</h4>
+                            <form method="post" enctype="multipart/form-data" onsubmit="return validateForm();">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">Name<span class="text-danger">*</span></label>
+                                            <input type="text" id="name" class="form-control" placeholder="Enter Name" name="name" required value="{{ data.name }}">
+                                        </div>
+                                    </div>
+                                    {% if data.image %}
+                                    <div class="col-lg-1 mt-4">
+                                        <div class="mb-3">
+                                            <img 
+                                                src="https://via.placeholder.com/50" 
+                                                data-src="{{ data.image }}" 
+                                                alt="Maincategory Image" 
+                                                class="lazy-load img-thumbnail" 
+                                                width="50"
+                                                height="50">
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="col-lg-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">Icon<span class="text-danger">*</span></label>
+                                            <input type="file" accept=".png,.jpg,.jpeg,.webp" class="form-control" name="image">
+                                        </div>
+                                    </div>
+
+                                    {% if data.banner1 %}
+                                    <div class="col-lg-1 mt-4">
+                                        <div class="mb-3">
+                                            <img 
+                                                src="https://via.placeholder.com/50" 
+                                                data-src="{{ data.banner1 }}" 
+                                                alt=" Image" 
+                                                class="lazy-load img-thumbnail" 
+                                                width="50"
+                                                height="50">
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="col-lg-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">Banner1<span class="text-danger">*</span></label>
+                                            <input type="file" accept=".png,.jpg,.jpeg,.webp" class="form-control" name="banner1">
+                                        </div>
+                                    </div>
+                                    {% if data.banner2 %}
+                                    <div class="col-lg-1 mt-4">
+                                        <div class="mb-3">
+                                            <img 
+                                                src="https://via.placeholder.com/50" 
+                                                data-src="{{ data.banner2 }}" 
+                                                alt=" Image" 
+                                                class="lazy-load img-thumbnail" 
+                                                width="50"
+                                                height="50">
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="col-lg-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">Banner2<span class="text-danger">*</span></label>
+                                            <input type="file" accept=".png,.jpg,.jpeg,.webp" class="form-control" name="banner2">
+                                        </div>
+                                    </div>
+
+                                    {% if data.banner3 %}
+                                    <div class="col-lg-1 mt-4">
+                                        <div class="mb-3">
+                                            <img 
+                                                src="https://via.placeholder.com/50" 
+                                                data-src="{{ data.banner3 }}" 
+                                                alt=" Image" 
+                                                class="lazy-load img-thumbnail" 
+                                                width="50"
+                                                height="50">
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="col-lg-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">Banner3<span class="text-danger">*</span></label>
+                                            <input type="file" accept=".png,.jpg,.jpeg,.webp" class="form-control" name="banner3">
+                                        </div>
+                                    </div>
+                                    {% if data.banner4 %}
+                                    <div class="col-lg-1 mt-4">
+                                        <div class="mb-3">
+                                            <img 
+                                                src="https://via.placeholder.com/50" 
+                                                data-src="{{ data.banner4 }}" 
+                                                alt=" Image" 
+                                                class="lazy-load img-thumbnail" 
+                                                width="50"
+                                                height="50">
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="col-lg-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">Banner4<span class="text-danger">*</span></label>
+                                            <input type="file" accept=".png,.jpg,.jpeg,.webp" class="form-control" name="banner4">
+                                        </div>
+                                    </div>
+                                    
+
+
+                                    <div class="col-lg-12">
+                                        <div class="mb-3">
+                                            <label class="form-label">Meta Title</label>
+                                            <input type="text" class="form-control" placeholder="Enter Meta Title" name="title" value="{{ data.title }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="mb-3">
+                                            <label class="form-label">Meta Description</label>
+                                            <textarea row="2" col="10" class="form-control" placeholder="Enter Meta Description" name="description">{{ data.description }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary text-center mt-4" style="padding:2px 50px;">Update</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- end row -->
+        </div>
+    </div>
+    <!-- End Page-content -->
+</div>
+
+
+{% endblock %}
