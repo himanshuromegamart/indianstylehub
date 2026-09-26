@@ -1,4 +1,4 @@
-﻿import os
+import os
 import shutil
 from pathlib import Path
 import dj_database_url
@@ -76,11 +76,15 @@ elif os.environ.get('VERCEL'):
     tmp_db = Path('/tmp') / 'db.sqlite3'
     orig_db = BASE_DIR / 'db.sqlite3'
     if not tmp_db.exists() and orig_db.exists():
-        shutil.copyfile(orig_db, tmp_db)
+        try:
+            shutil.copyfile(orig_db, tmp_db)
+        except Exception as e:
+            print("DB copy error:", e)
+    db_target = str(tmp_db) if tmp_db.exists() else str(orig_db)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': tmp_db,
+            'NAME': db_target,
         }
     }
 else:
