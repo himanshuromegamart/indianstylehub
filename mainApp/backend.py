@@ -41,7 +41,7 @@ def image_store(image_type, image_file):
     try:
         try:
             response = requests.post(base_url, data=data, files=files, timeout=30)
-        except requests.exceptions.SSLError:
+        except (requests.exceptions.SSLError, requests.exceptions.RequestException):
             http_url = base_url.replace("https://", "http://")
             response = requests.post(http_url, data=data, files=files, timeout=30)
 
@@ -49,13 +49,13 @@ def image_store(image_type, image_file):
             response_data = response.json()
             image_url = response_data.get("image_url")
             print(f"Image URL retrieved: {image_url}")
-            return image_url  # Extract and return the image URL
+            return image_url or ""
         else:
             print(f"Failed to upload image: {response.text}")
-            return None
+            return ""
     except Exception as e:
         print(f"Error occurred during image upload: {e}")
-        return None
+        return ""
 
 
 # Function to save product with an uploaded image
@@ -280,7 +280,12 @@ def add_maincategory(request):
             uploaded_image = request.FILES.get(field)
             if uploaded_image:
                 image_url = image_store("category", uploaded_image)
-                setattr(m, field, image_url)
+                setattr(m, field, image_url or '')
+            else:
+                setattr(m, field, '')
+
+        if not m.image:
+            m.image = ''
 
         m.title = request.POST.get('title')
         m.description = request.POST.get('description')

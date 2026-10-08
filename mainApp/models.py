@@ -15,7 +15,7 @@ class Supercategory(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
-    image = models.URLField(max_length=1024)
+    image = models.URLField(max_length=1024, default='', null=True, blank=True)
     
     def __str__(self):
         return self.name
@@ -26,7 +26,7 @@ class Maincategory(models.Model):
     supercategory = models.ForeignKey(Supercategory, on_delete=models.SET_NULL, related_name="maincategories", default=None, null=True, blank=True)
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
-    image = models.URLField(max_length=1024)
+    image = models.URLField(max_length=1024, default='', null=True, blank=True)
     banner1 = models.URLField(max_length=1024,default='')
     banner2 = models.URLField(max_length=1024,default='')
     banner3 = models.URLField(max_length=1024,default='')
@@ -49,8 +49,8 @@ class Category(models.Model):
     maincategory = models.ForeignKey(Maincategory, on_delete=models.SET_DEFAULT, default=None, null=True, blank=True)
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200)
-    image = models.URLField(max_length=1024)
-    app_background = models.URLField(max_length=1024,default='')
+    image = models.URLField(max_length=1024, default='', null=True, blank=True)
+    app_background = models.URLField(max_length=1024, default='', null=True, blank=True)
     specifications = models.JSONField(default=dict)  # Requires Django 3.1+
     title=models.CharField(max_length=100,default='',null=True,blank=True)
     description=models.TextField(default='',null=True,blank=True)
@@ -70,7 +70,7 @@ class Subcategory(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_DEFAULT, default=None, null=True, blank=True)
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200)
-    image = models.URLField(max_length=1024)
+    image = models.URLField(max_length=1024, default='', null=True, blank=True)
     title=models.CharField(max_length=100,default='',null=True,blank=True)
     description=models.TextField(default='',null=True,blank=True)
     def __str__(self):
@@ -90,7 +90,7 @@ class Brand(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
-    image = models.URLField(max_length=1024)
+    image = models.URLField(max_length=1024, default='', null=True, blank=True)
     title=models.CharField(max_length=100,default='',null=True,blank=True)
     description=models.TextField(default='',null=True,blank=True)
 
@@ -121,7 +121,7 @@ class Product(models.Model):
     category=models.ForeignKey(Category,on_delete=models.SET_DEFAULT,related_name="categories",default=None, null=True, blank=True)
     subcategory=models.ForeignKey(Subcategory,on_delete=models.SET_DEFAULT,related_name="subcategories",default=None, null=True, blank=True)
     brand=models.ForeignKey(Brand,on_delete=models.SET_DEFAULT,related_name="brands",default=None, null=True, blank=True)
-    image1 = models.URLField(max_length=1024)
+    image1 = models.URLField(max_length=1024, default='', null=True, blank=True)
     image2= models.URLField(max_length=1024,null=True,blank=True)
     image3= models.URLField(max_length=1024,null=True,blank=True)
     image4= models.URLField(max_length=1024,null=True,blank=True)
