@@ -30,7 +30,7 @@ def is_superuser(user):
 # Function to store the image on the external server
 def image_store(image_type, image_file):
     print("Function is called...")
-    base_url = "https://image.indianstylehub.com/add-image/"
+    base_url = os.environ.get('IMAGE_STORE_URL', "https://image.narifashionstore.com/add-image/")
     files = {
         'image': image_file  # Directly send the file object
     }
@@ -39,7 +39,12 @@ def image_store(image_type, image_file):
     }
 
     try:
-        response = requests.post(base_url, data=data, files=files)
+        try:
+            response = requests.post(base_url, data=data, files=files, timeout=30)
+        except requests.exceptions.SSLError:
+            http_url = base_url.replace("https://", "http://")
+            response = requests.post(http_url, data=data, files=files, timeout=30)
+
         if response.status_code == 201:
             response_data = response.json()
             image_url = response_data.get("image_url")

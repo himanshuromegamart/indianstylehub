@@ -13,6 +13,12 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
+    'https://narifashionstore.com',
+    'https://www.narifashionstore.com',
+    'http://narifashionstore.com',
+    'http://www.narifashionstore.com',
+    'https://image.narifashionstore.com',
+    'http://image.narifashionstore.com',
     'https://*.vercel.app',
     'https://*.now.sh',
     'https://*.onrender.com',

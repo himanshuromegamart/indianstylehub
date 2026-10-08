@@ -3,7 +3,7 @@
     
     {% for item in products %}
     <url>
-        <loc>https://indianstylehub.com/product-details/{{ item.name|slugify }}/{{ item.id }}</loc>
+        <loc>https://narifashionstore.com/product-details/{{ item.name|slugify }}/{{ item.id }}</loc>
         <lastmod>{{ item.date|date:"Y-m-d" }}</lastmod>
         <priority>0.8</priority>
     </url>
