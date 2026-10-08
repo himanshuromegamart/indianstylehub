@@ -233,7 +233,7 @@ class Order(models.Model):
 
 class Enquiry(models.Model):
     id = models.AutoField(primary_key=True)
-    product = models.ForeignKey(Product, on_delete=models.SET_DEFAULT, default=None)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, default=None, null=True, blank=True)
     name = models.CharField(max_length=200)
     phone = models.CharField(max_length=10)
     email = models.EmailField()
