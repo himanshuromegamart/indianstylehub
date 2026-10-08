@@ -34,90 +34,271 @@ def home_page(request):
 
 
 
-def category_by_maincategory(request, ops):
-    try:
-        maincategories = Maincategory.objects.all()
-        brands = Brand.objects.all()
-        colors = Color.objects.all()
-        sizes = Size.objects.all()
-        filteredProduct=Product.objects.all().order_by('id').reverse()[:12]
-        maincategory=None
+def dynamic_category_view(request, supercat=None, mcat=None, cat=None, scat=None):
+    """
+    Handles 4-tier category hierarchy:
+    Level 1: /<supercategory>/                          e.g. /women/ or /men/ or /kids/
+    Level 2: /<supercategory>/<maincategory>/           e.g. /women/footwear/
+    Level 3: /<supercategory>/<maincategory>/<category>/ e.g. /women/footwear/shoes/
+    Level 4: /<supercategory>/<maincategory>/<category>/<subcategory>/ e.g. /women/footwear/shoes/sports-shoes/
 
-        categories = None  # Default if 'all' is selected
+    FALLBACK RULE:
+    If category or subcategory is unavailable or has no products,
+    it automatically falls back to showing products of the parent category/maincategory/supercategory
+    without error.
+    """
+    SLUG_ALIASES = {
+        'female': 'women',
+        'male': 'men',
+        'kid': 'kids',
+        'girls': 'kids',
+        'boys': 'kids',
+    }
 
-        if ops == 'all':
-            products = Product.objects.all()
+    raw_supercat = supercat
+    if supercat and supercat.lower() in SLUG_ALIASES:
+        supercat = SLUG_ALIASES[supercat.lower()]
+
+    supercategory_obj = None
+    maincategory_obj = None
+    category_obj = None
+    subcategory_obj = None
+
+    breadcrumbs = [{'name': 'Home', 'url': '/'}]
+    current_title = "Shop"
+    current_description = ""
+    child_items = []
+
+    # 1. Determine Hierarchy Level
+    if supercat == 'all':
+        products = Product.objects.all().order_by('-id')
+        current_title = "All Products"
+        breadcrumbs.append({'name': 'All Products', 'url': '/all/'})
+        child_items = [{'name': s.name, 'image': s.image, 'url': f"/{s.slug}/"} for s in Supercategory.objects.filter(slug__in=['women', 'men', 'kids'])]
+
+    elif supercat and Supercategory.objects.filter(slug__iexact=supercat).exists():
+        supercategory_obj = Supercategory.objects.filter(slug__iexact=supercat).first()
+        current_title = supercategory_obj.name
+        breadcrumbs.append({'name': supercategory_obj.name, 'url': f"/{supercategory_obj.slug}/"})
+
+        if mcat:
+            maincategory_obj = Maincategory.objects.filter(slug__iexact=mcat).first()
+            if maincategory_obj:
+                current_title = f"{supercategory_obj.name} - {maincategory_obj.name}"
+                current_description = maincategory_obj.description or ""
+                breadcrumbs.append({'name': maincategory_obj.name, 'url': f"/{supercategory_obj.slug}/{maincategory_obj.slug}/"})
+
+        if cat:
+            if maincategory_obj:
+                category_obj = Category.objects.filter(maincategory=maincategory_obj, slug__iexact=cat).first()
+            if not category_obj:
+                category_obj = Category.objects.filter(slug__iexact=cat).first()
+            if category_obj:
+                current_title = f"{category_obj.name}"
+                current_description = category_obj.description or current_description
+                breadcrumbs.append({'name': category_obj.name, 'url': f"/{supercategory_obj.slug}/{maincategory_obj.slug if maincategory_obj else 'all'}/{category_obj.slug}/"})
+
+        if scat:
+            if category_obj:
+                subcategory_obj = Subcategory.objects.filter(category=category_obj, slug__iexact=scat).first()
+            if not subcategory_obj:
+                subcategory_obj = Subcategory.objects.filter(slug__iexact=scat).first()
+            if subcategory_obj:
+                current_title = f"{subcategory_obj.name}"
+                current_description = subcategory_obj.description or current_description
+                breadcrumbs.append({'name': subcategory_obj.name, 'url': f"/{supercategory_obj.slug}/{maincategory_obj.slug if maincategory_obj else 'all'}/{category_obj.slug if category_obj else 'all'}/{subcategory_obj.slug}/"})
+
+        # Determine Products & Child Items based on hierarchy depth:
+        if subcategory_obj:
+            products = Product.objects.filter(subcategory=subcategory_obj)
+            if not products.exists() and category_obj:
+                products = Product.objects.filter(category=category_obj)
+            if not products.exists() and maincategory_obj:
+                products = Product.objects.filter(maincategory=maincategory_obj)
+            if not products.exists():
+                products = Product.objects.filter(Q(supercategory=supercategory_obj) | Q(maincategory__supercategory=supercategory_obj))
+            child_items = []
+
+        elif category_obj:
+            products = Product.objects.filter(category=category_obj)
+            if not products.exists() and maincategory_obj:
+                products = Product.objects.filter(maincategory=maincategory_obj)
+            if not products.exists():
+                products = Product.objects.filter(Q(supercategory=supercategory_obj) | Q(maincategory__supercategory=supercategory_obj))
+            scats = Subcategory.objects.filter(category=category_obj)
+            child_items = [{
+                'name': s.name,
+                'image': s.image or (category_obj.image if category_obj else ''),
+                'url': f"/{supercategory_obj.slug}/{maincategory_obj.slug if maincategory_obj else 'all'}/{category_obj.slug}/{s.slug}/"
+            } for s in scats]
+
+        elif maincategory_obj:
+            products = Product.objects.filter(maincategory=maincategory_obj)
+            if not products.exists():
+                products = Product.objects.filter(Q(supercategory=supercategory_obj) | Q(maincategory__supercategory=supercategory_obj))
+            cats = Category.objects.filter(maincategory=maincategory_obj)
+            child_items = [{
+                'name': c.name,
+                'image': c.image or '',
+                'url': f"/{supercategory_obj.slug}/{maincategory_obj.slug}/{c.slug}/"
+            } for c in cats]
+
         else:
-            maincategory = get_object_or_404(Maincategory, slug=ops)
-            products = Product.objects.filter(maincategory=maincategory)
-            categories = Category.objects.filter(maincategory=maincategory)
+            # Supercategory only
+            products = Product.objects.filter(
+                Q(supercategory=supercategory_obj) | 
+                Q(maincategory__supercategory=supercategory_obj) | 
+                Q(offers=supercategory_obj)
+            )
+            mcats = Maincategory.objects.filter(supercategory=supercategory_obj)
+            if not mcats.exists():
+                mcats = Maincategory.objects.all()
+            child_items = [{
+                'name': m.name,
+                'image': m.image or '',
+                'url': f"/{supercategory_obj.slug}/{m.slug}/"
+            } for m in mcats]
 
-        # Pagination
-        paginator = Paginator(products, 100)
-        page_number = request.GET.get('page')
-        page_posts = paginator.get_page(page_number)
-        current_page = page_posts.number
-        total_pages = paginator.num_pages
-        page_range = range(max(current_page - 2, 1), min(current_page + 3, total_pages + 1))
+    elif supercat and Maincategory.objects.filter(slug__iexact=supercat).exists():
+        # Legacy Maincategory URL
+        maincategory_obj = Maincategory.objects.filter(slug__iexact=supercat).first()
+        current_title = maincategory_obj.name
+        current_description = maincategory_obj.description or ""
+        breadcrumbs.append({'name': maincategory_obj.name, 'url': f"/{maincategory_obj.slug}/"})
 
-        return render(request, 'front/products.html', {
-            'page_posts': page_posts,
-            'page_range': page_range,
-            'maincategories': maincategories,
-            'categories': categories,
-            'brands': brands,
-            'colors': colors,
-            'sizes': sizes,
-            'maincategory':maincategory,
-            'filteredProduct':filteredProduct,
-            'ops':maincategory,
-        })
+        if mcat:
+            category_obj = Category.objects.filter(maincategory=maincategory_obj, slug__iexact=mcat).first() or Category.objects.filter(slug__iexact=mcat).first()
+            if category_obj:
+                current_title = f"{maincategory_obj.name} - {category_obj.name}"
+                breadcrumbs.append({'name': category_obj.name, 'url': f"/{maincategory_obj.slug}/{category_obj.slug}/"})
 
-    except Exception as e:
-        return render(request, 'front/error.html', {'error_message': str(e)})
+        if cat:
+            subcategory_obj = Subcategory.objects.filter(category=category_obj, slug__iexact=cat).first() or Subcategory.objects.filter(slug__iexact=cat).first()
+            if subcategory_obj:
+                current_title = f"{category_obj.name if category_obj else maincategory_obj.name} - {subcategory_obj.name}"
+                breadcrumbs.append({'name': subcategory_obj.name, 'url': f"/{maincategory_obj.slug}/{category_obj.slug if category_obj else 'all'}/{subcategory_obj.slug}/"})
 
+        if subcategory_obj:
+            products = Product.objects.filter(subcategory=subcategory_obj)
+            if not products.exists() and category_obj:
+                products = Product.objects.filter(category=category_obj)
+            if not products.exists():
+                products = Product.objects.filter(maincategory=maincategory_obj)
+            child_items = []
+        elif category_obj:
+            products = Product.objects.filter(category=category_obj)
+            if not products.exists():
+                products = Product.objects.filter(maincategory=maincategory_obj)
+            scats = Subcategory.objects.filter(category=category_obj)
+            child_items = [{
+                'name': s.name,
+                'image': s.image or '',
+                'url': f"/{maincategory_obj.slug}/{category_obj.slug}/{s.slug}/"
+            } for s in scats]
+        else:
+            products = Product.objects.filter(maincategory=maincategory_obj)
+            cats = Category.objects.filter(maincategory=maincategory_obj)
+            child_items = [{
+                'name': c.name,
+                'image': c.image or '',
+                'url': f"/{maincategory_obj.slug}/{c.slug}/"
+            } for c in cats]
 
-def subcategory_by_category(request, mcat,cat):
+    else:
+        # Fallback if unknown slug
+        products = Product.objects.filter(name__icontains=raw_supercat or '')
+        if not products.exists():
+            products = Product.objects.all()
+        current_title = raw_supercat.title() if raw_supercat else "Products"
+
+    # Facet Filters
+    selected_maincategory = request.GET.get('maincategory')
+    selected_categories = request.GET.getlist('category[]')
+    selected_brands = request.GET.getlist('brand[]')
+    selected_colors = request.GET.getlist('color[]')
+    selected_size = request.GET.get('size')
+    selected_rating = request.GET.get('rating')
+    selected_min_price = request.GET.get('min_price')
+    selected_max_price = request.GET.get('max_price')
+
+    if selected_maincategory and selected_maincategory.isdigit():
+        products = products.filter(maincategory__id=int(selected_maincategory))
+
+    selected_categories_clean = [c for c in selected_categories if c.isdigit()]
+    if selected_categories_clean:
+        products = products.filter(category__id__in=selected_categories_clean)
+
+    selected_brands_clean = [b for b in selected_brands if b.isdigit()]
+    if selected_brands_clean:
+        products = products.filter(brand__id__in=selected_brands_clean)
+
+    if selected_colors:
+        products = products.filter(color__in=selected_colors)
+
+    if selected_size:
+        products = products.filter(size=selected_size)
+
+    if selected_rating and selected_rating.isdigit():
+        products = products.filter(reviews__gte=int(selected_rating))
+
+    if selected_min_price and selected_max_price:
+        try:
+            products = products.filter(price__gte=float(selected_min_price), price__lte=float(selected_max_price))
+        except ValueError:
+            pass
+
+    products = products.distinct().order_by('-id')
+
+    # Pagination
+    paginator = Paginator(products, 30)
+    page_number = request.GET.get('page')
+    page_posts = paginator.get_page(page_number)
+    current_page = page_posts.number
+    total_pages = paginator.num_pages
+    page_range = range(max(current_page - 2, 1), min(current_page + 3, total_pages + 1))
+
     maincategories = Maincategory.objects.all()
-    categories = Category.objects.all()
+    categories = Category.objects.filter(maincategory=maincategory_obj) if maincategory_obj else Category.objects.all()
     brands = Brand.objects.all()
     colors = Color.objects.all()
     sizes = Size.objects.all()
-    category=''
-    filteredProduct=Product.objects.all().order_by('id').reverse()[:12]
-    try:
-        # Fetch the maincategory or return a 404 if not found
-        maincategory = get_object_or_404(Maincategory, slug=mcat)
-        categories = Category.objects.filter(maincategory=maincategory)
-        category = get_object_or_404(Category,maincategory=maincategory, slug=cat)
-        
-        # Get the products for the selected maincategory and category
-        product=Product.objects.filter(maincategory=maincategory, category=category)
-        # Pagination
-        paginator = Paginator(product, 100)
-        page_number = request.GET.get('page')
-        page_posts = paginator.get_page(page_number)
-        current_page = page_posts.number
-        total_pages = paginator.num_pages
-        page_range = range(max(current_page - 2, 1), min(current_page + 3, total_pages + 1))
-        # Render the template with the data
-        return render(request, 'front/products.html', {
-            'page_posts': page_posts,
-            'page_range': page_range,
-            'maincategories': maincategories,
-            'categories': categories,
-            'brands': brands,
-            'colors': colors,
-            'sizes': sizes,
-            'maincategory':maincategory,
-            'filteredProduct':filteredProduct,
-            'ops':category,
-            })
-    
-    except Exception as e:
-        # Log the error and return a user-friendly error page
-        # (You can customize this based on your application's needs)
-        return render(request, 'front/error.html', {'error_message': str(e)})
+    subcategories = Subcategory.objects.filter(category=category_obj) if category_obj else Subcategory.objects.all()
+
+    context = {
+        'page_posts': page_posts,
+        'page_range': page_range,
+        'maincategories': maincategories,
+        'categories': categories,
+        'subcategories': subcategories,
+        'brands': brands,
+        'colors': colors,
+        'sizes': sizes,
+        'maincategory': maincategory_obj,
+        'supercategory': supercategory_obj,
+        'category': category_obj,
+        'subcategory': subcategory_obj,
+        'child_items': child_items,
+        'breadcrumbs': breadcrumbs,
+        'current_title': current_title,
+        'ops': maincategory_obj or supercategory_obj or category_obj or subcategory_obj,
+        'title': current_title,
+        'description': current_description,
+        'selected_maincategories': selected_maincategory,
+        'selected_categories': selected_categories,
+        'selected_brands': selected_brands,
+        'selected_colors': selected_colors,
+        'selected_size': selected_size,
+        'selected_rating': selected_rating,
+    }
+    return render(request, 'front/products.html', context)
+
+
+def category_by_maincategory(request, ops):
+    return dynamic_category_view(request, supercat=ops)
+
+
+def subcategory_by_category(request, mcat, cat):
+    return dynamic_category_view(request, supercat=mcat, mcat=cat)
 
 
 
@@ -238,38 +419,16 @@ def category_page(request,cat):
     return render(request, 'front/products.html', {'page_posts':page_posts,'page_range': page_range,'maincategories':maincategories,'categories':categories,'subcategories':subcategories,'brands':brands,'size':size,'color':color})
 
 
-def product_by_maincategory_category_subcategiry(request,mcat,cat,scat):
-    maincategories=Maincategory.objects.all()
-    categories=Category.objects.all()
-    subcategories=Subcategory.objects.all()
-    brands=Brand.objects.all()
-    size=Size.objects.all()
-    color=Color.objects.all()
-    try:
-        maincategory=get_object_or_404(Maincategory,slug=mcat)
-        category=get_object_or_404(Category,slug=cat)
-        subcategory=get_object_or_404(Subcategory,slug=scat)
-        # Get the Supercategory object
-        data = Product.objects.filter(maincategory=maincategory,category=category,subcategory=subcategory)
-        paginator = Paginator(data, 100)  # Show 10 posts per page
-        page_number = request.GET.get('page')
-        page_posts = paginator.get_page(page_number)
-        current_page = page_posts.number
-        total_pages = paginator.num_pages
-        page_range = range(max(current_page - 2, 1), min(current_page + 3, total_pages + 1))
-    except Exception as e:
-        print(f"Error occurred: {e}")  # Log the error for debugging
-        data = Product.objects.none()  # Return an empty queryset
-        
-    return render(request, 'front/products.html', {'page_posts':page_posts,'page_range': page_range,'maincategories':maincategories,'categories':categories,'subcategories':subcategories,'brands':brands,'size':size,'color':color})
-
+def product_by_maincategory_category_subcategiry(request, mcat, cat, scat):
+    return dynamic_category_view(request, supercat=mcat, mcat=cat, cat=scat)
 
 
 def men_home_page(request):
-    return render(request,'front/home-men.html')
+    return dynamic_category_view(request, supercat='men')
+
 
 def kid_home_page(request):
-    return render(request,'front/home-kids.html')
+    return dynamic_category_view(request, supercat='kids')
 
 def brand_page(request):
     return render(request,'front/brands.html')

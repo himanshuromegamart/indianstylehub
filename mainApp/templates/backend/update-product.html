@@ -26,6 +26,18 @@
 
                                     <div class="col-lg-3">
                                         <div class="mb-3">
+                                            <label class="form-label">Supercategory</label>
+                                            <select id="supercategory-select" class="form-control" name="supercategory">
+                                                <option value="">Auto / Optional &#9660;</option>
+                                                {% for sc in supercategories %}
+                                                <option value="{{ sc.id }}" {% if data.supercategory_id == sc.id %}selected{% endif %}>{{ sc.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3">
+                                        <div class="mb-3">
                                             <label class="form-label">Maincategory<span class="text-danger">*</span></label>
                                             <select id="maincategory-select" class="form-control" name="maincategory" title="Select Maincategory" required>
                                                 <option value="" disabled>Select Maincategory &#9660;</option>
@@ -40,9 +52,9 @@
                                     
                                     <div class="col-lg-3">
                                         <div class="mb-3">
-                                            <label class="form-label">Category<span class="text-danger">*</span></label>
-                                            <select id="subcategory-select" class="form-control" name="category" required onchange="updateCategorySpecification()">
-                                                <!-- Subcategories will be dynamically populated -->
+                                            <label class="form-label">Category (Optional)</label>
+                                            <select id="subcategory-select" class="form-control" name="category" onchange="updateCategorySpecification()">
+                                                <!-- Categories will be dynamically populated -->
                                             </select>
                                         </div>
                                     </div>
@@ -142,9 +154,9 @@
                                     
                                     <div class="col-lg-3">
                                         <div class="mb-3">
-                                            <label class="form-label">Subcategorty<span class="text-danger">*</span></label>
-                                            <select type="text" class="form-control"  name="subcategory" required>
-                                                <option value="" disabled selected>Select Subcategorty &#9660;</option>
+                                            <label class="form-label">Subcategory (Optional)</label>
+                                            <select type="text" class="form-control" name="subcategory">
+                                                <option value="">Select Subcategory (Optional) &#9660;</option>
                                                 {%for item in subcategories%}
                                                 <option value="{{item.slug}}" {% if item.name == data.subcategory.name %}selected{% endif %}>{{item.name}}</option>
                                                 {%endfor%}

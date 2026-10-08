@@ -125,10 +125,9 @@ urlpatterns = [
     path('gallery/',backend.gallery_page),
     path('delete-gallery/<int:id>/',backend.delete_gallery),
 
-    path('<str:ops>/',views.category_by_maincategory),
-    path('<str:mcat>/<str:cat>/',views.subcategory_by_category),
-    path('<str:mcat>/<str:cat>/<str:scat>/',views.product_by_maincategory_category_subcategiry),
-    
-        
+    path('<str:supercat>/<str:mcat>/<str:cat>/<str:scat>/', views.dynamic_category_view, name='subcategory_view'),
+    path('<str:supercat>/<str:mcat>/<str:cat>/', views.dynamic_category_view, name='category_view'),
+    path('<str:supercat>/<str:mcat>/', views.dynamic_category_view, name='maincategory_view'),
+    path('<str:supercat>/', views.dynamic_category_view, name='supercategory_view'),
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
 

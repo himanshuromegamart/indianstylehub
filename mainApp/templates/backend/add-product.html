@@ -23,8 +23,20 @@
                                 <div class="row">
                                     <div class="col-lg-3">
                                         <div class="mb-3">
+                                            <label class="form-label">Supercategory</label>
+                                            <select id="supercategory-select" class="form-control" name="supercategory">
+                                                <option value="">Auto / Optional &#9660;</option>
+                                                {% for sc in supercategories %}
+                                                <option value="{{ sc.id }}">{{ sc.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3">
+                                        <div class="mb-3">
                                             <label class="form-label">Maincategory<span class="text-danger">*</span></label>
-                                            <select id="maincategory-select" class="form-control" name="maincategory"  title="Select Maincategory" required>
+                                            <select id="maincategory-select" class="form-control" name="maincategory" title="Select Maincategory" required>
                                                 <option value="" disabled selected>Select Maincategory &#9660;</option>
                                                 {% for item in maincategories %}
                                                 <option value="{{ item.slug }}">{{ item.name }}</option>
@@ -35,22 +47,33 @@
                                     
                                     <div class="col-lg-3">
                                         <div class="mb-3">
-                                            <label class="form-label">Category<span class="text-danger">*</span></label>
-                                            <select id="subcategory-select" class="form-control" name="category" required>
-                                                <option value="" disabled selected>Select Category &#9660;</option>
+                                            <label class="form-label">Category (Optional)</label>
+                                            <select id="subcategory-select" class="form-control" name="category">
+                                                <option value="">Select Category (Optional) &#9660;</option>
                                             </select>
                                         </div>
                                     </div>
                                     
+                                    <div class="col-lg-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">Subcategory (Optional)</label>
+                                            <select type="text" class="form-control" name="subcategory" id="real-subcategory-select">
+                                                <option value="">Select Subcategory (Optional) &#9660;</option>
+                                                {%for item in subcategories%}
+                                                <option value="{{item.slug}}">{{item.name}}</option>
+                                                {%endfor%}
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <script>
                                         document.addEventListener('DOMContentLoaded', function () {
                                             var maincategorySelect = document.getElementById('maincategory-select');
                                             var categorySelect = document.getElementById('subcategory-select');
-                                            var subcategorySelect = document.querySelector('[name="subcategory"]');
+                                            var subcategorySelect = document.getElementById('real-subcategory-select');
                                     
-                                            // Function to populate categories based on maincategory
                                             function populateCategories(maincategory) {
-                                                categorySelect.innerHTML = '<option value="" disabled selected>Select Category &#9660;</option>';
+                                                categorySelect.innerHTML = '<option value="">Select Category (Optional) &#9660;</option>';
                                     
                                                 {% for item in categories %}
                                                 if ('{{ item.maincategory.slug }}' === maincategory) {
@@ -61,12 +84,11 @@
                                                 }
                                                 {% endfor %}
                                     
-                                                subcategorySelect.innerHTML = '<option value="" disabled selected>Select Subcategory &#9660;</option>'; // Reset subcategory
+                                                subcategorySelect.innerHTML = '<option value="">Select Subcategory (Optional) &#9660;</option>';
                                             }
                                     
-                                            // Function to populate subcategories based on category
                                             function populateSubcategories(category) {
-                                                subcategorySelect.innerHTML = '<option value="" disabled selected>Select Subcategory &#9660;</option>';
+                                                subcategorySelect.innerHTML = '<option value="">Select Subcategory (Optional) &#9660;</option>';
                                     
                                                 {% for item in subcategories %}
                                                 if ('{{ item.category.slug }}' === category) {
@@ -78,30 +100,15 @@
                                                 {% endfor %}
                                             }
                                     
-                                            // Event listener for maincategory change
                                             maincategorySelect.addEventListener('change', function () {
                                                 populateCategories(this.value);
                                             });
                                     
-                                            // Event listener for category change
                                             categorySelect.addEventListener('change', function () {
                                                 populateSubcategories(this.value);
                                             });
                                         });
                                     </script>
-                                    
-                                    
-                                    <div class="col-lg-3">
-                                        <div class="mb-3">
-                                            <label class="form-label">Subcategorty<span class="text-danger">*</span></label>
-                                            <select type="text" class="form-control"  name="subcategory" required>
-                                                <option value="" disabled selected>Select Subcategorty &#9660;</option>
-                                                {%for item in subcategories%}
-                                                <option value="{{item.slug}}">{{item.name}}</option>
-                                                {%endfor%}
-                                            </select>
-                                        </div>
-                                    </div>
 
                                     <div class="col-lg-3">
                                         <div class="mb-3">

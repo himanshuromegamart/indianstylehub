@@ -23,6 +23,7 @@ class Supercategory(models.Model):
 
 class Maincategory(models.Model):
     id = models.AutoField(primary_key=True)
+    supercategory = models.ForeignKey(Supercategory, on_delete=models.SET_NULL, related_name="maincategories", default=None, null=True, blank=True)
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
     image = models.URLField(max_length=1024)
@@ -36,6 +37,11 @@ class Maincategory(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_hierarchy_url(self):
+        if self.supercategory:
+            return f"/{self.supercategory.slug}/{self.slug}/"
+        return f"/{self.slug}/"
 
 
 class Category(models.Model):
@@ -51,6 +57,13 @@ class Category(models.Model):
     def __str__(self):
         return self.name
     
+    def get_hierarchy_url(self):
+        if self.maincategory and self.maincategory.supercategory:
+            return f"/{self.maincategory.supercategory.slug}/{self.maincategory.slug}/{self.slug}/"
+        elif self.maincategory:
+            return f"/{self.maincategory.slug}/{self.slug}/"
+        return f"/{self.slug}/"
+
 
 class Subcategory(models.Model):
     id = models.AutoField(primary_key=True)
@@ -62,6 +75,15 @@ class Subcategory(models.Model):
     description=models.TextField(default='',null=True,blank=True)
     def __str__(self):
         return self.name
+
+    def get_hierarchy_url(self):
+        if self.category and self.category.maincategory and self.category.maincategory.supercategory:
+            return f"/{self.category.maincategory.supercategory.slug}/{self.category.maincategory.slug}/{self.category.slug}/{self.slug}/"
+        elif self.category and self.category.maincategory:
+            return f"/{self.category.maincategory.slug}/{self.category.slug}/{self.slug}/"
+        elif self.category:
+            return f"/{self.category.slug}/{self.slug}/"
+        return f"/{self.slug}/"
 
 
 class Brand(models.Model):
@@ -93,6 +115,7 @@ class Size(models.Model):
 
 class Product(models.Model):
     id=models.AutoField(primary_key=True)
+    supercategory=models.ForeignKey(Supercategory,on_delete=models.SET_NULL,related_name="supercategory_products",default=None,null=True,blank=True)
     offers=models.ForeignKey(Supercategory,on_delete=models.SET_DEFAULT,related_name="offers",default=None,null=True,blank=True)
     maincategory=models.ForeignKey(Maincategory,on_delete=models.SET_DEFAULT,related_name="maincategory",default=None, null=True, blank=True)
     category=models.ForeignKey(Category,on_delete=models.SET_DEFAULT,related_name="categories",default=None, null=True, blank=True)
@@ -127,6 +150,19 @@ class Product(models.Model):
     date=models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return str(self.name)
+
+    def get_hierarchy_url(self):
+        from django.utils.text import slugify
+        slug_name = slugify(self.name) if self.name else str(self.id)
+        return f"/product-details/{slug_name}/{self.id}/"
+
+    def save(self, *args, **kwargs):
+        if not self.supercategory:
+            if self.maincategory and self.maincategory.supercategory:
+                self.supercategory = self.maincategory.supercategory
+            elif self.category and self.category.maincategory and self.category.maincategory.supercategory:
+                self.supercategory = self.category.maincategory.supercategory
+        super().save(*args, **kwargs)
     
 
 

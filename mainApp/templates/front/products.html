@@ -79,16 +79,52 @@
                     </style>
                     
                     
-                    <div class="col-lg-12 col-md-12 col-12">
+                    <!-- Breadcrumbs & Heading -->
+                    <div class="col-12 mb-3">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb" style="background: transparent; padding: 0.5rem 0; margin-bottom: 0.5rem;">
+                                {% for b in breadcrumbs %}
+                                    {% if forloop.last %}
+                                        <li class="breadcrumb-item active" aria-current="page" style="font-weight: 600; color: #ff6f61;">{{ b.name }}</li>
+                                    {% else %}
+                                        <li class="breadcrumb-item"><a href="{{ b.url }}" style="color: #666; text-decoration: none;">{{ b.name }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ol>
+                        </nav>
+                        <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 15px;">{{ current_title }}</h2>
+                    </div>
+
+                    <!-- Circular Child Navigation -->
+                    {% if child_items %}
+                    <div class="col-lg-12 col-md-12 col-12 mb-4">
                         <div class="row ul-bs-row justify-content-center text-center">
-                            {% for item in categories %}
-                            <a href="/{{item.maincategory.slug}}/{{item.slug}}" class="col-lg-1 col-md-2 col-3 text-center category-link">
-                                <img src="{{ item.image }}" alt="{{ item.name }}" style="border-radius: 50%; width: 90px; height: 90px;">
-                                <h6>{{ item.name }}</h6>
+                            {% for item in child_items %}
+                            <a href="{{ item.url }}" class="col-lg-2 col-md-3 col-4 text-center category-link" style="margin-bottom: 15px;">
+                                {% if item.image %}
+                                <img src="{{ item.image }}" alt="{{ item.name }}" style="border-radius: 50%; width: 85px; height: 85px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                {% else %}
+                                <div style="border-radius: 50%; width: 85px; height: 85px; background: #f1f3f5; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; color: #495057; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                    {{ item.name|slice:":3" }}
+                                </div>
+                                {% endif %}
+                                <h6 style="font-size: 14px; margin-top: 8px;">{{ item.name }}</h6>
                             </a>
                             {% endfor %}
                         </div>
                     </div>
+                    {% elif categories and not category and not subcategory %}
+                    <div class="col-lg-12 col-md-12 col-12 mb-4">
+                        <div class="row ul-bs-row justify-content-center text-center">
+                            {% for item in categories %}
+                            <a href="{{ item.get_hierarchy_url }}" class="col-lg-2 col-md-3 col-4 text-center category-link" style="margin-bottom: 15px;">
+                                <img src="{{ item.image }}" alt="{{ item.name }}" style="border-radius: 50%; width: 85px; height: 85px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                <h6 style="font-size: 14px; margin-top: 8px;">{{ item.name }}</h6>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
                     
 
                     <!-- left side bar -->
@@ -474,7 +510,15 @@
 
                                     <div class="ul-product-txt">
                                         <h4 class="ul-product-title"><a href="/product-details/{{item.name|slugify}}/{{item.id}}">{{item.name}}</a></h4>
-                                        <h5 class="ul-product-category"><a href="/product-details/{{item.name|slugify}}/{{item.id}}">{{item.category.name}}</a></h5>
+                                        <h5 class="ul-product-category">
+                                            {% if item.category %}
+                                                <a href="{{ item.category.get_hierarchy_url }}">{{ item.category.name }}</a>
+                                            {% elif item.maincategory %}
+                                                <a href="{{ item.maincategory.get_hierarchy_url }}">{{ item.maincategory.name }}</a>
+                                            {% elif item.supercategory %}
+                                                <a href="/{{ item.supercategory.slug }}/">{{ item.supercategory.name }}</a>
+                                            {% endif %}
+                                        </h5>
                                     </div>
                                 </div>
                             </div>

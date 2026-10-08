@@ -37,10 +37,21 @@
                             <form method="post" enctype="multipart/form-data" onsubmit="return validateForm();">
                                 {% csrf_token %}
                                 <div class="row">
-                                    <div class="col-lg-4">
+                                    <div class="col-lg-3">
                                         <div class="mb-3">
                                             <label class="form-label">Name<span class="text-danger">*</span></label>
                                             <input type="text" id="name" class="form-control" placeholder="Enter Name" name="name" required value="{{ data.name }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">Supercategory</label>
+                                            <select class="form-control" name="supercategory">
+                                                <option value="">None / Not Assigned &#9660;</option>
+                                                {% for sc in supercategories %}
+                                                <option value="{{ sc.id }}" {% if data.supercategory_id == sc.id %}selected{% endif %}>{{ sc.name }}</option>
+                                                {% endfor %}
+                                            </select>
                                         </div>
                                     </div>
                                     {% if data.image %}

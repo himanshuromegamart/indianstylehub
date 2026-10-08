@@ -184,26 +184,26 @@
                             <nav class="ul-header-nav">
                                 <a href="/">Home</a>
                                 <a href="/all">Shop</a>
-                                <a href="/all">Women</a>
-                                <a href="/all">Men's</a>
-                                <a href="/all">Kids</a>
+                                <a href="/women/">Women</a>
+                                <a href="/men/">Men's</a>
+                                <a href="/kids/">Kids</a>
                                 <a href="/blog">Blog</a>
 
                                 <div class="has-sub-menu has-mega-menu">
-                                    <a role="button">Pages</a>
+                                    <a role="button">Categories</a>
                                     <div class="ul-header-submenu ul-header-megamenu">
-                                        {%for mcat in maincategories%}
+                                        {% for mcat in all_maincategories %}
                                         <div class="single-col">
-                                            <span class="single-col-title">{{mcat.name}}</span>
+                                            <a href="{{ mcat.get_hierarchy_url }}" class="single-col-title" style="font-weight: 700; color: #111; display: block; margin-bottom: 8px;">{{ mcat.name }}</a>
                                             <ul>
-                                                {%for cat in categories%}
-                                                {%if mcat.slug == cat.maincategory.slug%}
-                                                <li><a href="/filter/?min_price=0&max_price=10000&maincategory={{mcat.id}}&category%5B%5D={{cat.id}}">{{cat.name}}</a></li>
-                                                {%endif%}
-                                                {%endfor%}
+                                                {% for cat in all_categories %}
+                                                {% if cat.maincategory_id == mcat.id %}
+                                                <li><a href="{{ cat.get_hierarchy_url }}">{{ cat.name }}</a></li>
+                                                {% endif %}
+                                                {% endfor %}
                                             </ul>
                                         </div>
-                                        {%endfor%}
+                                        {% endfor %}
                                     </div>
                                 </div>
                             </nav>

@@ -43,6 +43,17 @@
                                    </div>
                                 </div>
                                 <div class="col-lg-3">
+                                   <div class="mb-3">
+                                       <label class="form-label">Supercategory</label>
+                                       <select class="form-control" name="supercategory">
+                                           <option value="">None / Not Assigned &#9660;</option>
+                                           {% for sc in supercategories %}
+                                           <option value="{{ sc.id }}">{{ sc.name }}</option>
+                                           {% endfor %}
+                                       </select>
+                                   </div>
+                                </div>
+                                <div class="col-lg-3">
                                     <div class="mb-3">
                                         <label class="form-label">Icon(100x100px)<span class="text-danger">*</span></label>
                                         <input type="file" accept=".png,.jpg,.jpeg,.webp" class="form-control" name="image" required>

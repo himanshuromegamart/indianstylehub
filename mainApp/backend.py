@@ -263,11 +263,16 @@ def add_maincategory(request):
         return HttpResponseForbidden("You don't have permission to access this page.")
 
     maincategories = Maincategory.objects.all().order_by('-id')
+    supercategories = Supercategory.objects.all().order_by('name')
 
     if request.method == "POST":
         m = Maincategory()
         m.name = request.POST.get('name')
         m.slug = slugify(m.name)
+        
+        supercat_id = request.POST.get('supercategory')
+        if supercat_id:
+            m.supercategory = Supercategory.objects.filter(id=supercat_id).first()
 
         # Handle images
         image_fields = ['image', 'banner1', 'banner2', 'banner3', 'banner4']
@@ -283,7 +288,8 @@ def add_maincategory(request):
         return redirect('/maincategory')
 
     return render(request, 'backend/add-maincategory.html', {
-        'maincategories': maincategories
+        'maincategories': maincategories,
+        'supercategories': supercategories,
     })
 
 
@@ -304,11 +310,18 @@ def update_maincategory(request, id):
         return HttpResponseForbidden("You don't have permission to access this page.")
 
     maincategories = Maincategory.objects.all().order_by('-id')
+    supercategories = Supercategory.objects.all().order_by('name')
     data = get_object_or_404(Maincategory, id=id)
 
     if request.method == "POST":
         data.name = request.POST.get('name')
         data.slug = slugify(data.name)
+
+        supercat_id = request.POST.get('supercategory')
+        if supercat_id:
+            data.supercategory = Supercategory.objects.filter(id=supercat_id).first()
+        else:
+            data.supercategory = None
 
         # Image fields
         image_fields = ['image', 'banner1', 'banner2', 'banner3', 'banner4']
@@ -326,7 +339,8 @@ def update_maincategory(request, id):
 
     return render(request, 'backend/update-maincategory.html', {
         'data': data,
-        'maincategories': maincategories
+        'maincategories': maincategories,
+        'supercategories': supercategories,
     })
 
 @login_required(login_url='/admin-login/')
@@ -818,7 +832,6 @@ def delete_size(Request,id):
 
 @login_required(login_url='/admin-login/')
 @user_passes_test(is_superuser, login_url='/admin-login/')
-@user_passes_test(is_superuser, login_url='/admin-login/')
 def add_product(request):
     mcat = Maincategory.objects.all().order_by('-id')
     cat = Category.objects.all().order_by('-id')
@@ -826,14 +839,40 @@ def add_product(request):
     brnd = Brand.objects.all().order_by('-id')
     clr = Color.objects.all().order_by('-id')
     sz = Size.objects.all().order_by('-id')
+    supercats = Supercategory.objects.all().order_by('name')
 
     if request.method == "POST":
         product = Product()
 
-        # Assign related fields
-        product.maincategory = Maincategory.objects.get(slug=request.POST.get('maincategory'))
-        product.category = Category.objects.get(maincategory=product.maincategory,slug=request.POST.get('category'))
-        product.subcategory = Subcategory.objects.get(category=product.category,slug=request.POST.get('subcategory'))
+        # Assign related fields safely
+        mcat_slug = request.POST.get('maincategory')
+        cat_slug = request.POST.get('category')
+        scat_slug = request.POST.get('subcategory')
+        supercat_id = request.POST.get('supercategory')
+
+        if mcat_slug:
+            product.maincategory = Maincategory.objects.filter(slug=mcat_slug).first()
+        else:
+            product.maincategory = None
+
+        if product.maincategory and cat_slug:
+            product.category = Category.objects.filter(maincategory=product.maincategory, slug=cat_slug).first()
+        elif cat_slug:
+            product.category = Category.objects.filter(slug=cat_slug).first()
+        else:
+            product.category = None
+
+        if product.category and scat_slug:
+            product.subcategory = Subcategory.objects.filter(category=product.category, slug=scat_slug).first()
+        elif scat_slug:
+            product.subcategory = Subcategory.objects.filter(slug=scat_slug).first()
+        else:
+            product.subcategory = None
+
+        if supercat_id:
+            product.supercategory = Supercategory.objects.filter(id=supercat_id).first()
+        elif product.maincategory and product.maincategory.supercategory:
+            product.supercategory = product.maincategory.supercategory
 
         # Upload images
         for i in range(1, 5):
@@ -915,7 +954,7 @@ def add_product(request):
 
     context = {
         'maincategories': mcat, 'categories': cat, 'subcategories': scat,
-        'brands': brnd, 'clr': clr, 'sz': sz
+        'brands': brnd, 'clr': clr, 'sz': sz, 'supercategories': supercats,
     }
     return render(request, 'backend/add-product.html', context)
 
@@ -942,7 +981,6 @@ def product_page(Request):
 
 @login_required(login_url='/admin-login/')
 @user_passes_test(is_superuser, login_url='/admin-login/')
-@user_passes_test(is_superuser, login_url='/admin-login/')
 def update_product(request,id,pn):
     mcat = Maincategory.objects.all().order_by('-id')
     cat = Category.objects.all().order_by('-id')
@@ -950,16 +988,43 @@ def update_product(request,id,pn):
     brnd = Brand.objects.all().order_by('-id')
     clr = Color.objects.all().order_by('-id')
     sz = Size.objects.all().order_by('-id')
+    supercats = Supercategory.objects.all().order_by('name')
 
     product= get_object_or_404(Product,id=id)
     if request.method == "POST":
 
-        # Assign related fields
-        product.maincategory = Maincategory.objects.get(slug=request.POST.get('maincategory'))
-        product.category = Category.objects.get(maincategory=product.maincategory,slug=request.POST.get('category'))
-        product.subcategory = Subcategory.objects.get(category=product.category,slug=request.POST.get('subcategory'))
+        # Assign related fields safely
+        mcat_slug = request.POST.get('maincategory')
+        cat_slug = request.POST.get('category')
+        scat_slug = request.POST.get('subcategory')
+        supercat_id = request.POST.get('supercategory')
+
+        if mcat_slug:
+            product.maincategory = Maincategory.objects.filter(slug=mcat_slug).first()
+        else:
+            product.maincategory = None
+
+        if product.maincategory and cat_slug:
+            product.category = Category.objects.filter(maincategory=product.maincategory, slug=cat_slug).first()
+        elif cat_slug:
+            product.category = Category.objects.filter(slug=cat_slug).first()
+        else:
+            product.category = None
+
+        if product.category and scat_slug:
+            product.subcategory = Subcategory.objects.filter(category=product.category, slug=scat_slug).first()
+        elif scat_slug:
+            product.subcategory = Subcategory.objects.filter(slug=scat_slug).first()
+        else:
+            product.subcategory = None
+
+        if supercat_id:
+            product.supercategory = Supercategory.objects.filter(id=supercat_id).first()
+        elif product.maincategory and product.maincategory.supercategory:
+            product.supercategory = product.maincategory.supercategory
+
         if(request.POST.get('brand')):
-            product.brand = Brand.objects.get(name=request.POST.get('brand'))
+            product.brand = Brand.objects.filter(name=request.POST.get('brand')).first()
 
         # Upload images
         for i in range(1, 5):
@@ -1041,7 +1106,8 @@ def update_product(request,id,pn):
 
     context = {
         'maincategories': mcat, 'categories': cat, 'subcategories': scat,
-        'brands': brnd, 'clr': clr, 'sz': sz,'data':product
+        'brands': brnd, 'clr': clr, 'sz': sz, 'data': product,
+        'supercategories': supercats,
     }
     return render(request, 'backend/update-product.html', context)
 
@@ -1069,7 +1135,6 @@ def product_page(Request):
 
 @login_required(login_url='/admin-login/')
 @user_passes_test(is_superuser, login_url='/admin-login/')
-@user_passes_test(is_superuser, login_url='/admin-login/')
 def duplicate_product(request,id,pn):
     mcat = Maincategory.objects.all().order_by('-id')
     cat = Category.objects.all().order_by('-id')
@@ -1077,18 +1142,44 @@ def duplicate_product(request,id,pn):
     brnd = Brand.objects.all().order_by('-id')
     clr = Color.objects.all().order_by('-id')
     sz = Size.objects.all().order_by('-id')
+    supercats = Supercategory.objects.all().order_by('name')
 
     data= get_object_or_404(Product,id=id)
     product= Product()
     if request.method == "POST":
 
-        # Assign related fields
-        # Assign related fields
-        product.maincategory = Maincategory.objects.get(slug=request.POST.get('maincategory'))
-        product.category = Category.objects.get(maincategory=product.maincategory,slug=request.POST.get('category'))
-        product.subcategory = Subcategory.objects.get(category=product.category,slug=request.POST.get('subcategory'))
+        # Assign related fields safely
+        mcat_slug = request.POST.get('maincategory')
+        cat_slug = request.POST.get('category')
+        scat_slug = request.POST.get('subcategory')
+        supercat_id = request.POST.get('supercategory')
+
+        if mcat_slug:
+            product.maincategory = Maincategory.objects.filter(slug=mcat_slug).first()
+        else:
+            product.maincategory = None
+
+        if product.maincategory and cat_slug:
+            product.category = Category.objects.filter(maincategory=product.maincategory, slug=cat_slug).first()
+        elif cat_slug:
+            product.category = Category.objects.filter(slug=cat_slug).first()
+        else:
+            product.category = None
+
+        if product.category and scat_slug:
+            product.subcategory = Subcategory.objects.filter(category=product.category, slug=scat_slug).first()
+        elif scat_slug:
+            product.subcategory = Subcategory.objects.filter(slug=scat_slug).first()
+        else:
+            product.subcategory = None
+
+        if supercat_id:
+            product.supercategory = Supercategory.objects.filter(id=supercat_id).first()
+        elif product.maincategory and product.maincategory.supercategory:
+            product.supercategory = product.maincategory.supercategory
+
         if(request.POST.get('brand')):
-            product.brand = Brand.objects.get(name=request.POST.get('brand'))
+            product.brand = Brand.objects.filter(name=request.POST.get('brand')).first()
 
         # Upload images
         for i in range(1, 5):
@@ -1177,7 +1268,8 @@ def duplicate_product(request,id,pn):
 
     context = {
         'maincategories': mcat, 'categories': cat, 'subcategories': scat,
-        'brands': brnd, 'clr': clr, 'sz': sz,'data':data
+        'brands': brnd, 'clr': clr, 'sz': sz, 'data': data,
+        'supercategories': supercats,
     }
     return render(request, 'backend/update-product.html', context)
 
