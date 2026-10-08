@@ -1,5 +1,6 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
+from django.views.static import serve
 from mainApp import views
 from mainApp import backend
 from django.conf import settings
@@ -121,9 +122,12 @@ urlpatterns = [
     path('admin-update-blog/<int:id>/',backend.admin_update_blog),
     path('admin-delete-blog/<int:id>/',backend.admin_delete_blog),
     
-    #Slider
+    # Slider
     path('gallery/',backend.gallery_page),
     path('delete-gallery/<int:id>/',backend.delete_gallery),
+
+    # Media files serving (works in production as well)
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 
     path('<str:supercat>/<str:mcat>/<str:cat>/<str:scat>/', views.dynamic_category_view, name='subcategory_view'),
     path('<str:supercat>/<str:mcat>/<str:cat>/', views.dynamic_category_view, name='category_view'),

@@ -23,38 +23,82 @@ import json
 import io
 
 
+import uuid
+from django.conf import settings
+from django.utils.text import get_valid_filename
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 def is_superuser(user):
     return user.is_superuser
 
 
-# Function to store the image on the external server
+# Function to store the image (remote server with automatic local media fallback)
 def image_store(image_type, image_file):
-    print("Function is called...")
-    base_url = os.environ.get('IMAGE_STORE_URL', "https://image.narifashionstore.com/add-image/")
-    files = {
-        'image': image_file  # Directly send the file object
-    }
-    data = {
-        'image_type': image_type
-    }
+    print(f"image_store called for type: {image_type}")
+    if not image_file:
+        return ""
 
+    filename = getattr(image_file, 'name', 'upload.jpg')
+    content_type = getattr(image_file, 'content_type', 'image/jpeg')
+
+    # Safely read file content into memory
     try:
-        try:
-            response = requests.post(base_url, data=data, files=files, timeout=30)
-        except (requests.exceptions.SSLError, requests.exceptions.RequestException):
-            http_url = base_url.replace("https://", "http://")
-            response = requests.post(http_url, data=data, files=files, timeout=30)
-
-        if response.status_code == 201:
-            response_data = response.json()
-            image_url = response_data.get("image_url")
-            print(f"Image URL retrieved: {image_url}")
-            return image_url or ""
+        if hasattr(image_file, 'read'):
+            file_bytes = image_file.read()
+            if hasattr(image_file, 'seek'):
+                image_file.seek(0)
         else:
-            print(f"Failed to upload image: {response.text}")
-            return ""
+            file_bytes = bytes(image_file)
     except Exception as e:
-        print(f"Error occurred during image upload: {e}")
+        print(f"Error reading image file: {e}")
+        return ""
+
+    if not file_bytes:
+        print("Empty file received in image_store")
+        return ""
+
+    # 1. Try remote image server
+    base_url = os.environ.get('IMAGE_STORE_URL', "https://image.narifashionstore.com/add-image/")
+    urls_to_try = [base_url]
+    if base_url.startswith("https://"):
+        urls_to_try.append(base_url.replace("https://", "http://"))
+
+    for target_url in urls_to_try:
+        try:
+            files = {
+                'image': (filename, io.BytesIO(file_bytes), content_type)
+            }
+            data = {
+                'image_type': image_type
+            }
+            response = requests.post(target_url, data=data, files=files, timeout=15, verify=False)
+            if response.status_code == 201:
+                response_data = response.json()
+                image_url = response_data.get("image_url") or response_data.get("url") or response_data.get("file_url")
+                if image_url:
+                    print(f"Remote image uploaded successfully: {image_url}")
+                    return image_url
+            else:
+                print(f"Remote upload {target_url} returned status {response.status_code}: {response.text[:200]}")
+        except Exception as e:
+            print(f"Failed to connect to remote image store ({target_url}): {e}")
+
+    # 2. Fallback: Save directly to local media storage
+    try:
+        clean_name = get_valid_filename(filename)
+        unique_name = f"{uuid.uuid4().hex[:8]}_{clean_name}"
+        folder = os.path.join(settings.MEDIA_ROOT, image_type)
+        os.makedirs(folder, exist_ok=True)
+        file_path = os.path.join(folder, unique_name)
+        with open(file_path, 'wb') as f:
+            f.write(file_bytes)
+        local_url = f"/media/{image_type}/{unique_name}"
+        print(f"Local storage fallback successful: {local_url}")
+        return local_url
+    except Exception as e:
+        print(f"Local media fallback error: {e}")
         return ""
 
 
@@ -334,7 +378,8 @@ def update_maincategory(request, id):
             uploaded_image = request.FILES.get(field)
             if uploaded_image:
                 image_url = image_store("category", uploaded_image)
-                setattr(data, field, image_url)
+                if image_url:
+                    setattr(data, field, image_url)
 
         data.title = request.POST.get('title')
         data.description = request.POST.get('description')
@@ -383,21 +428,16 @@ def add_category(Request):
             uploaded_image=Request.FILES.get('image')
             uploaded_image2=Request.FILES.get('app_background')
             if uploaded_image:
-            # Call the image_store function to upload the image and get the URL
-               image_url = image_store("category", uploaded_image)
+                image_url = image_store("category", uploaded_image)
             else:
-                image_url = None
-
-            if(image_url):
-                c.image=image_url
+                image_url = ''
+            c.image = image_url or ''
                 
             if uploaded_image2:
-            # Call the image_store function to upload the image and get the URL
-               image_url2 = image_store("category", uploaded_image2)
+                image_url2 = image_store("category", uploaded_image2)
             else:
-                image_url2 = None
-            if(image_url2):
-                c.app_background=image_url2
+                image_url2 = ''
+            c.app_background = image_url2 or ''
             
             c.title=Request.POST.get('title')
             c.description=Request.POST.get('description')
@@ -499,12 +539,10 @@ def add_subcategory(Request):
 
             uploaded_image=Request.FILES.get('image')
             if uploaded_image:
-            # Call the image_store function to upload the image and get the URL
-               image_url = image_store("category", uploaded_image)
+                image_url = image_store("category", uploaded_image)
             else:
-                image_url = None
-            if(image_url):
-                c.image=image_url
+                image_url = ''
+            c.image = image_url or ''
 
             
             
@@ -632,11 +670,10 @@ def add_brand(Request):
             m.slug=slugify(m.name)
             uploaded_image=Request.FILES.get('image')
             if uploaded_image:
-            # Call the image_store function to upload the image and get the URL
-               image_url = image_store("category", uploaded_image)
+                image_url = image_store("category", uploaded_image)
             else:
-                image_url = None
-            m.image=image_url
+                image_url = ''
+            m.image = image_url or ''
             m.title=Request.POST.get('title')
             m.description=Request.POST.get('description')
             if Brand.objects.filter(name=m.name):
@@ -884,7 +921,9 @@ def add_product(request):
             uploaded_image = request.FILES.get(f'image{i}')
             if uploaded_image:
                 image_url = image_store("product", uploaded_image)
-                setattr(product, f'image{i}', image_url)
+                setattr(product, f'image{i}', image_url or '')
+            else:
+                setattr(product, f'image{i}', '')
 
         # Assign other fields
         product.name = request.POST.get('name')
@@ -1036,7 +1075,8 @@ def update_product(request,id,pn):
             uploaded_image = request.FILES.get(f'image{i}')
             if uploaded_image:
                 image_url = image_store("product", uploaded_image)
-                setattr(product, f'image{i}', image_url)
+                if image_url:
+                    setattr(product, f'image{i}', image_url)
 
         # Assign other fields
         product.name = request.POST.get('name')
