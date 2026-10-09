@@ -243,11 +243,10 @@ def add_supercategory(Request):
             m.slug=slugify(m.name)
             uploaded_image=Request.FILES.get('image')
             if uploaded_image:
-            # Call the image_store function to upload the image and get the URL
-               image_url = image_store("category", uploaded_image)
+                image_url = image_store("category", uploaded_image)
             else:
-                image_url = None
-            m.image=image_url
+                image_url = ''
+            m.image = image_url or ''
             
             m.save()
             return redirect('/supercategory')
@@ -276,12 +275,9 @@ def update_supercategory(Request,id):
             data.slug=slugify(data.name)
             uploaded_image=Request.FILES.get('image')
             if uploaded_image:
-            # Call the image_store function to upload the image and get the URL
-               image_url = image_store("category", uploaded_image)
-            else:
-                image_url = None
-            if(image_url):
-                data.image=image_url
+                image_url = image_store("category", uploaded_image)
+                if image_url:
+                    data.image=image_url
             
             data.save()
             return redirect('/supercategory')

@@ -36,29 +36,21 @@
                             <form method="post" enctype="multipart/form-data" onsubmit="return validateForm();" >
                                 {%csrf_token%}
                                 <div class="row">
-                                <div class="col-lg-4">
-                                   <div class="mb-3">
-                                       <label class="form-label">Name<span class="text-danger">*</span></label>
-                                       <input type="text" id="name" class="form-control" placeholder="Enter Name"name="name" required>
-                                   </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="mb-3">
-                                        <label class="form-label">Icon(100x100px)<span class="text-danger">*</span></label>
-                                        <input type="file" accept=".png,.jpg,.jpeg" class="form-control" name="image" required>
+                                    <div class="col-lg-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Supercategory Name<span class="text-danger">*</span></label>
+                                            <input type="text" id="name" class="form-control" placeholder="Enter Supercategory Name" name="name" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Icon / Image (Optional)</label>
+                                            <input type="file" accept=".png,.jpg,.jpeg,.webp" class="form-control" name="image">
+                                        </div>
                                     </div>
                                 </div>
-
-                                <div class="col-lg-4">
-                                    <div class="mb-3">
-                                        <label class="form-label">Background Image(400x320px)<span class="text-danger">*</span></label>
-                                        <input type="file" accept=".png,.jpg,.jpeg" class="form-control" name="image2" required>
-                                    </div>
-                                </div>
-
-                                
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-primary text-center mt-4" style="padding:2px 50px;">Add</submit>
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary text-center mt-4" style="padding:2px 50px;">Add</button>
                                 </div>
                             </form>
                         </div>

@@ -184,9 +184,9 @@
                             <nav class="ul-header-nav">
                                 <a href="/">Home</a>
                                 <a href="/all">Shop</a>
-                                <a href="/women/">Women</a>
-                                <a href="/men/">Men's</a>
-                                <a href="/kids/">Kids</a>
+                                {% for sc in nav_supercategories %}
+                                <a href="/{{ sc.slug }}/">{{ sc.name }}</a>
+                                {% endfor %}
                                 <a href="/blog">Blog</a>
 
                                 <div class="has-sub-menu has-mega-menu">
