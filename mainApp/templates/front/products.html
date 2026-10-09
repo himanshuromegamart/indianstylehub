@@ -82,7 +82,7 @@
                     <!-- Breadcrumbs & Heading -->
                     <div class="col-12 mb-3">
                         <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb" style="background: transparent; padding: 0.5rem 0; margin-bottom: 0.5rem;">
+                            <ol class="breadcrumb" style="--bs-breadcrumb-divider: '/'; background: transparent; padding: 0.5rem 0; margin-bottom: 0.5rem;">
                                 {% for b in breadcrumbs %}
                                     {% if forloop.last %}
                                         <li class="breadcrumb-item active" aria-current="page" style="font-weight: 600; color: #ff6f61;">{{ b.name }}</li>

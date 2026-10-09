@@ -284,6 +284,10 @@ button {
   color: var(--ul-primary);
 }
 
+.breadcrumb-item + .breadcrumb-item::before {
+  content: var(--bs-breadcrumb-divider, "/") !important;
+}
+
 .ul-sidebar {
   position: fixed;
   z-index: 10;
