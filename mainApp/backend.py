@@ -153,27 +153,43 @@ def admin_login(request):
     return render(request, "backend/login.html")
 
 
+def admin_logout(request):
+    logout(request)
+    try:
+        request.session.flush()
+    except Exception:
+        pass
+    return redirect("/admin-login/")
+
+
 @login_required(login_url='/admin-login')
 def admin_dashboard(Request):
   if not Request.user.is_superuser:
       return HttpResponseForbidden("You don't have permission to access this page.")
   else:
-    data=Product.objects.all().order_by('id').reverse()
-    offers=Supercategory.objects.all().order_by('id').reverse()
-    # prod=len(Product.objects.all())
-    # ord=len(Order.objects.all())
-    # sel=len(Seller.objects.all())
-    # pen=len(Product.objects.filter(verification="Pending"))
-    # act=len(Product.objects.filter(verification="Done"))
-    # oos = len(Product.objects.filter(qty__lt=1))
-    paginator = Paginator(data, 100)  # Show 10 posts per page
+    data = Product.objects.all().order_by('-id')
+    offers = Supercategory.objects.all().order_by('-id')
+    prod = Product.objects.count()
+    ord = Order.objects.count()
+    enq = Enquiry.objects.count()
+    buyer_count = Buyer.objects.count()
+    recent_orders = Order.objects.all().order_by('-id')[:8]
+    paginator = Paginator(data, 100)
     page_number = Request.GET.get('page')
     page_posts = paginator.get_page(page_number)
     current_page = page_posts.number
     total_pages = paginator.num_pages
     page_range = range(max(current_page - 2, 1), min(current_page + 3, total_pages + 1))
-    # return render(Request,'superadmin/index.html',{'page_posts':page_posts,'page_range': page_range,'prod':prod,'ord':ord,'sel':sel,'pen':pen,'act':act,'oos':oos})
-    return render(Request,'backend/index.html',{'page_posts':page_posts,'page_range': page_range,'offers':offers})
+    return render(Request, 'backend/index.html', {
+        'page_posts': page_posts,
+        'page_range': page_range,
+        'offers': offers,
+        'prod': prod,
+        'ord': ord,
+        'enq': enq,
+        'buyer_count': buyer_count,
+        'recent_orders': recent_orders,
+    })
 
 
 # Slider
@@ -247,6 +263,8 @@ def add_supercategory(Request):
             else:
                 image_url = ''
             m.image = image_url or ''
+            m.title = Request.POST.get('title', '')
+            m.description = Request.POST.get('description', '')
             
             m.save()
             return redirect('/supercategory')
@@ -278,6 +296,8 @@ def update_supercategory(Request,id):
                 image_url = image_store("category", uploaded_image)
                 if image_url:
                     data.image=image_url
+            data.title = Request.POST.get('title', '')
+            data.description = Request.POST.get('description', '')
             
             data.save()
             return redirect('/supercategory')
@@ -1399,84 +1419,113 @@ def admin_blog(request):
 
 
 
-@login_required(login_url='/employee-login')
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
 def admin_add_blog(request):
-    prod = Product.objects.count()  # Use count() instead of len() for efficiency
+    supercategories = Supercategory.objects.all().order_by('name')
+    categories = Category.objects.all().order_by('name')
+    products = Product.objects.all().order_by('-id')[:200]
 
     if request.method == "POST":
-        image_type = "blog"
+        blog = Blog()
+        blog.title = request.POST.get('title', '').strip()
+        raw_slug = request.POST.get('slug', '').strip()
+        base_slug = slugify(raw_slug) if raw_slug else slugify(blog.title)
+        slug = base_slug
+        counter = 1
+        while Blog.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        blog.slug = slug
+
+        # Relationships
+        supercat_id = request.POST.get('supercategory')
+        cat_id = request.POST.get('category')
+        prod_id = request.POST.get('product')
+
+        if supercat_id:
+            blog.supercategory = Supercategory.objects.filter(id=supercat_id).first()
+        if cat_id:
+            blog.category = Category.objects.filter(id=cat_id).first()
+        if prod_id:
+            blog.product = Product.objects.filter(id=prod_id).first()
+
         uploaded_image = request.FILES.get('image')
-        print("Image URL: ",uploaded_image)
-
         if uploaded_image:
-            # Call the image_store function to upload the image and get the URL
-            image_url = image_store(image_type, uploaded_image)
-            print("Image URL: ",image_url)
+            image_url = image_store("blog", uploaded_image)
+            blog.image = image_url or ''
         else:
-            image_url = None
+            blog.image = ''
 
-        # Proceed only if the image URL was successfully retrieved
-        if image_url:
-            blog = Blog()
-            blog.image=image_url
-            blog.title = request.POST.get('title')
-            blog.slug = slugify(request.POST.get('slug', ''))
-            
-            # Check for unique slug and append a random number if needed
-            if Blog.objects.filter(slug=blog.slug).exists():
-                slug = f"{blog.slug}-{randrange(1, 10)}"  # Generate a more readable blog.slug
-                blog.slug = slug
-            
-            blog.description = request.POST.get('description')
-            blog.meta_description = request.POST.get('meta_description')
-            blog.save()
-        else:
-            return redirect("/admin-blog")
-    
+        blog.description = request.POST.get('description', '')
+        blog.meta_description = request.POST.get('meta_description', '')
+        blog.save()
+        messages.success(request, "Blog post created successfully.")
+        return redirect("/admin-blog")
+
     return render(request, 'backend/add-blog.html', {
-        'prod': prod,
+        'supercategories': supercategories,
+        'categories': categories,
+        'products': products,
     })
 
 
-@login_required(login_url='/employee-login')
-def admin_update_blog(request,id):
-    # Gather data for the dashboard stats
-    blog = Blog.objects.get(id=id)
-    prod = Product.objects.count()  # Use count() instead of len() for efficiency
-    
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def admin_update_blog(request, id):
+    blog = get_object_or_404(Blog, id=id)
+    supercategories = Supercategory.objects.all().order_by('name')
+    categories = Category.objects.all().order_by('name')
+    products = Product.objects.all().order_by('-id')[:200]
+
     if request.method == "POST":
-        image_type = "blog"
-        uploaded_image = request.FILES.get('image')
-        print("Image URL: ",uploaded_image)
+        blog.title = request.POST.get('title', '').strip()
+        raw_slug = request.POST.get('slug', '').strip()
+        base_slug = slugify(raw_slug) if raw_slug else slugify(blog.title)
+        slug = base_slug
+        counter = 1
+        while Blog.objects.filter(slug=slug).exclude(id=blog.id).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        blog.slug = slug
 
-        if uploaded_image:
-            # Call the image_store function to upload the image and get the URL
-            image_url = image_store(image_type, uploaded_image)
-            print("Image URL: ",image_url)
+        # Relationships
+        supercat_id = request.POST.get('supercategory')
+        cat_id = request.POST.get('category')
+        prod_id = request.POST.get('product')
+
+        if supercat_id:
+            blog.supercategory = Supercategory.objects.filter(id=supercat_id).first()
         else:
-            image_url = None
+            blog.supercategory = None
 
-        # Proceed only if the image URL was successfully retrieved
-        
-        if(uploaded_image):
-           blog.image=image_url
-        blog.title = request.POST.get('title')
-        blog.slug = slugify(request.POST.get('slug', ''))
-        
-        # Check for unique slug and append a random number if needed
-        if Blog.objects.filter(slug=blog.slug).exclude(id=blog.id):
-            slug = f"{blog.slug}-{randrange(1, 10)}"  # Generate a more readable slug
-            blog.slug = slug
-        
-        blog.description = request.POST.get('description')
-        blog.meta_description = request.POST.get('meta_description')
+        if cat_id:
+            blog.category = Category.objects.filter(id=cat_id).first()
+        else:
+            blog.category = None
+
+        if prod_id:
+            blog.product = Product.objects.filter(id=prod_id).first()
+        else:
+            blog.product = None
+
+        uploaded_image = request.FILES.get('image')
+        if uploaded_image:
+            image_url = image_store("blog", uploaded_image)
+            if image_url:
+                blog.image = image_url
+
+        blog.description = request.POST.get('description', '')
+        blog.meta_description = request.POST.get('meta_description', '')
         blog.save()
+        messages.success(request, "Blog post updated successfully.")
         return redirect("/admin-blog")
-        
+
     return render(request, 'backend/update-blog.html', {
-        'prod': prod,
-        'blog':blog
-        
+        'blog': blog,
+        'supercategories': supercategories,
+        'categories': categories,
+        'products': products,
     })
 
 
@@ -1538,4 +1587,462 @@ def delete_gallery(Request,id):
        data=Gallery.objects.get(id=id)
        data.delete()
        return redirect('/gallery')
+
+
+# ==================== POPULAR LINKS (SEO) MANAGEMENT ====================
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def popular_links_page(request):
+    search_query = request.GET.get('search_query', '')
+    if search_query:
+        links = PopularLink.objects.filter(
+            Q(title__icontains=search_query) |
+            Q(url__icontains=search_query) |
+            Q(state__icontains=search_query)
+        ).order_by('order', '-id')
+    else:
+        links = PopularLink.objects.all().order_by('order', '-id')
+
+    paginator = Paginator(links, 50)
+    page_number = request.GET.get('page')
+    page_posts = paginator.get_page(page_number)
+
+    return render(request, 'backend/popular-links.html', {
+        'page_posts': page_posts,
+        'total_count': links.count(),
+        'search_query': search_query,
+    })
+
+
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def add_popular_link(request):
+    supercategories = Supercategory.objects.all().order_by('name')
+    maincategories = Maincategory.objects.all().order_by('name')
+    categories = Category.objects.all().order_by('name')
+    subcategories = Subcategory.objects.all().order_by('name')
+
+    if request.method == "POST":
+        link = PopularLink()
+        link.title = request.POST.get('title', '').strip()
+        link.url = request.POST.get('url', '').strip()
+        link.state = request.POST.get('state', '').strip()
+        link.order = int(request.POST.get('order', 0) or 0)
+        link.show_on_home = True if (request.POST.get('show_on_home') in ['on', '1', 'true', True]) else False
+        link.is_active = True if (request.POST.get('is_active') in ['on', '1', 'true', True]) else False
+
+        supercat_id = request.POST.get('supercategory')
+        maincat_id = request.POST.get('maincategory')
+        cat_id = request.POST.get('category')
+        subcat_id = request.POST.get('subcategory')
+
+        if supercat_id:
+            link.supercategory = Supercategory.objects.filter(id=supercat_id).first()
+        if maincat_id:
+            link.maincategory = Maincategory.objects.filter(id=maincat_id).first()
+        if cat_id:
+            link.category = Category.objects.filter(id=cat_id).first()
+        if subcat_id:
+            link.subcategory = Subcategory.objects.filter(id=subcat_id).first()
+
+        link.save()
+        messages.success(request, f"Popular Link '{link.title}' added successfully!")
+        return redirect('/popular-links/')
+
+    return render(request, 'backend/add-popular-link.html', {
+        'supercategories': supercategories,
+        'maincategories': maincategories,
+        'categories': categories,
+        'subcategories': subcategories,
+    })
+
+
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def update_popular_link(request, id):
+    link = get_object_or_404(PopularLink, id=id)
+    supercategories = Supercategory.objects.all().order_by('name')
+    maincategories = Maincategory.objects.all().order_by('name')
+    categories = Category.objects.all().order_by('name')
+    subcategories = Subcategory.objects.all().order_by('name')
+
+    if request.method == "POST":
+        link.title = request.POST.get('title', '').strip()
+        link.url = request.POST.get('url', '').strip()
+        link.state = request.POST.get('state', '').strip()
+        link.order = int(request.POST.get('order', 0) or 0)
+        link.show_on_home = True if (request.POST.get('show_on_home') in ['on', '1', 'true', True]) else False
+        link.is_active = True if (request.POST.get('is_active') in ['on', '1', 'true', True]) else False
+
+        supercat_id = request.POST.get('supercategory')
+        maincat_id = request.POST.get('maincategory')
+        cat_id = request.POST.get('category')
+        subcat_id = request.POST.get('subcategory')
+
+        link.supercategory = Supercategory.objects.filter(id=supercat_id).first() if supercat_id else None
+        link.maincategory = Maincategory.objects.filter(id=maincat_id).first() if maincat_id else None
+        link.category = Category.objects.filter(id=cat_id).first() if cat_id else None
+        link.subcategory = Subcategory.objects.filter(id=subcat_id).first() if subcat_id else None
+
+        link.save()
+        messages.success(request, f"Popular Link '{link.title}' updated successfully!")
+        return redirect('/popular-links/')
+
+    return render(request, 'backend/update-popular-link.html', {
+        'link': link,
+        'supercategories': supercategories,
+        'maincategories': maincategories,
+        'categories': categories,
+        'subcategories': subcategories,
+    })
+
+
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def delete_popular_link(request, id):
+    link = get_object_or_404(PopularLink, id=id)
+    title = link.title
+    link.delete()
+    messages.success(request, f"Popular Link '{title}' deleted successfully!")
+    return redirect('/popular-links/')
+
+
+# Orders Management
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def admin_orders_page(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+    
+    status_filter = request.GET.get('status', '').strip()
+    search_query = request.GET.get('search_query', '').strip()
+
+    orders_qs = Order.objects.all().order_by('-id')
+
+    if status_filter:
+        orders_qs = orders_qs.filter(orderStatus__iexact=status_filter)
+
+    if search_query:
+        orders_qs = orders_qs.filter(
+            Q(id__icontains=search_query) |
+            Q(address__address__icontains=search_query) |
+            Q(address__city__icontains=search_query) |
+            Q(address__alternatePhone__icontains=search_query) |
+            Q(buyer__name__icontains=search_query) |
+            Q(buyer__phone__icontains=search_query) |
+            Q(buyer__email__icontains=search_query) |
+            Q(transactionId__icontains=search_query) |
+            Q(waywill__icontains=search_query) |
+            Q(product__name__icontains=search_query)
+        )
+
+    total_count = Order.objects.count()
+    pending_count = Order.objects.filter(orderStatus__iexact="pending").count()
+    confirmed_count = Order.objects.filter(orderStatus__iexact="confirmed").count()
+    shipped_count = Order.objects.filter(orderStatus__iexact="shipped").count()
+    delivered_count = Order.objects.filter(orderStatus__iexact="delivered").count()
+    cancelled_count = Order.objects.filter(orderStatus__iexact="cancelled").count()
+
+    paginator = Paginator(orders_qs, 25)
+    page_number = request.GET.get('page')
+    page_posts = paginator.get_page(page_number)
+    current_page = page_posts.number
+    total_pages = paginator.num_pages
+    page_range = range(max(current_page - 2, 1), min(current_page + 3, total_pages + 1))
+
+    return render(request, 'backend/orders.html', {
+        'page_posts': page_posts,
+        'page_range': page_range,
+        'status_filter': status_filter,
+        'search_query': search_query,
+        'total_count': total_count,
+        'pending_count': pending_count,
+        'confirmed_count': confirmed_count,
+        'shipped_count': shipped_count,
+        'delivered_count': delivered_count,
+        'cancelled_count': cancelled_count,
+    })
+
+
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def admin_order_details(request, id):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+    
+    order = get_object_or_404(Order, id=id)
+
+    if request.method == 'POST':
+        new_status = request.POST.get('orderStatus', '').strip()
+        new_waybill = request.POST.get('waywill', '').strip()
+        new_cancelled_by = request.POST.get('cancelled_by', '').strip()
+
+        if new_status:
+            order.orderStatus = new_status
+        order.waywill = new_waybill
+        order.cancelled_by = new_cancelled_by
+        order.save()
+
+        messages.success(request, f"Order #{order.id} status updated to '{order.orderStatus}' successfully!")
+        return redirect(f"/admin-order-details/{order.id}/")
+
+    return render(request, 'backend/order-details.html', {
+        'order': order,
+    })
+
+
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def admin_delete_order(request, id):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+    
+    order = get_object_or_404(Order, id=id)
+    order_id = order.id
+    order.delete()
+    messages.success(request, f"Order #{order_id} deleted successfully.")
+    return redirect('/admin-order/')
+
+
+# ==========================================
+# FIREBASE PUSH NOTIFICATION BACKEND SYSTEM
+# ==========================================
+
+@csrf_exempt
+def save_device_token(request):
+    """API endpoint to receive and register FCM browser device tokens"""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+        except Exception:
+            data = request.POST
+
+        token = data.get('token', '').strip()
+        device_type = data.get('device_type', 'web').strip()
+
+        if not token:
+            return JsonResponse({'status': 'error', 'message': 'Token is required'}, status=400)
+
+        user = request.user if request.user.is_authenticated else None
+        device_obj, created = DeviceToken.objects.update_or_create(
+            token=token,
+            defaults={'device_type': device_type, 'user': user}
+        )
+
+        return JsonResponse({
+            'status': 'success',
+            'created': created,
+            'message': 'Device token saved successfully!',
+            'token_id': device_obj.id
+        })
+
+    return JsonResponse({'status': 'error', 'message': 'Only POST method allowed'}, status=405)
+
+
+def send_notification(request):
+    """
+    Handles /send endpoint (called by frontend test button or API)
+    Broadcasts or logs push notifications.
+    """
+    title = request.POST.get('title') or request.GET.get('title') or "Special Offer from Bharat Shop!"
+    body = request.POST.get('body') or request.GET.get('body') or "Don't miss our latest exclusive collection and deals."
+    url = request.POST.get('url') or request.GET.get('url') or "/"
+    image = request.POST.get('image') or request.GET.get('image') or ""
+    icon = request.POST.get('icon') or request.GET.get('icon') or "/static/assets/img/logo.png"
+
+    tokens = list(DeviceToken.objects.values_list('token', flat=True))
+    total_devices = len(tokens)
+
+    push_log = PushNotification.objects.create(
+        title=title,
+        body=body,
+        url=url,
+        image=image,
+        icon=icon,
+        total_sent=total_devices
+    )
+
+    try:
+        import firebase_admin
+        from firebase_admin import messaging
+        if firebase_admin._apps and total_devices > 0:
+            message = messaging.MulticastMessage(
+                notification=messaging.Notification(title=title, body=body, image=image or None),
+                data={'url': url},
+                tokens=tokens
+            )
+            messaging.send_each_for_multicast(message)
+    except Exception:
+        pass
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or not request.POST:
+        return HttpResponse(f"Success! Broadcasted '{title}' to {total_devices} active device(s). (Notification ID: #{push_log.id})")
+
+    messages.success(request, f"Push Notification '{title}' broadcasted to {total_devices} device(s) successfully!")
+    return redirect('/admin-notifications/')
+
+
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def push_notifications_page(request):
+    """Admin dashboard page for viewing devices, sending broadcasts, and seeing history"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+
+    if request.method == "POST":
+        title = request.POST.get('title', '').strip()
+        body = request.POST.get('body', '').strip()
+        url = request.POST.get('url', '/').strip()
+        image = request.POST.get('image', '').strip()
+
+        if not title or not body:
+            messages.error(request, "Title and Body are required to send a notification.")
+            return redirect('/admin-notifications/')
+
+        tokens = list(DeviceToken.objects.values_list('token', flat=True))
+        total_devices = len(tokens)
+
+        PushNotification.objects.create(
+            title=title,
+            body=body,
+            url=url,
+            image=image,
+            total_sent=total_devices
+        )
+
+        messages.success(request, f"Push Notification '{title}' sent to {total_devices} device(s) successfully!")
+        return redirect('/admin-notifications/')
+
+    devices = DeviceToken.objects.all().order_by('-created_at')
+    history = PushNotification.objects.all().order_by('-created_at')
+
+    paginator = Paginator(history, 20)
+    page_number = request.GET.get('page')
+    page_posts = paginator.get_page(page_number)
+    current_page = page_posts.number
+    total_pages = paginator.num_pages
+    page_range = range(max(current_page - 2, 1), min(current_page + 3, total_pages + 1))
+
+    return render(request, 'backend/notifications.html', {
+        'page_posts': page_posts,
+        'page_range': page_range,
+        'devices': devices[:50],
+        'total_devices': devices.count(),
+        'total_notifications': history.count(),
+    })
+
+
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def delete_device_token(request, id):
+    """Delete a single registered device token"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+    device = get_object_or_404(DeviceToken, id=id)
+    device.delete()
+    messages.success(request, "Device token removed successfully.")
+    return redirect('/admin-notifications/')
+
+
+# Customer / Buyer Management for Admin Dashboard
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def admin_buyer(request):
+    """Admin view to list all registered customers / buyers with their complete details and addresses"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+
+    search_query = request.GET.get('search', '').strip() or request.POST.get('search', '').strip()
+
+    buyers_qs = Buyer.objects.all().order_by('-id')
+
+    if search_query:
+        buyers_qs = buyers_qs.filter(
+            Q(name__icontains=search_query) |
+            Q(phone__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(address__city__icontains=search_query) |
+            Q(address__address__icontains=search_query) |
+            Q(address__pin__icontains=search_query)
+        ).distinct()
+
+    paginator = Paginator(buyers_qs, 25)
+    page_number = request.GET.get('page')
+    page_posts = paginator.get_page(page_number)
+    current_page = page_posts.number
+    total_pages = paginator.num_pages
+    page_range = range(max(current_page - 2, 1), min(current_page + 3, total_pages + 1))
+
+    # Pre-fetch address and order statistics for displayed buyers
+    buyers_data = []
+    for b in page_posts:
+        latest_addr = Address.objects.filter(buyer=b).order_by('-id').first()
+        all_addrs = Address.objects.filter(buyer=b)
+        orders = Order.objects.filter(buyer=b)
+        order_count = orders.count()
+        order_total = sum([float(getattr(o, 'finalPrice', 0) or getattr(o, 'totalPrice', 0) or 0) for o in orders])
+
+        buyers_data.append({
+            'buyer': b,
+            'primary_address': latest_addr,
+            'addresses': all_addrs,
+            'order_count': order_count,
+            'order_total': order_total,
+        })
+
+    return render(request, 'backend/buyer.html', {
+        'page_posts': page_posts,
+        'page_range': page_range,
+        'buyers_data': buyers_data,
+        'search_query': search_query,
+        'total_buyers': Buyer.objects.count(),
+    })
+
+
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def admin_buyer_details(request, id):
+    """Admin view for detailed customer profile, all addresses, and full order history"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+
+    buyer = get_object_or_404(Buyer, id=id)
+    addresses = Address.objects.filter(buyer=buyer).order_by('-id')
+    orders = Order.objects.filter(buyer=buyer).order_by('-id')
+    total_spent = sum([float(getattr(o, 'finalPrice', 0) or getattr(o, 'totalPrice', 0) or 0) for o in orders])
+
+    return render(request, 'backend/buyer-details.html', {
+        'buyer': buyer,
+        'addresses': addresses,
+        'orders': orders,
+        'order_count': orders.count(),
+        'total_spent': total_spent,
+    })
+
+
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def admin_delete_buyer(request, id):
+    """Admin can delete a buyer account and their addresses"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+
+    buyer = get_object_or_404(Buyer, id=id)
+    buyer_name = buyer.name
+    buyer_phone = buyer.phone
+
+    try:
+        user = User.objects.filter(username=buyer_phone).first()
+        if user and not user.is_staff and not user.is_superuser:
+            user.delete()
+    except Exception:
+        pass
+
+    buyer.delete()
+    messages.success(request, f"Customer '{buyer_name}' ({buyer_phone}) deleted successfully.")
+    return redirect('/admin-buyer/')
+
+
+
+
 

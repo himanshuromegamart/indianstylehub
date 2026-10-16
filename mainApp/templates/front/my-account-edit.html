@@ -1,0 +1,126 @@
+{% extends "front/index.html" %}
+{% load static %}
+
+{% block title %}Edit Profile | Nari Fashion Store{% endblock %}
+
+{% block body %}
+<main>
+    <div class="ul-container">
+        <div class="ul-breadcrumb">
+            <h2 class="ul-breadcrumb-title">Edit Profile</h2>
+            <div class="ul-breadcrumb-nav">
+                <a href="/"><i class="flaticon-home"></i> Home</a>
+                <i class="flaticon-arrow-point-to-right"></i>
+                <a href="/my-account/">My Account</a>
+                <i class="flaticon-arrow-point-to-right"></i>
+                <span class="current-page">Edit Profile</span>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .nf-account{display:grid;grid-template-columns:280px 1fr;gap:30px;padding:clamp(25px,4vw,50px) 0}
+        @media(max-width:991px){.nf-account{grid-template-columns:1fr}}
+        .nf-card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.05);border:1px solid #f0f0f0;overflow:hidden}
+        .nf-sidebar-profile{padding:30px 24px;text-align:center;background:linear-gradient(135deg,#FFF5F4 0%,#FFF0EE 100%);border-bottom:1px solid #f0e6e4}
+        .nf-avatar{width:80px;height:80px;margin:0 auto 14px;background:linear-gradient(135deg,#F5224D,#FF941F);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px;font-weight:700;box-shadow:0 6px 20px rgba(245,34,77,.25)}
+        .nf-sidebar-profile h4{font-size:18px;font-weight:700;color:#111827;margin:0 0 3px}
+        .nf-sidebar-profile .nf-phone{font-size:13px;color:#6b7280;margin:0}
+        .nf-sidebar-nav{padding:12px}
+        .nf-sidebar-nav a{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;color:#4b5563;font-size:14px;font-weight:500;text-decoration:none;transition:all .2s;margin-bottom:2px}
+        .nf-sidebar-nav a i{font-size:18px;width:22px;text-align:center}
+        .nf-sidebar-nav a:hover{background:#fef2f2;color:#F5224D}
+        .nf-sidebar-nav a.active{background:linear-gradient(135deg,#F5224D,#FF941F);color:#fff;font-weight:600;box-shadow:0 4px 15px rgba(245,34,77,.2)}
+        .nf-sidebar-nav a.active i{color:#fff}
+        .nf-sidebar-nav .nf-nav-logout{color:#ef4444;margin-top:8px;border-top:1px solid #f3f4f6;padding-top:14px}
+        .nf-sidebar-nav .nf-nav-logout:hover{background:#fef2f2;color:#dc2626}
+        @media(max-width:991px){
+            .nf-sidebar-profile{padding:18px 20px;display:flex;align-items:center;gap:14px;text-align:left}
+            .nf-avatar{width:52px;height:52px;font-size:22px;margin:0;flex-shrink:0}
+            .nf-sidebar-nav{display:flex;overflow-x:auto;gap:8px;padding:10px 14px;-webkit-overflow-scrolling:touch}
+            .nf-sidebar-nav::-webkit-scrollbar{display:none}
+            .nf-sidebar-nav a{white-space:nowrap;padding:8px 14px;font-size:13px;margin-bottom:0;background:#F9FAFB;flex-shrink:0}
+            .nf-sidebar-nav .nf-nav-logout{margin-top:0;border-top:none;padding-top:8px}
+        }
+        .nf-edit-header{padding:28px 30px;border-bottom:1px solid #f3f4f6}
+        .nf-edit-header h4{font-size:18px;font-weight:700;color:#111827;margin:0 0 4px}
+        .nf-edit-header p{font-size:13px;color:#9ca3af;margin:0}
+        .nf-edit-form{padding:30px}
+        .nf-field{margin-bottom:22px}
+        .nf-field label{display:block;font-weight:600;font-size:12px;color:#374151;margin-bottom:8px;letter-spacing:.4px;text-transform:uppercase}
+        .nf-field input{width:100%;height:52px;border:2px solid #e5e7eb;border-radius:12px;padding:0 18px;font-size:15px;font-family:var(--font-primary);color:#111827;background:#fafafa;transition:all .25s ease;outline:none}
+        .nf-field input:focus{border-color:#F5224D;background:#fff;box-shadow:0 0 0 4px rgba(245,34,77,.08)}
+        .nf-field input:disabled{background:#f3f4f6;color:#9ca3af;cursor:not-allowed;border-color:#e5e7eb}
+        .nf-field .nf-hint{font-size:12px;color:#9ca3af;margin-top:6px;display:flex;align-items:center;gap:5px}
+        .nf-save-btn{background:linear-gradient(135deg,#F5224D,#FF941F);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:15px;padding:14px 36px;cursor:pointer;transition:all .3s;letter-spacing:.3px}
+        .nf-save-btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(245,34,77,.3)}
+        .nf-alert{padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+        .nf-alert-success{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0}
+        .nf-alert-error{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+    </style>
+
+    <div class="ul-container">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="nf-alert {% if message.tags == 'error' %}nf-alert-error{% elif message.tags == 'success' %}nf-alert-success{% endif %}" style="margin-top:20px">
+                {% if message.tags == 'success' %}✓{% else %}⚠{% endif %} {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="nf-account">
+            <!-- Sidebar -->
+            <div>
+                <div class="nf-card" style="position:sticky;top:100px">
+                    <div class="nf-sidebar-profile">
+                        <div class="nf-avatar">{{ buyer.name|slice:":1"|upper }}</div>
+                        <h4>{{ buyer.name }}</h4>
+                        <p class="nf-phone">📞 {{ buyer.phone }}</p>
+                    </div>
+                    <nav class="nf-sidebar-nav">
+                        <a href="/my-account/"><i class="flaticon-user"></i> Dashboard</a>
+                        <a href="/my-account-orders/"><i class="flaticon-shopping-bag"></i> My Orders</a>
+                        <a href="/my-account-address/"><i class="flaticon-location"></i> Addresses</a>
+                        <a href="/my-account-edit/" class="active"><i class="flaticon-edit"></i> Edit Profile</a>
+                        <a href="/wishlist/"><i class="flaticon-heart"></i> Wishlist</a>
+                        <a href="/logout/" class="nf-nav-logout"><i class="flaticon-close"></i> Sign Out</a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div>
+                <div class="nf-card">
+                    <div class="nf-edit-header">
+                        <h4>✏️ Update Your Details</h4>
+                        <p>Keep your information up to date for a smoother shopping experience</p>
+                    </div>
+                    <div class="nf-edit-form">
+                        <form method="POST" action="/my-account-edit/">
+                            {% csrf_token %}
+
+                            <div class="nf-field">
+                                <label>Full Name</label>
+                                <input type="text" name="name" value="{{ buyer.name }}" required placeholder="Enter your full name">
+                            </div>
+
+                            <div class="nf-field">
+                                <label>Phone Number</label>
+                                <input type="text" value="{{ buyer.phone }}" disabled>
+                                <p class="nf-hint">🔒 Phone number is your login ID and cannot be changed</p>
+                            </div>
+
+                            <div class="nf-field">
+                                <label>Email Address</label>
+                                <input type="email" name="email" value="{{ buyer.email }}" required placeholder="you@example.com">
+                            </div>
+
+                            <button type="submit" class="nf-save-btn">Save Changes →</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

@@ -1,79 +1,102 @@
-    {%extends 'backend/index.html'%}
-    {%load static%}
-    {%block body%}
-    <!-- ============================================================== -->
-    <div class="main-contentw-100">
-        <div class="">
-            <div class="container-fluid">
-                
-                <!-- end row -->
-                
-                <div class="row">
-                    <div class="col-xl-12">
-                        <div class="card">
-                            <div class="card-body">
+{% extends 'backend/index.html' %}
+{% load static %}
+{% load rmeditor %}
+{% block body %}
+{% rmeditor_media %}
+<!-- ============================================================== -->
+<div class="main-contentw-100">
+    <div class="">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-body">
 
-                            <h4 class=" text-center border bg-primary text-light p-1">ADD BLOG</h4>
-                            <form method="post" enctype="multipart/form-data">
-                                {%csrf_token%}
-                                <div class="row">
-                                    
-                                    <div class="col-lg-3">
-                                        <div class="mb-3">
-                                            <label class="form-label">Image<span class="text-danger">*</span></label>
-                                            <input type="file" accept=".png,.jpg,.jpeg,.webp" class="form-control" name="image" required>
-                                        </div>
-                                    </div>
-                                            
-                            
-                                <div class="col-lg-9">
+                        <h4 class="text-center border bg-primary text-light p-2 rounded">ADD BLOG / ARTICLE</h4>
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-lg-6">
                                     <div class="mb-3">
-                                        <label class="form-label">Title</label>
-                                        <input type="text" class="form-control" id="colorpicker-default"placeholder="Enter Title"name="title" >
+                                        <label class="form-label">Blog Title <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" placeholder="Enter Blog Title" name="title" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Featured Image <span class="text-danger">*</span></label>
+                                        <input type="file" accept=".png,.jpg,.jpeg,.webp" class="form-control" name="image" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Connect to Supercategory (Optional)</label>
+                                        <select name="supercategory" class="form-control">
+                                            <option value="">-- None / General Blog --</option>
+                                            {% for item in supercategories %}
+                                            <option value="{{ item.id }}">{{ item.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Connect to Category (Optional)</label>
+                                        <select name="category" class="form-control">
+                                            <option value="">-- None --</option>
+                                            {% for item in categories %}
+                                            <option value="{{ item.id }}">{{ item.name }} ({{ item.maincategory.name }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Connect to Product (Optional)</label>
+                                        <select name="product" class="form-control">
+                                            <option value="">-- None --</option>
+                                            {% for item in products %}
+                                            <option value="{{ item.id }}">{{ item.name|truncatechars:45 }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Slug (Optional - Auto-generated from title)</label>
+                                        <input type="text" class="form-control" placeholder="custom-blog-slug" name="slug">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">SEO Meta Description</label>
+                                        <input type="text" class="form-control" placeholder="Brief 150-160 char summary for search engines" name="meta_description">
                                     </div>
                                 </div>
 
                                 <div class="col-lg-12">
                                     <div class="mb-3">
-                                        <label class="form-label">Slug</label>
-                                        <input type="text" class="form-control" id="colorpicker-default" placeholder="Enter Slug" name="slug" value="{{blog.slug}}" >
-                                    </div>
-                                 </div>
-
-                                 <div class="col-lg-12">
-                                    <div class="mb-3">
-                                        <label class="form-label">Meta Description</label>
-                                        <input type="text" class="form-control" placeholder="Enter Meta Description"name="meta_description" >
+                                        <label class="form-label">Blog Content / Article Body (Rich Text Editor) <span class="text-danger">*</span></label>
+                                        <textarea class="form-control rmeditor" rows="12" placeholder="Write rich text article with headings, images, lists, links..." name="description"></textarea>
                                     </div>
                                 </div>
-
-                                <div class="col-lg-12">
-                                    <div class="mb-3">
-                                        <label class="form-label"> Description</label>
-                                        <textarea class="form-control" placeholder="Enter Description"name="description" ></textarea>
-                                    </div>
-                                </div>
-                            
-                                <script>
-                                    tinymce.init({
-                                        selector: 'textarea',
-                                        plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
-                                        toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
-                                        convert_urls: false  // Disable URL conversion
-                                    });
-                                </script>
-                                
-                                <div class="text-center">
-                                    <button type="submit" class="btn btn-primary text-center mt-4" style="padding:2px 50px;">Add</submit>
-                                    </div>
-                                </form>
                             </div>
+                            
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary text-center mt-3" style="padding:6px 50px;">Publish Blog</button>
+                            </div>
+                        </form>
                         </div>
                     </div>
                 </div>
-                <!-- end row -->
-            </div> 
-        </div>
-        <!-- End Page-content -->
-
-        {%endblock%}
+            </div>
+        </div> 
+    </div>
+</div>
+{% endblock %}

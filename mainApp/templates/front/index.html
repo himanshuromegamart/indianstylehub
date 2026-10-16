@@ -4,12 +4,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>
-        {%block title%}Indian Style Hub &mdash; Shop Your Dream{%endblock%}
+        {%block title%}Nari Fashion Store &mdash; Shop Your Dream{%endblock%}
     </title>
     {%block description%}
-        <meta name="description" content="Indian Style Hub is your one-stop destination for trendy and traditional Indian fashion. We offer a wide range of clothing, including sarees, kurtis, lehengas, and Indo-western wear, blending rich heritage with modern styles. Our mission is to bring high-quality, affordable fashion to everyone while celebrating India's vibrant culture.">
+        <meta name="description" content="Nari Fashion Store is your one-stop destination for trendy and traditional Indian fashion. We offer a wide range of clothing, including sarees, kurtis, lehengas, and Indo-western wear, blending rich heritage with modern styles. Our mission is to bring high-quality, affordable fashion to everyone while celebrating India's vibrant culture.">
+        <link rel="canonical" href="{{ request.build_absolute_uri }}">
+        <meta property="og:title" content="Nari Fashion Store — Shop Your Dream">
+        <meta property="og:description" content="Explore sarees, kurtis, lehengas, and Indo-western fashion blending rich Indian culture with modern aesthetics at Nari Fashion Store.">
+        <meta property="og:url" content="{{ request.build_absolute_uri }}">
+        <meta property="og:site_name" content="Nari Fashion Store">
+        <meta property="og:type" content="website">
     {%endblock%}
+
+    <!-- JSON-LD Structured Data: Organization & WebSite with Sitelinks Searchbox -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://narifashionstore.com/#organization",
+          "name": "Nari Fashion Store",
+          "alternateName": ["Narifashionstore", "Nari Fashion"],
+          "url": "https://narifashionstore.com/",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://narifashionstore.com/static/assets/img/image.png"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://narifashionstore.com/#website",
+          "url": "https://narifashionstore.com/",
+          "name": "Nari Fashion Store",
+          "publisher": {
+            "@id": "https://narifashionstore.com/#organization"
+          },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://narifashionstore.com/search/?query={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+    </script>
     <!-- libraries CSS -->
     <link rel="stylesheet" href="{%static 'assets/icon/flaticon_glamer.css'%}">
     <link rel="stylesheet" href="{%static 'assets/vendor/bootstrap/bootstrap.min.css'%}">
@@ -18,7 +62,56 @@
     <link rel="stylesheet" href="{%static 'assets/vendor/slim-select/slimselect.css'%}">
     <link rel="stylesheet" href="{%static 'assets/vendor/animate-wow/animate.min.css'%}">
     <!-- custom CSS -->
-    <link rel="stylesheet" href="{%static 'assets/css/style.css'%}">
+    <link rel="stylesheet" href="{%static 'assets/css/style.css'%}?v=3.6">
+    <style>
+        /* Ensure all product listing images display in full without clipping in any dimension */
+        .ul-product-img {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+            height: clamp(200px, 18vw, 262px) !important;
+            aspect-ratio: 270/262 !important;
+            overflow: hidden !important;
+            position: relative !important;
+            background-color: #ffffff !important;
+            border-radius: 12px !important;
+        }
+        .ul-product-img img {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            object-fit: contain !important;
+            object-position: center center !important;
+            display: block !important;
+        }
+        .ul-product-horizontal-img {
+            flex-shrink: 0 !important;
+            width: clamp(92px, 6.62vw, 118px) !important;
+            height: clamp(92px, 6.62vw, 118px) !important;
+            aspect-ratio: 1/1 !important;
+            background-color: #ffffff !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 10px !important;
+            overflow: hidden !important;
+        }
+        .ul-product-horizontal-img img {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            object-fit: contain !important;
+            object-position: center center !important;
+            display: block !important;
+        }
+        .ul-product-details-img img {
+            object-fit: contain !important;
+            background-color: #ffffff !important;
+        }
+    </style>
     <link rel="icon" type="image/png" href="{%static 'assets/img/favicon.webp'%}">
     <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5SEN03E30"></script>
@@ -44,7 +137,7 @@
         <div class="ul-sidebar-header">
             <div class="ul-sidebar-header-logo">
                 <a href="/">
-                    <img src="{%static 'assets/img/logo.webp'%}"  alt="logo" class="logo">
+                    <img src="{%static 'assets/img/image.png'%}" alt="logo" class="logo">
                 </a>    
             </div>
             <!-- sidebar closer -->
@@ -54,10 +147,10 @@
         <div class="ul-sidebar-header-nav-wrapper d-block d-lg-none"></div>
 
         <div class="ul-sidebar-about d-none d-lg-block">
-            <span class="title">About Indian Style Hub</span>
-            <p class="mb-0">Indian Style Hub is your one-stop destination for trendy and traditional Indian fashion. We offer a wide range of clothing, including sarees, kurtis, lehengas, and Indo-western wear, blending rich heritage with modern styles. Our mission is to bring high-quality, affordable fashion to everyone while celebrating India's vibrant culture.<br>
+            <span class="title">About Nari Fashion Store</span>
+            <p class="mb-0">Nari Fashion Store is your one-stop destination for trendy and traditional Indian fashion. We offer a wide range of clothing, including sarees, kurtis, lehengas, and Indo-western wear, blending rich heritage with modern styles. Our mission is to bring high-quality, affordable fashion to everyone while celebrating India's vibrant culture.<br>
 
-                We collaborate with skilled artisans to craft unique designs that reflect elegance and comfort. With a seamless shopping experience, secure payments, and fast delivery, we ensure customer satisfaction. Shop with Indian Style Hub and embrace the perfect fusion of tradition and style!</p>
+                We collaborate with skilled artisans to craft unique designs that reflect elegance and comfort. With a seamless shopping experience, secure payments, and fast delivery, we ensure customer satisfaction. Shop with Nari Fashion Store and embrace the perfect fusion of tradition and style!</p>
         </div>
 
 
@@ -162,7 +255,7 @@
                     <!-- header left -->
                     <div class="header-bottom-left">
                         <div class="logo-container">
-                            <a href="/" class="d-inline-block"><img src="{%static 'assets/img/logo.webp'%}" alt="logo" class="logo"></a>
+                            <a href="/" class="d-inline-block"><img src="{%static 'assets/img/image.png'%}" alt="logo" class="logo"></a>
                         </div>
 
                         <!-- search form -->
@@ -184,26 +277,32 @@
                             <nav class="ul-header-nav">
                                 <a href="/">Home</a>
                                 <a href="/all">Shop</a>
-                                {% for sc in nav_supercategories %}
-                                <a href="/{{ sc.slug }}/">{{ sc.name }}</a>
-                                {% endfor %}
+                                {% if nav_supercategories %}
+                                    {% for sc in nav_supercategories %}
+                                    <a href="/{{ sc.slug }}/">{{ sc.name }}</a>
+                                    {% endfor %}
+                                {% else %}
+                                    <a href="/all">Women</a>
+                                    <a href="/all">Men's</a>
+                                    <a href="/all">Kids</a>
+                                {% endif %}
                                 <a href="/blog">Blog</a>
 
                                 <div class="has-sub-menu has-mega-menu">
-                                    <a role="button">Categories</a>
+                                    <a role="button">Pages</a>
                                     <div class="ul-header-submenu ul-header-megamenu">
-                                        {% for mcat in all_maincategories %}
+                                        {%for mcat in maincategories%}
                                         <div class="single-col">
-                                            <a href="{{ mcat.get_hierarchy_url }}" class="single-col-title" style="font-weight: 700; color: #111; display: block; margin-bottom: 8px;">{{ mcat.name }}</a>
+                                            <span class="single-col-title">{{mcat.name}}</span>
                                             <ul>
-                                                {% for cat in all_categories %}
-                                                {% if cat.maincategory_id == mcat.id %}
-                                                <li><a href="{{ cat.get_hierarchy_url }}">{{ cat.name }}</a></li>
-                                                {% endif %}
-                                                {% endfor %}
+                                                {%for cat in categories%}
+                                                {%if mcat.slug == cat.maincategory.slug%}
+                                                <li><a href="/filter/?min_price=0&max_price=10000&maincategory={{mcat.id}}&category%5B%5D={{cat.id}}">{{cat.name}}</a></li>
+                                                {%endif%}
+                                                {%endfor%}
                                             </ul>
                                         </div>
-                                        {% endfor %}
+                                        {%endfor%}
                                     </div>
                                 </div>
                             </nav>
@@ -213,9 +312,15 @@
                     <!-- actions -->
                     <div class="ul-header-actions">
                         <button class="ul-header-mobile-search-opener d-xxl-none"><i class="flaticon-search-interface-symbol"></i></button>
-                        <button><i class="flaticon-user"></i></button>
-                        <a href="#!"><i class="flaticon-heart"></i></a>
-                        <a href="#!"><i class="flaticon-shopping-bag"></i></a>
+                        <a href="/my-account/" title="My Account"><i class="flaticon-user"></i></a>
+                        <a href="/wishlist/" class="position-relative" title="Wishlist">
+                            <i class="flaticon-heart"></i>
+                            <span class="wishlist-badge badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle" style="font-size: 10px; display: {% if header_wishlist_count %}inline-block{% else %}none{% endif %};">{{ header_wishlist_count }}</span>
+                        </a>
+                        <a href="/cart/" class="position-relative" title="Shopping Cart">
+                            <i class="flaticon-shopping-bag"></i>
+                            <span class="cart-badge badge rounded-pill bg-primary position-absolute top-0 start-100 translate-middle" style="font-size: 10px; display: {% if header_cart_count %}inline-block{% else %}none{% endif %};">{{ header_cart_count }}</span>
+                        </a>
                     </div>
 
                     <!-- sidebar opener -->
@@ -231,6 +336,172 @@
     {%block body%}
     <main>
         <!-- BANNER SECTION START -->
+        <style>
+            .ul-banner {
+                display: flex !important;
+                align-items: stretch !important;
+                justify-content: space-between !important;
+                gap: clamp(14px, 1.4vw, 22px) !important;
+                width: 100% !important;
+                overflow: hidden !important;
+            }
+            .ul-banner-slider-wrapper {
+                width: 58% !important;
+                max-width: 58% !important;
+                flex: 0 0 58% !important;
+                height: clamp(280px, 27vw, 400px) !important;
+                position: relative !important;
+                z-index: 2 !important;
+                background-color: var(--white) !important;
+                border-radius: 20px !important;
+                overflow: hidden !important;
+            }
+            .ul-banner-slider-wrapper::before,
+            .ul-banner-slider-wrapper::after {
+                display: none !important;
+            }
+            .ul-banner-slider {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 100% !important;
+                border-radius: 20px !important;
+                overflow: hidden !important;
+            }
+            .ul-banner-slider .swiper-wrapper {
+                display: flex !important;
+                width: 100% !important;
+                height: 100% !important;
+                will-change: transform;
+            }
+            .ul-banner-slide {
+                flex: 0 0 100% !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 100% !important;
+                border-radius: 20px !important;
+                overflow: hidden !important;
+                margin: 0 !important;
+                position: relative !important;
+            }
+            .ul-banner-slide-img {
+                width: 100% !important;
+                height: 100% !important;
+                border-radius: 20px !important;
+                overflow: hidden !important;
+            }
+            .ul-banner-slide-img img {
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: fill !important;
+                object-position: top center !important;
+                border-radius: 20px !important;
+                display: block !important;
+            }
+            .ul-banner-img-slider-wrapper {
+                flex: 1 1 0% !important;
+                min-width: 0 !important;
+                max-width: 42% !important;
+                height: clamp(280px, 27vw, 400px) !important;
+                border-radius: 20px !important;
+                overflow: hidden !important;
+                position: relative !important;
+                z-index: 1 !important;
+                display: block !important;
+            }
+            .ul-banner-img-slider {
+                width: 100% !important;
+                height: 100% !important;
+                border-radius: 20px !important;
+                overflow: hidden !important;
+            }
+            .ul-banner-img-slider .swiper-wrapper {
+                display: flex !important;
+                width: 100% !important;
+                height: 100% !important;
+                gap: 16px !important;
+                will-change: transform;
+            }
+            .ul-banner-img-slider .swiper-slide {
+                flex: 0 0 calc((100% - 16px) / 2) !important;
+                width: calc((100% - 16px) / 2) !important;
+                max-width: calc((100% - 16px) / 2) !important;
+                height: 100% !important;
+                border-radius: 20px !important;
+                overflow: hidden !important;
+                position: relative !important;
+                margin: 0 !important;
+            }
+            @media screen and (max-width: 1099px) {
+                .ul-banner-img-slider .swiper-slide {
+                    flex: 0 0 100% !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                }
+            }
+            .ul-banner-img-slider img {
+                height: 100% !important;
+                width: 100% !important;
+                border-radius: 20px !important;
+                object-fit: cover !important;
+                object-position: top center !important;
+                aspect-ratio: auto !important;
+                display: block !important;
+            }
+            .ul-side-banner-card {
+                display: block;
+                width: 100%;
+                height: 100%;
+                position: relative;
+                border-radius: 20px;
+                overflow: hidden;
+            }
+            .ul-side-banner-arrow {
+                position: absolute;
+                bottom: 16px;
+                left: 14px;
+                width: 30px;
+                height: 38px;
+                background: rgba(255, 255, 255, 0.25);
+                backdrop-filter: blur(6px);
+                border: 1px solid rgba(255, 255, 255, 0.45);
+                border-radius: 8px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                color: #ffffff;
+                font-size: 12px;
+                z-index: 3;
+                transition: all 0.25s ease;
+            }
+            .ul-side-banner-card:hover .ul-side-banner-arrow {
+                background: var(--ul-primary);
+                border-color: var(--ul-primary);
+            }
+            @media screen and (max-width: 991px) {
+                .ul-banner-slider-wrapper {
+                    width: 65% !important;
+                    max-width: 65% !important;
+                    flex: 0 0 65% !important;
+                    height: 300px !important;
+                }
+                .ul-banner-img-slider-wrapper {
+                    max-width: 35% !important;
+                    height: 300px !important;
+                }
+            }
+            @media screen and (max-width: 767px) {
+                .ul-banner-slider-wrapper {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    flex: 0 0 100% !important;
+                    height: 225px !important;
+                    border-radius: 16px !important;
+                }
+                .ul-banner-img-slider-wrapper {
+                    display: none !important;
+                }
+            }
+        </style>
         <div class="overflow-hidden">
             <div class="ul-container">
                 <section class="ul-banner">
@@ -238,7 +509,6 @@
                         <div class="ul-banner-slider swiper">
                             <div class="swiper-wrapper">
                                 {%for item in slider%}
-                                <!-- single slide -->
                                 <div class="swiper-slide ul-banner-slide">
                                     <div class="ul-banner-slide-img">
                                         <img src="{{item.image}}" alt="Banner Image">
@@ -247,28 +517,38 @@
                                         <a href="{{item.link}}" class="ul-btn" target="_blank">SHOP NOW <i class="flaticon-up-right-arrow"></i></a>
                                     </div>
                                 </div>
-                            {%endfor%}  
+                                {%endfor%}
                             </div>
 
                             <!-- slider navigation -->
                             <div class="ul-banner-slider-nav-wrapper">
                                 <div class="ul-banner-slider-nav">
-                                    <button class="prev"><span class="icon"><i class="flaticon-down"></i></span></button>
-                                    <button class="next"><span class="icon"><i class="flaticon-down"></i></span></button>
+                                    <button class="prev" type="button"><span class="icon"><i class="flaticon-down"></i></span></button>
+                                    <button class="next" type="button"><span class="icon"><i class="flaticon-down"></i></span></button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="ul-banner-img-slider-wrapper">
-                        <div class="ul-banner-img-slider swiper overflow-visible">
+                        <div class="ul-banner-img-slider swiper">
                             <div class="swiper-wrapper">
-                                {%for item in slider%}
+                                {%for item in slider|slice:"1:"%}
                                 <div class="swiper-slide">
-                                    <img src="{{item.image}}" alt="Banner Image">
+                                    <a href="{{item.link|default:'/all'}}" class="ul-side-banner-card">
+                                        <img src="{{item.image}}" alt="Banner Image">
+                                        <span class="ul-side-banner-arrow"><i class="flaticon-arrow-point-to-right"></i></span>
+                                    </a>
                                 </div>
                                 {%endfor%}
-                                
+                                {%for item in slider|slice:":1"%}
+                                <div class="swiper-slide">
+                                    <a href="{{item.link|default:'/all'}}" class="ul-side-banner-card">
+                                        <img src="{{item.image}}" alt="Banner Image">
+                                        <span class="ul-side-banner-arrow"><i class="flaticon-arrow-point-to-right"></i></span>
+                                    </a>
+                                </div>
+                                {%endfor%}
                             </div>
                         </div>
                     </div>
@@ -318,7 +598,7 @@
                             <h2 class="ul-section-title">Our Latest Product</h2>
                         </div>
 
-                        <div class="right"><a href="#" class="ul-btn">More Collection <i class="flaticon-up-right-arrow"></i></a></div>
+                        <div class="right"><a href="/all" class="ul-btn">More Collection <i class="flaticon-up-right-arrow"></i></a></div>
                     </div>
 
 
@@ -349,11 +629,12 @@
                                             </div>
 
                                             <div class="ul-product-img">
-                                                <img src="{{item.image1}}" style="height:250px;width:250px" alt="Product Image">
+                                                <img src="{{item.image1}}" alt="Product Image">
 
                                                 <div class="ul-product-actions">
-                                                    <a href="/product-details/{{item.name|slugify}}/{{item.id}}"><i class="flaticon-hide"></i></a>
-
+                                                    <button type="button" class="btn-card-add-cart" data-id="{{item.id}}" title="Add to Cart"><i class="flaticon-shopping-bag"></i></button>
+                                                    <a href="/product-details/{{item.name|slugify}}/{{item.id}}" title="View Details"><i class="flaticon-hide"></i></a>
+                                                    <button type="button" class="btn-card-add-wishlist" data-id="{{item.id}}" title="Add to Wishlist"><i class="flaticon-heart"></i></button>
                                                 </div>
                                             </div>
 
@@ -389,8 +670,8 @@
 
         <!-- AD SECTION START -->
         <div class="ul-container  mt-4 mb-4 p-3 rounded-3 bg-light text-center">
-            <a href="#">
-            <img src="https://image.narifashionstore.com/media/front_image/India_Style_Hub_Banner_2.jpg" alt="Ad Image"> 
+            <a href="/all">
+            <img src="https://image.narifashionstore.com/media/front_image/India_Style_Hub_Banner_2.jpg" alt="Ad Image" onerror="this.onerror=null; this.src='https://image.indianstylehub.com/media/website_front_image/India_Style_Hub_Banner_2.jpg';"> 
             </a>    
         </div>
         <!-- AD SECTION END -->
@@ -424,7 +705,7 @@
                         <div class="mix col {{item.maincategory.slug}}">
                             <div class="ul-product-horizontal">
                                 <div class="ul-product-horizontal-img">
-                                    <img src="{{item.image1}}" style="height:100px;width:100px" alt="Product Image">
+                                    <img src="{{item.image1}}" alt="Product Image">
                                 </div>
 
                                 <div class="ul-product-horizontal-txt">
@@ -451,7 +732,7 @@
                 <div>
                     <img src="https://img.freepik.com/free-photo/close-up-woman-front-clothing-pile_23-2150950851.jpg?uid=R189317073&ga=GA1.1.1725747204.1721378766&semt=ais_hybrid&w=740" alt="Video Banner" class="ul-video-cover">
                 </div>
-                <a href="https://www.youtube.com/watch?v=1gTvEIpl8K0&ab_channel=IndraIbrahim" data-fslightbox="video" class="ul-video-btn"><i class="flaticon-play-button-arrowhead"></i></a>
+                <a href="https://www.youtube.com/watch?v=1gTvEIpl8K0" data-fslightbox="video" class="ul-video-btn" aria-label="Watch Fashion Collection Video"><i class="flaticon-play-button-arrowhead"></i></a>
             </div>
         </div>
         <!-- VIDEO SECTION END -->
@@ -580,12 +861,12 @@
                                         </div>
 
                                         <div class="ul-product-img">
-                                            <img src="{{item.image1}}" style="height:250px;width:250px" alt="Product Image">
+                                            <img src="{{item.image1}}" alt="Product Image">
 
                                             <div class="ul-product-actions">
-                                                <button><i class="flaticon-shopping-bag"></i></button>
-                                                <a href="#"><i class="flaticon-hide"></i></a>
-                                                <button><i class="flaticon-heart"></i></button>
+                                                <button type="button" class="btn-card-add-cart" data-id="{{item.id}}" title="Add to Cart"><i class="flaticon-shopping-bag"></i></button>
+                                                <a href="/product-details/{{item.name|slugify}}/{{item.id}}" title="View Details"><i class="flaticon-hide"></i></a>
+                                                <button type="button" class="btn-card-add-wishlist" data-id="{{item.id}}" title="Add to Wishlist"><i class="flaticon-heart"></i></button>
                                             </div>
                                         </div>
 
@@ -816,10 +1097,10 @@
                                         </div>
                                     </div>
 
-                                    <h3 class="ul-blog-title"><a href="blog-details/{{item.slug}}">{{item.title}}</a></h3>
+                                    <h3 class="ul-blog-title"><a href="/blog-details/{{item.slug}}">{{item.title}}</a></h3>
                                     <p class="ul-blog-descr">{{item.meta_description}}</p>
 
-                                    <a href="blog-details/{{item.slug}}" class="ul-blog-btn">Read More <span class="icon"><i class="flaticon-up-right-arrow"></i></span></a>
+                                    <a href="/blog-details/{{item.slug}}" class="ul-blog-btn">Read More <span class="icon"><i class="flaticon-up-right-arrow"></i></span></a>
                                 </div>
                             </div>
                         </div>
@@ -849,6 +1130,43 @@
             </div>
         </div>
         <!-- GALLERY SECTION END -->
+
+        {% if popular_links %}
+        <!-- HOME POPULAR SEARCHES SECTION START -->
+        <div class="ul-container my-5 pt-3">
+            <div class="ul-inner-container">
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white" style="border: 1px solid #ECEFF2 !important;">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+                        <div>
+                            <span class="badge rounded-pill px-3 py-2 text-uppercase fw-semibold" style="background: rgba(239, 40, 83, 0.08); color: #EF2853; letter-spacing: 0.5px; font-size: 11px;">
+                                Pan-India Wholesale & Retail Directory
+                            </span>
+                            <h2 class="h4 fw-bold text-dark mt-2 mb-1" style="font-size: 1.5rem; letter-spacing: -0.3px;">
+                                Popular Searches & Regional Fashion Hubs across India
+                            </h2>
+                            <p class="text-muted small mb-0">
+                                Discover verified manufacturers, wholesale markets, and regional suppliers for ethnic and western fashion across major Indian states.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-2 pt-2">
+                        {% for link in popular_links %}
+                        <div class="col">
+                            <a href="{{ link.url }}" class="d-flex align-items-center justify-content-between text-decoration-none p-2 px-3 rounded-3 border" style="background: #fff; border-color: #F8E6E2 !important;">
+                                <span class="text-truncate fw-medium" style="color: #2b3445; font-size: 13px;">{{ link.title }}</span>
+                                {% if link.state %}
+                                <span class="badge bg-light text-muted border ms-2 flex-shrink-0" style="font-size: 10px;">{{ link.state }}</span>
+                                {% endif %}
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- HOME POPULAR SEARCHES SECTION END -->
+        {% endif %}
     </main>
 
     {%endblock%}
@@ -932,7 +1250,7 @@
             </div>
 
             <div class=" text-center">
-                <p class="copyright-txt text-center text-light">Copyright @2025 By <a href="/" class="ul-footer-bottom-link" target="_blank">Indian Style Hub</a> |  Design and Developed by  <a href="https://www.plumint.com/" class="ul-footer-bottom-link" target="_blank">Plumint</a></p>
+                <p class="copyright-txt text-center text-light">Copyright @2026 By <a href="/" class="ul-footer-bottom-link">Nari Fashion Store</a>. All Rights Reserved.</p>
                 
             </div>
         </div>
@@ -950,7 +1268,229 @@
     <script src="{%static 'assets/vendor/mixitup/mixitup.min.js'%}"></script>
     <script src="{%static 'assets/vendor/fslightbox/fslightbox.js'%}"></script>
     <!-- custom JS -->
-    <script src="{%static 'assets/js/main.js'%}"></script>
+    <script src="{%static 'assets/js/main.js'%}?v=3.8"></script>
     <script src="{%static 'assets/js/countdown.js'%}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const mainSliderEl = document.querySelector(".ul-banner-slider");
+            const thumbSliderEl = document.querySelector(".ul-banner-img-slider");
+            if (!mainSliderEl) return;
+
+            // Destroy any existing Swiper instance (e.g. from cached main.js) so it can NEVER rewind to index 0
+            [mainSliderEl, thumbSliderEl].forEach(function (el) {
+                if (el && el.swiper) {
+                    try {
+                        el.swiper.destroy(true, true);
+                    } catch (e) {}
+                }
+                if (el) {
+                    el.querySelectorAll(".swiper-slide-duplicate").forEach(function (dup) {
+                        dup.remove();
+                    });
+                }
+            });
+
+            const mainWrapper = mainSliderEl.querySelector(".swiper-wrapper");
+            const thumbWrapper = thumbSliderEl ? thumbSliderEl.querySelector(".swiper-wrapper") : null;
+            if (!mainWrapper || mainWrapper.children.length === 0) return;
+
+            // Ensure enough slides in queue for seamless % modulo wrap-around
+            function ensureQueueLength(wrapper, minCount) {
+                if (!wrapper || wrapper.children.length === 0) return;
+                const originals = Array.from(wrapper.children);
+                while (wrapper.children.length < minCount) {
+                    originals.forEach(function (node) {
+                        wrapper.appendChild(node.cloneNode(true));
+                    });
+                }
+            }
+            ensureQueueLength(mainWrapper, 4);
+            if (thumbWrapper) ensureQueueLength(thumbWrapper, 6);
+
+            function resetWrapper(wrapper) {
+                if (!wrapper) return;
+                wrapper.style.transition = "none";
+                wrapper.style.transform = "translate3d(0px, 0px, 0px)";
+            }
+            resetWrapper(mainWrapper);
+            resetWrapper(thumbWrapper);
+
+            function getStepPx(wrapper) {
+                if (!wrapper || !wrapper.firstElementChild) return 0;
+                const firstRect = wrapper.firstElementChild.getBoundingClientRect();
+                const styles = window.getComputedStyle(wrapper);
+                const gap = parseFloat(styles.columnGap || styles.gap || "0") || 0;
+                return firstRect.width + gap;
+            }
+
+            let isAnimating = false;
+            const DURATION = 650;
+            const EASING = "cubic-bezier(0.25, 1, 0.5, 1)";
+
+            // Forward step: ALWAYS comes from behind (right -> left) using % circular queue (appendChild)
+            function stepForward() {
+                if (isAnimating) return;
+                isAnimating = true;
+
+                const mainStep = getStepPx(mainWrapper);
+                const thumbStep = getStepPx(thumbWrapper);
+
+                mainWrapper.style.transition = "transform " + DURATION + "ms " + EASING;
+                mainWrapper.style.transform = "translate3d(-" + mainStep + "px, 0px, 0px)";
+
+                if (thumbWrapper && thumbStep > 0) {
+                    thumbWrapper.style.transition = "transform " + DURATION + "ms " + EASING;
+                    thumbWrapper.style.transform = "translate3d(-" + thumbStep + "px, 0px, 0px)";
+                }
+
+                setTimeout(function () {
+                    mainWrapper.style.transition = "none";
+                    if (mainWrapper.firstElementChild) {
+                        mainWrapper.appendChild(mainWrapper.firstElementChild);
+                    }
+                    mainWrapper.style.transform = "translate3d(0px, 0px, 0px)";
+
+                    if (thumbWrapper && thumbStep > 0) {
+                        thumbWrapper.style.transition = "none";
+                        if (thumbWrapper.firstElementChild) {
+                            thumbWrapper.appendChild(thumbWrapper.firstElementChild);
+                        }
+                        thumbWrapper.style.transform = "translate3d(0px, 0px, 0px)";
+                    }
+
+                    // Force reflow so transition:none applies before next frame
+                    void mainWrapper.offsetHeight;
+                    isAnimating = false;
+                }, DURATION + 20);
+            }
+
+            // Backward step for Prev button using % circular queue prepend
+            function stepBackward() {
+                if (isAnimating) return;
+                isAnimating = true;
+
+                const mainStep = getStepPx(mainWrapper);
+                const thumbStep = getStepPx(thumbWrapper);
+
+                mainWrapper.style.transition = "none";
+                if (mainWrapper.lastElementChild) {
+                    mainWrapper.insertBefore(mainWrapper.lastElementChild, mainWrapper.firstElementChild);
+                }
+                mainWrapper.style.transform = "translate3d(-" + mainStep + "px, 0px, 0px)";
+
+                if (thumbWrapper && thumbStep > 0) {
+                    thumbWrapper.style.transition = "none";
+                    if (thumbWrapper.lastElementChild) {
+                        thumbWrapper.insertBefore(thumbWrapper.lastElementChild, thumbWrapper.firstElementChild);
+                    }
+                    thumbWrapper.style.transform = "translate3d(-" + thumbStep + "px, 0px, 0px)";
+                }
+
+                void mainWrapper.offsetHeight;
+
+                mainWrapper.style.transition = "transform " + DURATION + "ms " + EASING;
+                mainWrapper.style.transform = "translate3d(0px, 0px, 0px)";
+
+                if (thumbWrapper && thumbStep > 0) {
+                    thumbWrapper.style.transition = "transform " + DURATION + "ms " + EASING;
+                    thumbWrapper.style.transform = "translate3d(0px, 0px, 0px)";
+                }
+
+                setTimeout(function () {
+                    isAnimating = false;
+                }, DURATION + 20);
+            }
+
+            let autoTimer = setInterval(stepForward, 3500);
+            function restartTimer() {
+                clearInterval(autoTimer);
+                autoTimer = setInterval(stepForward, 3500);
+            }
+
+            const nextBtnOld = mainSliderEl.querySelector(".ul-banner-slider-nav .next");
+            const prevBtnOld = mainSliderEl.querySelector(".ul-banner-slider-nav .prev");
+
+            if (nextBtnOld) {
+                const nextBtn = nextBtnOld.cloneNode(true);
+                nextBtnOld.parentNode.replaceChild(nextBtn, nextBtnOld);
+                nextBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    stepForward();
+                    restartTimer();
+                });
+            }
+            if (prevBtnOld) {
+                const prevBtn = prevBtnOld.cloneNode(true);
+                prevBtnOld.parentNode.replaceChild(prevBtn, prevBtnOld);
+                prevBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    stepBackward();
+                    restartTimer();
+                });
+            }
+        });
+
+        // Global Cart Toast Notification System
+        let cartToastTimer = null;
+        function showCartToast(productName) {
+            const toast = document.getElementById('cartToastNotification');
+            const titleEl = document.getElementById('toastProductTitle');
+            if (!toast) return;
+
+            if (titleEl && productName) {
+                titleEl.textContent = productName;
+            } else if (titleEl) {
+                titleEl.textContent = 'Item successfully added to your shopping cart';
+            }
+
+            toast.style.display = 'block';
+            // Force reflow
+            void toast.offsetHeight;
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+
+            if (cartToastTimer) clearTimeout(cartToastTimer);
+            cartToastTimer = setTimeout(hideCartToast, 4000);
+        }
+
+        function hideCartToast() {
+            const toast = document.getElementById('cartToastNotification');
+            if (!toast) return;
+            toast.style.transform = 'translateY(-20px)';
+            toast.style.opacity = '0';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 300);
+        }
+    </script>
+
+    <!-- FLOATING CART TOAST NOTIFICATION -->
+    <div id="cartToastNotification" style="position: fixed; top: 25px; right: 25px; z-index: 999999; min-width: 320px; max-width: 380px; background: #ffffff; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-left: 5px solid #28a745; padding: 16px 18px; display: none; transform: translateY(-20px); opacity: 0; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 38px; height: 38px; border-radius: 50%; background: #e8f5e9; color: #2e7d32; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; flex-shrink: 0;">✓</div>
+                <div>
+                    <h6 style="margin: 0; font-size: 15px; font-weight: 700; color: #111;">Added to Cart!</h6>
+                    <p id="toastProductTitle" style="margin: 3px 0 0; font-size: 12px; color: #666; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
+                </div>
+            </div>
+            <button type="button" onclick="hideCartToast()" style="background: none; border: none; font-size: 20px; color: #888; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 14px;">
+            <a href="/cart/" style="flex: 1; border-radius: 8px; font-weight: 600; font-size: 12px; padding: 8px 0; text-align: center; text-decoration: none; border: 1px solid #ddd; color: #222; background: #f8f9fa;">View Cart</a>
+            <a href="/checkout/" style="flex: 1; border-radius: 8px; font-weight: 600; font-size: 12px; padding: 8px 0; text-align: center; text-decoration: none; background: #EF2853; color: #ffffff;">Checkout &rarr;</a>
+        </div>
+    </div>
+    <style>
+        @media (max-width: 575px) {
+            #cartToastNotification {
+                top: 15px !important;
+                right: 15px !important;
+                left: 15px !important;
+                min-width: auto !important;
+                max-width: none !important;
+            }
+        }
+    </style>
 </body>
 </html>

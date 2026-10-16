@@ -1,106 +1,236 @@
 {% extends "front/index.html" %}
-{%load static%}
-{%block body%}
+{% load static %}
+{% block title %}Contact Us | Nari Fashion Boutique{% endblock %}
 
-    <main>
-        <!-- BREADCRUMB SECTION START -->
-        <div class="ul-container">
-            <div class="ul-breadcrumb">
-                <h2 class="ul-breadcrumb-title">Contact Us</h2>
-                <div class="ul-breadcrumb-nav">
-                    <a href="/"><i class="flaticon-home"></i> Home</a>
-                    <i class="flaticon-arrow-point-to-right"></i>
-                    <span class="current-page">Contact Us</span>
-                </div>
+{% block body %}
+<main style="background: #FCF9F9; padding-bottom: 50px;">
+    <!-- BREADCRUMB SECTION START -->
+    <div class="ul-container">
+        <div class="ul-breadcrumb">
+            <h2 class="ul-breadcrumb-title">Contact Us</h2>
+            <div class="ul-breadcrumb-nav">
+                <a href="/"><i class="flaticon-home"></i> Home</a>
+                <i class="flaticon-arrow-point-to-right"></i>
+                <span class="current-page">Contact Us</span>
             </div>
         </div>
-        <!-- BREADCRUMB SECTION END -->
+    </div>
+    <!-- BREADCRUMB SECTION END -->
 
+    <style>
+        .nf-contact-hero {
+            text-align: center;
+            max-width: 650px;
+            margin: 20px auto 10px;
+            padding: 0 15px;
+        }
+        .nf-contact-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #FFF0F3;
+            color: #EF2853;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 5px 14px;
+            border-radius: 20px;
+            border: 1px solid #FCD4DC;
+            margin-bottom: 10px;
+        }
+        .nf-contact-title {
+            font-size: clamp(24px, 2.5vw, 32px);
+            font-weight: 800;
+            color: #1A1A1A;
+            margin-bottom: 8px;
+        }
+        .nf-contact-sub {
+            color: #6B7280;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .nf-contact-form-box {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid #F3E4E7;
+            box-shadow: 0 10px 35px rgba(239, 40, 83, 0.06), 0 2px 10px rgba(0, 0, 0, 0.03);
+            max-width: 780px;
+            margin: 25px auto 40px;
+            padding: clamp(24px, 3.5vw, 42px);
+        }
+        .nf-input-group {
+            margin-bottom: 20px;
+        }
+        .nf-input-group label {
+            display: block;
+            font-weight: 700;
+            font-size: 12px;
+            color: #374151;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .nf-input-box {
+            position: relative;
+        }
+        .nf-input-box input,
+        .nf-input-box textarea {
+            width: 100%;
+            border: 1.5px solid #E5E7EB;
+            border-radius: 12px;
+            background: #FAFAFA;
+            padding: 0 45px 0 16px;
+            font-size: 14.5px;
+            color: #111827;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+        .nf-input-box input {
+            height: 50px;
+        }
+        .nf-input-box textarea {
+            height: 140px;
+            padding: 14px 45px 14px 16px;
+            resize: vertical;
+        }
+        .nf-input-box input:focus,
+        .nf-input-box textarea:focus {
+            border-color: #EF2853;
+            background: #FFFFFF;
+            box-shadow: 0 0 0 4px rgba(239, 40, 83, 0.10);
+        }
+        .nf-input-box .field-icon {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            color: #9CA3AF;
+            font-size: 16px;
+            pointer-events: none;
+        }
+        .nf-input-box input + .field-icon {
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .nf-submit-btn {
+            background: linear-gradient(135deg, #EF2853 0%, #D81A43 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            height: 52px;
+            padding: 0 35px;
+            font-weight: 800;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 6px 18px rgba(239, 40, 83, 0.25);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+        .nf-submit-btn:hover {
+            background: linear-gradient(135deg, #D81A43 0%, #B81335 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(239, 40, 83, 0.35);
+        }
+    </style>
 
-        <!-- CONTACT INFO SECTION START -->
-        <section class="ul-contact-infos">
-            <!-- single contact info -->
-            <div class="ul-contact-info">
-                <div class="icon"><i class="flaticon-location"></i></div>
-                <div class="txt">
-                    <h6 class="title">Our Address</h6>
-                    <p class="descr mb-0">New Delhi, Delhi - 110027</p>
-                </div>
-            </div>
+    <div class="nf-contact-hero">
+        <span class="nf-contact-badge"><i class="flaticon-sparkle"></i> Customer Care</span>
+        <h2 class="nf-contact-title">We'd Love To Hear From You</h2>
+        <p class="nf-contact-sub">Have a question about our boutique collections, sizing, or an existing order? Our team is always here to assist you.</p>
+    </div>
 
-            <!-- single contact info -->
-            <div class="ul-contact-info">
-                <div class="icon"><i class="flaticon-email"></i></div>
-                <div class="txt">
-                    <h6 class="title">Email Address</h6>
-                    <p class="descr mb-0">
-                        <a href="mailto:info@narifashionstore.com">info@narifashionstore.com</a>
-                    </p>
-                </div>
-            </div>
-
-            <!-- single contact info -->
-            <div class="ul-contact-info">
-                <div class="icon"><i class="flaticon-stop-watch-1"></i></div>
-                <div class="txt">
-                    <h6 class="title">Hours of Operation</h6>
-                    <p class="descr mb-0">
-                        <span>Sunday-Fri: 9 AM – 6 PM</span><br>
-                        <span>Saturday: 9 AM – 4 PM</span>
-                    </p>
-                </div>
-            </div>
-        </section>
-        <!-- CONTACT INFO SECTION END -->
-
-
-
-        <div class="ul-contact-from-">
-            <div class="ul-contact-form-container">
-                <h3 class="ul-contact-form-container__title">Get in Touch</h3>
-                {%if msg%}
-                
-                    <div class="alert alert-success">
-                        {{msg}}
-                    </div>
-                {%endif%}
-                <form method="post" class="ul-contact-form">
-                    {% csrf_token %}
-                    <div class="grid">
-                        <!-- firstname -->
-                        <div class="form-group">
-                            <div class="position-relative">
-                                <input type="text" name="name" id="name" placeholder="Your Name" required>
-                                <span class="field-icon"><i class="flaticon-user"></i></span>
-                            </div>
-                        </div>
-
-                        <!-- phone -->
-                        <div class="form-group">
-                            <div class="position-relative">
-                                <input type="tel" name="phone" id="phone-number" placeholder="Your Phone" required oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,10);">
-                                <span class="field-icon"><i class="flaticon-user"></i></span>
-                            </div>
-                        </div>
-                        <!-- email -->
-                        <div class="form-group">
-                            <div class="position-relative">
-                                <input type="email" name="email" id="email" placeholder="Your Email Address" required>
-                                <span class="field-icon"><i class="flaticon-email"></i></span>
-                            </div>
-                        </div>
-                        <!-- message -->
-                        <div class="form-group">
-                            <div class="position-relative">
-                                <textarea name="message" id="message" placeholder="Write Message..." required></textarea>
-                                <span class="field-icon"><i class="flaticon-edit"></i></span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- submit btn -->
-                    <button type="submit">Send Message</button>
-                </form>
+    <!-- CONTACT INFO CARDS -->
+    <section class="ul-contact-infos">
+        <div class="ul-contact-info">
+            <div class="icon"><i class="flaticon-location"></i></div>
+            <div class="txt">
+                <h6 class="title">Boutique Address</h6>
+                <p class="descr mb-0">New Delhi, Delhi - 110027</p>
             </div>
         </div>
-    </main>
-{%endblock%}
+
+        <div class="ul-contact-info">
+            <div class="icon"><i class="flaticon-email"></i></div>
+            <div class="txt">
+                <h6 class="title">Email Support</h6>
+                <p class="descr mb-0">
+                    <a href="mailto:info@narifashionstore.com">info@narifashionstore.com</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="ul-contact-info">
+            <div class="icon"><i class="flaticon-stop-watch-1"></i></div>
+            <div class="txt">
+                <h6 class="title">Operating Hours</h6>
+                <p class="descr mb-0">
+                    <span>Mon – Sat: 9:30 AM – 7:30 PM</span><br>
+                    <span>Sunday: 10:00 AM – 5:00 PM</span>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT FORM -->
+    <div class="ul-container">
+        <div class="nf-contact-form-box">
+            {% if msg %}
+            <div class="alert alert-success d-flex align-items-center gap-2 mb-4 rounded-3 border-0 shadow-sm" style="background: #ECFDF5; color: #065F46;">
+                <i class="flaticon-sparkle"></i>
+                <div>{{ msg }}</div>
+            </div>
+            {% endif %}
+
+            <form method="post" class="ul-contact-form">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6 col-12 nf-input-group">
+                        <label for="name">Your Full Name</label>
+                        <div class="nf-input-box">
+                            <input type="text" name="name" id="name" placeholder="e.g. Ananya Sen" required>
+                            <span class="field-icon"><i class="flaticon-user"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-12 nf-input-group">
+                        <label for="phone-number">Mobile Number</label>
+                        <div class="nf-input-box">
+                            <input type="tel" name="phone" id="phone-number" placeholder="10-digit mobile number" required pattern="[0-9]{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,10);">
+                            <span class="field-icon"><i class="flaticon-user"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 nf-input-group">
+                        <label for="email">Email Address</label>
+                        <div class="nf-input-box">
+                            <input type="email" name="email" id="email" placeholder="ananya@example.com" required>
+                            <span class="field-icon"><i class="flaticon-email"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 nf-input-group">
+                        <label for="message">Your Message or Order Query</label>
+                        <div class="nf-input-box">
+                            <textarea name="message" id="message" placeholder="How can we help you today?" required></textarea>
+                            <span class="field-icon"><i class="flaticon-edit"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="nf-submit-btn">
+                            <span>SEND MESSAGE</span>
+                            <i class="flaticon-up-right-arrow ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock %}

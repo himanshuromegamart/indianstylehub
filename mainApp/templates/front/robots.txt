@@ -1,5 +1,15 @@
 User-agent: *
 Allow: /
-Disallow: /blog-details/jollywood-bangalore-ticket-prices/
-Disallow: blog-details/loco-bear-bangalore/
-Sitemap: https://narifashionstore.com/sitemap.xml
+Disallow: /admin/
+Disallow: /admin-login/
+Disallow: /admin-dashboard/
+Disallow: /my-account/
+Disallow: /my-account-address/
+Disallow: /my-account-edit/
+Disallow: /my-account-orders/
+Disallow: /checkout/
+Disallow: /cart/
+Disallow: /add-to-cart/
+
+Sitemap: https://narifashionstore.com/sitemap.xml/
+

@@ -1,93 +1,130 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Order Confirmed</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: #f4f8fb;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
+{% extends "front/index.html" %}
+{% load static %}
+{% block body %}
+<main>
+    <!-- BREADCRUMB SECTION START -->
+    <div class="ul-container">
+        <div class="ul-breadcrumb">
+            <h2 class="ul-breadcrumb-title">Order Confirmation</h2>
+            <div class="ul-breadcrumb-nav">
+                <a href="/"><i class="flaticon-home"></i> Home</a>
+                <i class="flaticon-arrow-point-to-right"></i>
+                <a href="/cart/">Cart</a>
+                <i class="flaticon-arrow-point-to-right"></i>
+                <span class="current-page">Confirmation</span>
+            </div>
+        </div>
+    </div>
+    <!-- BREADCRUMB SECTION END -->
 
-    .confirmation-box {
-      text-align: center;
-      background: #fff;
-      padding: 40px 30px;
-      border-radius: 15px;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-      animation: fadeInUp 1s ease-out;
-    }
+    <div class="container" style="max-width: 820px; margin: 20px auto 40px auto; padding: 0 15px;">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <!-- Success Card -->
+                <div class="card border-0 shadow-sm rounded-3 p-3 p-md-4 bg-white text-center mb-4" style="border: 1px solid #ECEFF2 !important;">
+                    <div class="mb-3">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 56px; height: 56px; background-color: #E8F5E9; color: #2E7D32;">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                        </div>
+                    </div>
 
-    .confirmation-box .checkmark {
-      font-size: 70px;
-      color: #28a745;
-      animation: popIn 0.5s ease-out;
-    }
+                    <h3 class="fw-bold text-dark mb-1" style="font-size: 1.4rem;">Order Placed Successfully!</h3>
+                    <p class="text-muted mb-3 small">
+                        Thank you for your order. We have received your order and are getting it ready to be shipped.
+                    </p>
 
-    .confirmation-box h1 {
-      margin: 20px 0 10px;
-      color: #333;
-      font-size: 28px;
-    }
+                    <!-- Order Details Summary Box -->
+                    <div class="row g-2 p-3 rounded-3 mb-3 text-start" style="background-color: #F8FAFC; border: 1px solid #E2E8F0;">
+                        <div class="col-sm-6 col-12">
+                            <span class="text-muted small d-block">Order Reference ID</span>
+                            <strong class="text-primary font-monospace" style="font-size: 1.05rem;">{{ order_number|default:"BHT-CONFIRMED" }}</strong>
+                        </div>
+                        <div class="col-sm-6 col-12">
+                            <span class="text-muted small d-block">Order Date</span>
+                            <strong class="text-dark">{{ order_date|default:"Just now" }}</strong>
+                        </div>
+                        <div class="col-sm-6 col-12">
+                            <span class="text-muted small d-block">Payment Method</span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-semibold">
+                                Cash on Delivery (COD)
+                            </span>
+                        </div>
+                        <div class="col-sm-6 col-12">
+                            <span class="text-muted small d-block">Total Amount</span>
+                            <strong class="text-dark" style="font-size: 1.15rem;">₹{{ total|default:"0" }}</strong>
+                        </div>
+                    </div>
 
-    .confirmation-box p {
-      color: #666;
-      font-size: 16px;
-      line-height: 1.5;
-    }
+                    <!-- Delivery Address Box -->
+                    {% if address %}
+                    <div class="text-start p-4 rounded-4 mb-4" style="background-color: #FFFFFF; border: 1px solid #ECEFF2;">
+                        <h5 class="fw-bold mb-3 text-dark d-flex align-items-center">
+                            <i class="flaticon-pin text-primary me-2"></i> Delivery Address
+                        </h5>
+                        <p class="mb-1 fw-semibold text-dark">{{ buyer.name|default:"Customer" }}</p>
+                        <p class="mb-1 text-muted">{{ address.address }}</p>
+                        <p class="mb-1 text-muted">{{ address.city }}{% if address.state %}, {{ address.state }}{% endif %}{% if address.pin %} - {{ address.pin }}{% endif %}</p>
+                        <p class="mb-0 text-muted"><i class="flaticon-phone-call me-1"></i> Phone: <strong>{{ buyer.phone|default:address.alternatePhone }}</strong></p>
+                    </div>
+                    {% endif %}
 
-    .confirmation-box .btn {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 12px 25px;
-      background: #28a745;
-      color: #fff;
-      border-radius: 6px;
-      text-decoration: none;
-      transition: background 0.3s ease;
-    }
+                    <!-- Ordered Items Preview -->
+                    {% if cart_items %}
+                    <div class="text-start mb-4">
+                        <h5 class="fw-bold mb-3 text-dark">
+                            <i class="flaticon-shopping-cart text-primary me-2"></i> Items in this Order ({{ cart_items|length }})
+                        </h5>
+                        <div class="border rounded-4 overflow-hidden" style="border-color: #ECEFF2 !important;">
+                            {% for item in cart_items %}
+                            <div class="d-flex align-items-center justify-content-between p-3 border-bottom {% if forloop.last %}border-bottom-0{% endif %}" style="background-color: #FFFFFF;">
+                                <div class="d-flex align-items-center gap-3">
+                                    {% if item.image %}
+                                    <img src="{{ item.image }}" alt="{{ item.name }}" 
+                                         class="rounded-3 object-fit-cover" style="width: 55px; height: 55px; border: 1px solid #eee;">
+                                    {% else %}
+                                    <div class="rounded-3 bg-light d-flex align-items-center justify-content-center" style="width: 55px; height: 55px;">
+                                        <i class="flaticon-image text-muted"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="mb-1 text-dark fw-semibold" style="font-size: 0.95rem;">{{ item.name }}</h6>
+                                        <div class="small text-muted">
+                                            Qty: <strong>{{ item.quantity }}</strong>
+                                            {% if item.size %}&nbsp;|&nbsp;Size: {{ item.size }}{% endif %}
+                                            {% if item.color %}&nbsp;|&nbsp;Color: {{ item.color }}{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="fw-bold text-dark" style="font-size: 1rem;">₹{{ item.subtotal }}</span>
+                                    <div class="small text-muted">₹{{ item.price }} each</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
 
-    .confirmation-box .btn:hover {
-      background: #218838;
-    }
-
-    @keyframes popIn {
-      0% {
-        transform: scale(0.4);
-        opacity: 0;
-      }
-      100% {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  </style>
-</head>
-<body>
-
-  <div class="confirmation-box">
-    <div class="checkmark">✔️</div>
-    <h1>Thank You!</h1>
-    <p>Your order has been confirmed.<br>
-       A confirmation email has been sent to your inbox.</p>
-    <a href="/" class="btn">Continue Shopping</a>
-  </div>
-</body>
-</html>
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+                        <a href="/" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-semibold">
+                            <i class="flaticon-home me-1"></i> Continue Shopping
+                        </a>
+                        {% if user.is_authenticated %}
+                        <a href="/my-account-orders/" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold">
+                            <i class="flaticon-shopping-bag me-1"></i> View My Orders
+                        </a>
+                        {% endif %}
+                        <button onclick="window.print()" class="btn btn-light px-4 py-2 rounded-pill fw-semibold border">
+                            <i class="flaticon-printer me-1"></i> Print Receipt
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

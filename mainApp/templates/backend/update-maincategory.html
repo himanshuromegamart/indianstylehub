@@ -1,9 +1,12 @@
 {% extends 'backend/index.html' %}
 {% load static %}
+{% load rmeditor %}
 {% block body %}
+{% rmeditor_media %}
 
 <script>
     function validateForm() {
+        if (window.RMEditor) RMEditor.syncAll();
         var name = document.getElementById("name").value.trim();
         var currentname = '{{data.name}}'
 
@@ -162,8 +165,8 @@
                                     </div>
                                     <div class="col-lg-12">
                                         <div class="mb-3">
-                                            <label class="form-label">Meta Description</label>
-                                            <textarea row="2" col="10" class="form-control" placeholder="Enter Meta Description" name="description">{{ data.description }}</textarea>
+                                            <label class="form-label">Category Blog / SEO Description (Rich Text Editor)</label>
+                                            <textarea rows="6" class="form-control rmeditor" placeholder="Write rich-text blog, article or description for this maincategory..." name="description">{{ data.description|default:'' }}</textarea>
                                         </div>
                                     </div>
                                 </div>

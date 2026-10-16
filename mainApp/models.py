@@ -1,5 +1,6 @@
 from django.db import models
 from tinymce.models import HTMLField
+from django.contrib.auth.models import User
 
 
 
@@ -16,6 +17,8 @@ class Supercategory(models.Model):
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
     image = models.URLField(max_length=1024, default='', null=True, blank=True)
+    title = models.CharField(max_length=100, default='', null=True, blank=True)
+    description = models.TextField(default='', null=True, blank=True)
     
     def __str__(self):
         return self.name
@@ -168,10 +171,14 @@ class Product(models.Model):
 
 class Blog(models.Model):
     id=models.AutoField(primary_key=True)
-    image = models.URLField(max_length=1024)
+    supercategory = models.ForeignKey(Supercategory, on_delete=models.SET_NULL, default=None, null=True, blank=True, related_name="blogs")
+    maincategory = models.ForeignKey(Maincategory, on_delete=models.SET_NULL, default=None, null=True, blank=True, related_name="blogs")
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, default=None, null=True, blank=True, related_name="blogs")
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, default=None, null=True, blank=True, related_name="blogs")
+    image = models.URLField(max_length=1024, default='', null=True, blank=True)
     title=models.CharField(max_length=200)
     slug=models.CharField(max_length=200)
-    description=HTMLField(default='')
+    description=models.TextField(default='')
     meta_description=models.TextField(default='',null=True,blank=True)
     views=models.IntegerField(default=0)
     date=models.DateTimeField(auto_now_add=True)
@@ -183,9 +190,9 @@ class Blog(models.Model):
 class Buyer(models.Model):
     id=models.AutoField(primary_key=True)
     name=models.CharField(max_length=150,default='')
-    phone=models.CharField(max_length=10,default='')
-    email=models.EmailField(default='')
-    password=models.CharField(max_length=50,default='')
+    phone=models.CharField(max_length=20,default='')
+    email=models.EmailField(default='', blank=True, null=True)
+    password=models.CharField(max_length=50,default='', blank=True, null=True)
     verification=models.CharField(max_length=30,default="pending")
     date=models.DateTimeField(auto_now_add=True)
     def __str__(self):
@@ -196,13 +203,13 @@ class Buyer(models.Model):
 class Address(models.Model):
     id=models.AutoField(primary_key=True)
     buyer=models.ForeignKey(Buyer,on_delete=models.CASCADE)
-    addressType= models.CharField(max_length=100,default='')
-    alternatePhone= models.CharField(max_length=10,default='')
-    address= models.CharField(max_length=10,default='')
-    landmark= models.CharField(max_length=10,default='')
-    city= models.CharField(max_length=10,default='')
-    state= models.CharField(max_length=10,default='')
-    pin= models.CharField(max_length=10,default='')
+    addressType= models.CharField(max_length=100,default='Home')
+    alternatePhone= models.CharField(max_length=20,default='',blank=True,null=True)
+    address= models.TextField(default='')
+    landmark= models.CharField(max_length=255,default='',blank=True,null=True)
+    city= models.CharField(max_length=150,default='',blank=True,null=True)
+    state= models.CharField(max_length=150,default='',blank=True,null=True)
+    pin= models.CharField(max_length=20,default='',blank=True,null=True)
 
 
 class Wishlist(models.Model):
@@ -264,3 +271,76 @@ class Contact(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.phone}"
+
+
+class PopularLink(models.Model):
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=255, help_text="Anchor text / SEO keyword display title")
+    url = models.CharField(max_length=1024, help_text="Target URL or redirect destination (e.g. /search/?query=... or custom URL)")
+    supercategory = models.ForeignKey(Supercategory, on_delete=models.CASCADE, null=True, blank=True, related_name="popular_links")
+    maincategory = models.ForeignKey(Maincategory, on_delete=models.CASCADE, null=True, blank=True, related_name="popular_links")
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True, related_name="popular_links")
+    subcategory = models.ForeignKey(Subcategory, on_delete=models.CASCADE, null=True, blank=True, related_name="popular_links")
+    state = models.CharField(max_length=100, blank=True, default='', help_text="State / City name (optional)")
+    show_on_home = models.BooleanField(default=False, help_text="Show in Home Page SEO Hub")
+    order = models.IntegerField(default=0, help_text="Display priority order")
+    is_active = models.BooleanField(default=True, help_text="Toggle link visibility")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = "Popular Link"
+        verbose_name_plural = "Popular Links"
+
+    def __str__(self):
+        return self.title
+
+
+class DeviceToken(models.Model):
+    id = models.AutoField(primary_key=True)
+    token = models.CharField(max_length=500, unique=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    device_type = models.CharField(max_length=50, default='web')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.device_type} - {self.token[:20]}..."
+
+
+class PushNotification(models.Model):
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=200)
+    body = models.TextField()
+    url = models.CharField(max_length=500, default='/')
+    icon = models.CharField(max_length=500, default='/default-icon.png', blank=True)
+    image = models.CharField(max_length=500, blank=True, default='')
+    total_sent = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+
+class PasswordResetOTP(models.Model):
+    id = models.AutoField(primary_key=True)
+    email = models.EmailField(max_length=254)
+    otp = models.CharField(max_length=10)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def is_valid(self):
+        import datetime
+        from django.utils import timezone
+        return not self.is_used and (timezone.now() - self.created_at) < datetime.timedelta(minutes=15)
+
+    def __str__(self):
+        return f"{self.email} - {self.otp}"
+
+

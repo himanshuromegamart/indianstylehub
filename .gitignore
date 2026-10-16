@@ -1,7 +1,8 @@
-﻿env/
+env/
 venv/
 __pycache__/
 *.pyc
 staticfiles_build/
 .DS_Store
 .env
+.vscode/

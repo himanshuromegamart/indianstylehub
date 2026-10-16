@@ -1,105 +1,186 @@
-{%extends 'superadmin/index.html'%}
-{%load static%}
-{%block body%}
-<!-- ============================================================== -->
-<div class="main-contentw-100">
-    <div class="">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-12 mt-2">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title mb-4 text-center"> Buyer Details </h4>
-                            <div class="table-responsive">
-                                <table class="table align-middle table-nowrap table-bordered">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th class="align-middle">Name</th>
-                                            <td> {{data.name}}<td>
-                                        </tr>
-                                        
-                                        <tr>
-                                            <th class="align-middle">Email</th>
-                                            <td> {{data.email}}<td>
-                                        </tr>
-                                        <tr>
-                                            <th class="align-middle">Phone</th>
-                                            <td> {{data.phone}}<td>
-                                        </tr>
-                                        <tr>
-                                            <th class="align-middle">Address</th>
-                                            <td> {{data.address}}<td>
-                                        </tr>
-                                        <tr>
-                                            <th class="align-middle">City</th>
-                                            <td> {{data.city}}<td>
-                                        </tr>
-                                        <tr>
-                                            <th class="align-middle">State</th>
-                                            <td> {{data.state}}<td>
-                                        </tr>
-                                      
-                                        <tr>
-                                            <th class="align-middle">PIN</th>
-                                            <td> {{data.pin}}<td>
-                                        </tr>
-                                        <tr>
-                                            <th class="align-middle">PAN No.</th>
-                                            <td> {{data.pan_no}}<td>
-                                        </tr>
-                                        <tr>
-                                            <th class="align-middle">GST No.</th>
-                                            <td> {{data.gst_no}}<td>
-                                        </tr>
-                                        
-                                        
-                                        <tr>
-                                            <th class="align-middle">PAN Card</th>
-                                            {%if data.pan%}
-                                            <td> <a href="{{data.pan.url}}" target="_blank"><i class="fa fa-eye"></i>View document</a><td>
-                                            {%endif%}
-                                            </tr>
-                                        
-                                        <tr>
-                                            <th class="align-middle">GST Certificate</th>
-                                            {%if data.gst_certificate%}
-                                            <td> <a href="{{data.gst_certificate.url}}" target="_blank"><i class="fa fa-eye"></i>View document</a><td>
-                                            {%endif%}
-                                            </tr>
-                                        <tr>
-                                            <th class="align-middle">Visiting Card</th>
-                                            {%if data.visiting_card%}
-                                            <td> <a href="{{data.visiting_card.url}}" target="_blank"><i class="fa fa-eye"></i>View document</a><td>
-                                            {%endif%}
-                                            </tr>
-                                        
-                                        <tr>
-                                            <th class="align-middle">Registration Date</th>
-                                            <td> {{data.date}}<td>
-                                        </tr>
-                                        <tr>
-                                            <th class="align-middle">Verification</th>
-                                            {%if data.verification == "Pending"%}
-                                            <td class="bg-danger text-light"> {{data.verification}}<span style="float:right;"><a href="/admin-verify-buyer/{{data.id}}" class="btn btn-primary btn-sm">Verify Now</a></span><td>
-                                                {%else%}
-                                                <td class="bg-success text-light"> {{data.verification}}<td>
-                                                {%endif%}
-                                        </tr>
-                                        <span style="float:right"><a href="/admin-update-user/{{data.id}}">UPDATE</a> </span>
-                                            
-                                    </thead>
-                                   
-                                </table>
+{% extends 'backend/index.html' %}
+{% load static %}
+
+{% block title %}Customer Details - {{ buyer.name }} | Nari Fashion Admin{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0 font-size-18">Customer Profile</h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/admin-dashboard/">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/admin-buyer/">Users</a></li>
+                    <li class="breadcrumb-item active">{{ buyer.name }}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Customer Overview Hero Banner -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="background: linear-gradient(135deg, #FFF5F7 0%, #FFFFFF 100%); border: 1px solid #F5E5E8 !important;">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avatar-lg">
+                            <span class="avatar-title rounded-circle fw-bold text-white fs-3 shadow-sm" style="background: linear-gradient(135deg, #EF2853 0%, #D81A43 100%); width: 70px; height: 70px;">
+                                {{ buyer.name|slice:":1"|upper|default:"U" }}
+                            </span>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-1 text-dark">{{ buyer.name|default:"Customer" }}</h3>
+                            <div class="d-flex flex-wrap align-items-center gap-3 text-muted small">
+                                <span><i class="bx bx-phone text-primary me-1"></i><strong>{{ buyer.phone }}</strong></span>
+                                {% if buyer.email %}
+                                <span><i class="bx bx-envelope text-primary me-1"></i>{{ buyer.email }}</span>
+                                {% endif %}
+                                <span><i class="bx bx-calendar text-primary me-1"></i>Joined: {{ buyer.date|date:"d M Y"|default:"Recently" }}</span>
                             </div>
-                            <!-- end table-responsive -->
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        {% if buyer.phone %}
+                        <a href="https://wa.me/91{{ buyer.phone }}" target="_blank" class="btn btn-success btn-sm d-flex align-items-center gap-1 shadow-sm">
+                            <i class="bx bxl-whatsapp font-size-16"></i> WhatsApp
+                        </a>
+                        <a href="tel:{{ buyer.phone }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bx bx-phone font-size-16"></i> Call
+                        </a>
+                        {% endif %}
+                        <a href="/admin-buyer/" class="btn btn-outline-primary btn-sm">
+                            <i class="bx bx-arrow-back font-size-16"></i> Back to Users
+                        </a>
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-3 pt-3 border-top">
+                    <div class="col-md-4 col-sm-6">
+                        <div class="p-3 bg-white rounded-3 border">
+                            <small class="text-muted d-block mb-1">Total Orders Placed</small>
+                            <h4 class="fw-bold text-dark mb-0">{{ order_count }}</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <div class="p-3 bg-white rounded-3 border">
+                            <small class="text-muted d-block mb-1">Lifetime Spent</small>
+                            <h4 class="fw-bold text-success mb-0">&#8377;{{ total_spent|floatformat:2 }}</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-12">
+                        <div class="p-3 bg-white rounded-3 border">
+                            <small class="text-muted d-block mb-1">Saved Delivery Addresses</small>
+                            <h4 class="fw-bold text-primary mb-0">{{ addresses|length }}</h4>
                         </div>
                     </div>
                 </div>
-                
-
             </div>
-         </div> 
+        </div>
     </div>
-    <!-- End Page-content -->
+</div>
 
-    {%endblock%}
+<div class="row">
+    <!-- LEFT: Saved Delivery Addresses -->
+    <div class="col-lg-5 col-12 mb-4">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                    <i class="bx bx-map-pin text-danger"></i> Saved Delivery Addresses ({{ addresses|length }})
+                </h5>
+
+                {% if addresses %}
+                <div class="d-flex flex-column gap-3">
+                    {% for addr in addresses %}
+                    <div class="p-3 rounded-3 border bg-light position-relative">
+                        <span class="badge bg-primary-subtle text-primary fw-semibold mb-2" style="font-size: 11px;">
+                            <i class="bx bx-home-alt me-1"></i>{{ addr.addressType|default:"Delivery Address" }}
+                        </span>
+
+                        <p class="mb-2 text-dark" style="line-height: 1.6;">
+                            <strong>{{ addr.address }}</strong><br>
+                            {% if addr.landmark %}Landmark: {{ addr.landmark }}<br>{% endif %}
+                            {{ addr.city }}, {{ addr.state }} — <strong>{{ addr.pin }}</strong>
+                        </p>
+
+                        {% if addr.alternatePhone %}
+                        <small class="text-muted d-block">
+                            <i class="bx bx-phone me-1"></i>Alternate Phone: <strong>{{ addr.alternatePhone }}</strong>
+                        </small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4 bg-light rounded-3">
+                    <i class="bx bx-map-alt font-size-36 text-muted mb-2"></i>
+                    <p class="text-muted small mb-0">No delivery address saved yet by this user.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Order History -->
+    <div class="col-lg-7 col-12 mb-4">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                    <i class="bx bx-shopping-bag text-success"></i> Customer Order History ({{ orders|length }})
+                </h5>
+
+                {% if orders %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small">
+                            <tr>
+                                <th>Order #</th>
+                                <th>Date</th>
+                                <th>Total</th>
+                                <th>Payment</th>
+                                <th>Status</th>
+                                <th class="text-end">View</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ord in orders %}
+                            <tr>
+                                <td class="fw-bold">#{{ ord.id }}</td>
+                                <td><small class="text-muted">{{ ord.orderDate|default:"Recently" }}</small></td>
+                                <td class="fw-bold text-success">&#8377;{{ ord.finalPrice|default:ord.totalPrice|floatformat:2 }}</td>
+                                <td>
+                                    <span class="badge bg-light text-dark border small">{{ ord.transactionId|default:"COD" }}</span>
+                                </td>
+                                <td>
+                                    {% if ord.orderStatus == "Delivered" %}
+                                    <span class="badge bg-success-subtle text-success">Delivered</span>
+                                    {% elif ord.orderStatus == "Cancelled" %}
+                                    <span class="badge bg-danger-subtle text-danger">Cancelled</span>
+                                    {% else %}
+                                    <span class="badge bg-warning-subtle text-warning">{{ ord.orderStatus|default:"Pending" }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="/admin-order-details/{{ ord.id }}/" class="btn btn-sm btn-outline-primary" title="View Full Order Receipt">
+                                        <i class="bx bx-file"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4 bg-light rounded-3">
+                    <i class="bx bx-cart font-size-36 text-muted mb-2"></i>
+                    <p class="text-muted small mb-0">This customer hasn't placed any orders yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

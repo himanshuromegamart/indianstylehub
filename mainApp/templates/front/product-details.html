@@ -1,38 +1,114 @@
 {% extends "front/index.html" %}
 {%load static%}
-{%block title%}{{data.name}}{%endblock%}
+{%block title%}{{data.name}} &mdash; Nari Fashion Store{%endblock%}
 {%block description%}
-        <meta name="description" content="{{data.description}}">
-    {%endblock%}
+    <meta name="description" content="{{data.description|striptags|truncatewords:25}}">
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+    <meta property="og:title" content="{{data.name}} &mdash; Nari Fashion Store">
+    <meta property="og:description" content="{{data.description|striptags|truncatewords:25}}">
+    <meta property="og:image" content="{{data.image1}}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:type" content="product">
+
+    {% if breadcrumbs %}
+    <!-- BreadcrumbList Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {% for b in breadcrumbs %}
+        {
+          "@type": "ListItem",
+          "position": {{ forloop.counter }},
+          "name": "{{ b.name|escapejs }}",
+          "item": "{{ request.scheme }}://{{ request.get_host }}{{ b.url }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ]
+    }
+    </script>
+    {% endif %}
+
+    <!-- Google Rich Snippet Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": "{{ data.name|escapejs }}",
+      "image": [
+        "{{ data.image1 }}"
+        {% if data.image2 %},"{{ data.image2 }}"{% endif %}
+        {% if data.image3 %},"{{ data.image3 }}"{% endif %}
+      ],
+      "description": "{{ data.description|striptags|truncatewords:30|escapejs }}",
+      "sku": "{{ data.sku|default:data.id }}",
+      "brand": {
+        "@type": "Brand",
+        "name": "{{ data.brand|default:'Nari Fashion Store' }}"
+      },
+      "offers": {
+        "@type": "Offer",
+        "url": "{{ request.build_absolute_uri }}",
+        "priceCurrency": "INR",
+        "price": "{{ data.price }}",
+        "availability": "{% if data.quantity > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+        "itemCondition": "https://schema.org/NewCondition"
+      }
+      {% if data.rating and data.rating > 0 %}
+      ,"aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "{{ data.rating }}",
+        "reviewCount": "{{ data.reviews|default:1 }}"
+      }
+      {% endif %}
+    }
+    </script>
+{%endblock%}
 {%block body%}
 <main>
     <!-- MAIN CONTENT SECTION START -->
     <div class="ul-inner-page-container">
+        <!-- Breadcrumbs Navigation -->
+        {% if breadcrumbs %}
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb" style="--bs-breadcrumb-divider: '/'; background: transparent; padding: 0.25rem 0; margin-bottom: 0.5rem;">
+                {% for b in breadcrumbs %}
+                    {% if forloop.last %}
+                        <li class="breadcrumb-item active" aria-current="page" style="font-weight: 600; color: var(--ul-primary);">{{ b.name }}</li>
+                    {% else %}
+                        <li class="breadcrumb-item"><a href="{{ b.url }}" style="color: #666; text-decoration: none;">{{ b.name }}</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ol>
+        </nav>
+        {% endif %}
+
         <div class="ul-product-details">
             <div class="ul-product-details-top">
-                <div class="row ul-bs-row row-cols-lg-2 row-cols-1 align-items-center">
+                <div class="row ul-bs-row row-cols-lg-2 row-cols-1 align-items-start">
                     <!-- img -->
                     <div class="col">
                         <div class="ul-product-details-img">
                             <div class="ul-product-details-img-slider swiper">
                                 <div class="swiper-wrapper">
                                     <!-- single img -->
-                                    <div class="swiper-slide"><img src="{{data.image1}}" alt="Product Image"></div>
+                                    <div class="swiper-slide"><img src="{{data.image1}}" alt="{{data.name}}" loading="eager" fetchpriority="high" onerror="this.onerror=null; this.src='{%static 'assets/img/logo.webp'%}';"></div>
                                     <!-- single img -->
                                     {%if data.image2%}
-                                    <div class="swiper-slide"><img src="{{data.image2}}" alt="Product Image"></div>
+                                    <div class="swiper-slide"><img src="{{data.image2}}" alt="{{data.name}} View 2" loading="lazy" onerror="this.onerror=null; this.src='{%static 'assets/img/logo.webp'%}';"></div>
                                     {%endif%}
                                     {%if data.image3%}
-                                    <div class="swiper-slide"><img src="{{data.image3}}" alt="Product Image"></div>
+                                    <div class="swiper-slide"><img src="{{data.image3}}" alt="{{data.name}} View 3" loading="lazy" onerror="this.onerror=null; this.src='{%static 'assets/img/logo.webp'%}';"></div>
                                     {%endif%}
                                     {%if data.image4%}
-                                    <div class="swiper-slide"><img src="{{data.image4}}" alt="Product Image"></div>
+                                    <div class="swiper-slide"><img src="{{data.image4}}" alt="{{data.name}} View 4" loading="lazy" onerror="this.onerror=null; this.src='{%static 'assets/img/logo.webp'%}';"></div>
                                     {%endif%}
                                 </div>
 
                                 <div class="ul-product-details-img-slider-nav" id="ul-product-details-img-slider-nav">
-                                    <button class="prev"><i class="flaticon-left-arrow"></i></button>
-                                    <button class="next"><i class="flaticon-arrow-point-to-right"></i></button>
+                                    <button class="prev" aria-label="Previous Image"><i class="flaticon-left-arrow"></i></button>
+                                    <button class="next" aria-label="Next Image"><i class="flaticon-arrow-point-to-right"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -50,17 +126,25 @@
                                     <i class="flaticon-star"></i>
                                     <i class="flaticon-star"></i>
                                 </span>
-                                <span class="review-number">(2 Customer Reviews)</span>
+                                <span class="review-number">(Customer Verified)</span>
                             </div>
 
-                            <!-- price -->
-                            <span class="ul-product-details-price">&#8377;{{data.price}}</span>
-
                             <!-- product title -->
-                            <h3 class="ul-product-details-title">{{data.name}}</h3>
+                            <h1 class="ul-product-details-title">{{data.name}}</h1>
+
+                            <!-- price and discount badge -->
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <span class="ul-product-details-price mb-0">&#8377;{{data.price}}</span>
+                                {% if data.baseprice and data.baseprice > data.price %}
+                                <span class="text-muted text-decoration-line-through fs-5">&#8377;{{data.baseprice}}</span>
+                                {% endif %}
+                                {% if data.discount %}
+                                <span class="ul-product-discount-tag fs-6 px-2 py-1">{{data.discount}}% OFF</span>
+                                {% endif %}
+                            </div>
 
                             <!-- product description -->
-                            <p class="ul-product-details-descr">{{data.description|slice:'200'}}</p>
+                            <p class="ul-product-details-descr">{{data.description|striptags|slice:'200'}}</p>
 
                             <!-- product options -->
                             <div class="ul-product-details-options">
@@ -71,12 +155,12 @@
                                         {%for item in skuProductBySize%}
                                         {%if item.size == data.size%}
                                         <a href="/product-details/{{ item.name|slugify }}/{{ item.id }}"
-                                            class="color-option">
+                                            class="color-option" aria-label="Size {{item.size}}">
                                             <span class="size-btn bg-danger text-light">{{item.size}}</span>
                                         </a>
                                         {%else%}
                                         <a href="/product-details/{{ item.name|slugify }}/{{ item.id }}"
-                                            class="color-option">
+                                            class="color-option" aria-label="Size {{item.size}}">
                                             <span class="size-btn">{{item.size}}</span>
                                         </a>
                                         {%endif%}
@@ -89,10 +173,10 @@
                                     <form action="#" class="variants">
                                         {% for item in skuProductByColor %}
                                         <a href="/product-details/{{ item.name|slugify }}/{{ item.id }}"
-                                            class="color-option">
+                                            class="color-option" aria-label="Color {{item.color}}">
                                             <span class="color-btn"
                                                 style="background-color: {{ item.color }}; border: 1px solid gray; 
-                                                        {% if item.color == data.color %} border: 2px solid red; {% endif %}">
+                                                        {% if item.color == data.color %} border: 2px solid var(--ul-primary); outline: 2px solid var(--ul-primary); outline-offset: 2px; {% endif %}">
                                             </span>
                                         </a>
                                         {% endfor %}
@@ -104,35 +188,34 @@
                             <!-- product quantity -->
                             <div class="ul-product-details-option ul-product-details-quantity">
                                 <span class="title">Quantity</span>
-                                <form action="#" class="ul-product-quantity-wrapper">
+                                <div class="ul-product-quantity-wrapper">
                                     <input type="number" name="product-quantity" id="ul-product-details-quantity"
-                                        class="ul-product-quantity" value="{{data.quantity}}" min="1" readonly>
+                                        class="ul-product-quantity" value="1" min="1" readonly aria-label="Quantity">
                                     <div class="btns">
-                                        <button type="button" class="quantityIncreaseButton"><i
+                                        <button type="button" class="quantityIncreaseButton" id="btnQtyInc" aria-label="Increase Quantity"><i
                                                 class="flaticon-plus"></i></button>
-                                        <button type="button" class="quantityDecreaseButton"><i
+                                        <button type="button" class="quantityDecreaseButton" id="btnQtyDec" aria-label="Decrease Quantity"><i
                                                 class="flaticon-minus-sign"></i></button>
                                     </div>
-                                </form>
+                                </div>
                             </div>
 
                             <!-- product actions -->
                             <div class="ul-product-details-actions">
-                                <div class="left">
-                                    <button class="add-to-cart" onclick="openEnquiryForm()">Add to Cart <span class="icon"><i
+                                <div class="left d-flex flex-wrap gap-2 align-items-center">
+                                    <button type="button" class="add-to-cart" id="btnAddToCart" data-id="{{data.id}}" aria-label="Add to cart">Add to Cart <span class="icon"><i
                                                 class="flaticon-cart"></i></span></button>
-                                    <button class="add-to-wishlist"><span class="icon"><i
+                                    <button type="button" class="btn-buy-now" id="btnBuyNow" data-id="{{data.id}}" style="background: #EF2853; color: #ffffff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(239, 40, 83, 0.25);"><i class="flaticon-sparkle me-1"></i> BUY NOW</button>
+                                    <button type="button" class="add-to-wishlist" id="btnAddToWishlist" data-id="{{data.id}}" aria-label="Add to wishlist"><span class="icon"><i
                                                 class="flaticon-heart"></i></span> Add to wishlist</button>
                                 </div>
                                 <div class="share-options">
-                                    <button><i class="flaticon-facebook-app-symbol"></i></button>
-                                    <button><i class="flaticon-twitter"></i></button>
-                                    <button><i class="flaticon-linkedin-big-logo"></i></button>
-                                    <a href="#"><i class="flaticon-youtube"></i></a>
+                                    <button aria-label="Share on Facebook"><i class="flaticon-facebook-app-symbol"></i></button>
+                                    <button aria-label="Share on Twitter"><i class="flaticon-twitter"></i></button>
+                                    <button aria-label="Share on LinkedIn"><i class="flaticon-linkedin-big-logo"></i></button>
+                                    <a href="#!" aria-label="YouTube Channel"><i class="flaticon-youtube"></i></a>
                                 </div>
                             </div>
-
-                            
                         </div>
                     </div>
                 </div>
@@ -177,11 +260,86 @@
                                 padding: 8px 12px;
                                 text-align: left;
                             }
+                            .rich-text-content h1, .rich-text-content h2, .rich-text-content h3, .rich-text-content h4, .rich-text-content h5, .rich-text-content h6 {
+                                color: #222;
+                                margin-top: 1.25rem;
+                                margin-bottom: 0.75rem;
+                                font-weight: 600;
+                            }
+                            .rich-text-content p {
+                                margin-bottom: 1rem;
+                                line-height: 1.8;
+                                color: #4f4f4f;
+                            }
+                            .rich-text-content ul, .rich-text-content ol {
+                                margin-bottom: 1.2rem;
+                                padding-left: 1.5rem;
+                            }
+                            .rich-text-content li {
+                                margin-bottom: 0.4rem;
+                                line-height: 1.7;
+                            }
+                            .rich-text-content img {
+                                max-width: 100%;
+                                height: auto;
+                                border-radius: 8px;
+                                margin: 1rem 0;
+                            }
+                            .rich-text-content table {
+                                width: 100%;
+                                margin-bottom: 1.5rem;
+                                border-collapse: collapse;
+                            }
+                            .rich-text-content table th, .rich-text-content table td {
+                                padding: 10px 14px;
+                                border: 1px solid #dee2e6;
+                            }
+                            .rich-text-content table th {
+                                background: #f8f9fa;
+                                font-weight: 600;
+                            }
+                            .rich-text-content blockquote {
+                                border-left: 4px solid #27338f;
+                                padding-left: 15px;
+                                margin: 1.2rem 0;
+                                color: #666;
+                                font-style: italic;
+                            }
+                            .rich-text-content a {
+                                color: #27338f;
+                                text-decoration: underline;
+                            }
+                            .rich-text-content a:hover {
+                                color: #e65c00;
+                            }
                         </style>
                         <div class="col-lg-8 col-12 ">
-                            <h3 class="ul-product-details-inner-title">Item Description</h3>
-                            <p>{{data.description}}</p>
+                            <h3 class="ul-product-details-inner-title">Product Details & Description</h3>
+                            <div class="rich-text-content product-blog-content mt-3" style="line-height: 1.85; color: #444; font-size: 15px;">
+                                {{ data.description|safe }}
+                            </div>
                         </div>
+
+                        {% if related_blogs %}
+                        <div class="col-12 mt-4 pt-4 border-top">
+                            <h4 class="mb-3" style="font-weight: 600; color: #222;"><i class="fa fa-book-open text-primary"></i> Style Guides & Related Articles</h4>
+                            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
+                                {% for b in related_blogs %}
+                                <div class="col">
+                                    <div class="card h-100 border shadow-none rounded-3 p-2 bg-light">
+                                        {% if b.image %}
+                                        <img src="{{ b.image }}" class="card-img-top rounded-2" alt="{{ b.title }}" style="height: 120px; object-fit: cover;">
+                                        {% endif %}
+                                        <div class="card-body p-2">
+                                            <h6 class="card-title fs-6"><a href="/blog-details/{{ b.slug }}" class="text-decoration-none text-dark fw-bold">{{ b.title }}</a></h6>
+                                            <a href="/blog-details/{{ b.slug }}" class="btn btn-sm btn-link p-0 text-primary">Read Guide &rarr;</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -209,27 +367,25 @@
                                                 <div class="ul-product">
                                                     <div class="ul-product-heading">
                                                         <span class="ul-product-price">&#8377;{{item.price}}</span>
-                                                        <span class="ul-product-discount-tag">{{item.discount}}%
-                                                            Off</span>
+                                                        <span class="ul-product-discount-tag">{{item.discount}}% Off</span>
                                                     </div>
 
                                                     <div class="ul-product-img">
-                                                        <img src="{{item.image1}}"
-                                                            style="height:250px;width:auto;border-radius:10px"
-                                                            alt="Product Image">
+                                                        <img src="{{item.image1}}" alt="{{item.name}}" loading="lazy" onerror="this.onerror=null; this.src='{%static 'assets/img/logo.webp'%}';">
+
+                                                        <div class="ul-product-actions">
+                                                            <button type="button" class="btn-card-add-cart" data-id="{{item.id}}" title="Add to Cart"><i class="flaticon-shopping-bag"></i></button>
+                                                            <a href="/product-details/{{item.name|slugify}}/{{item.id}}" aria-label="View {{item.name}}" title="View Details"><i class="flaticon-hide"></i></a>
+                                                            <button type="button" class="btn-card-add-wishlist" data-id="{{item.id}}" title="Add to Wishlist"><i class="flaticon-heart"></i></button>
+                                                        </div>
                                                     </div>
 
                                                     <div class="ul-product-txt">
-                                                        <h4 class="ul-product-title"><a
-                                                                href="/product-details/{{item.name|slugify}}/{{item.id}}">{{item.name}}</a>
-                                                        </h4>
-                                                        <h5 class="ul-product-category"><a
-                                                                href="/{{item.maincategory.slug}}">{{item.maincategory.name}}</a>
-                                                        </h5>
+                                                        <h4 class="ul-product-title"><a href="/product-details/{{item.name|slugify}}/{{item.id}}">{{item.name}}</a></h4>
+                                                        <h5 class="ul-product-category"><a href="/{{item.maincategory.slug}}">{{item.maincategory.name}}</a></h5>
                                                     </div>
                                                 </div>
                                             </div>
-
                                             <!-- product card -->
                                             {%endfor%}
 
@@ -238,134 +394,181 @@
 
                                     <!-- slider navigation -->
                                     <div class="ul-products-slider-nav ul-products-slider-1-nav">
-                                        <button class="prev"><i class="flaticon-left-arrow"></i></button>
-                                        <button class="next"><i class="flaticon-arrow-point-to-right"></i></button>
+                                        <button class="prev" aria-label="Previous Product"><i class="flaticon-left-arrow"></i></button>
+                                        <button class="next" aria-label="Next Product"><i class="flaticon-arrow-point-to-right"></i></button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </section>
 
-                        <!-- Pop for enquiry-->
-                      
-
-                        <!-- Pop-up Form -->
-                        <div id="enquiryPopup" class="popup">
-                          <div class="popup-content">
-                            <span class="close" onclick="closeEnquiryForm()">&times;</span>
-                            <h2>Product Enquiry</h2>
-                            <form method="POST" action="/add-enquiry/">
-                              {% csrf_token %}
-                              <div class="row">
-                                <div class="col-lg-6">
-                              <input type="hidden" name="productId" id="productIdInput" value="{{data.id}}">
-                            
-                              <label>Name:</label>
-                              <input type="text" name="name" required>
-                                </div>
-                                <div class="col-lg-6">
-                              <label>Phone:</label>
-                              <input type="text" name="phone" maxlength="10" required
-                                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)">
-
-                            </div>
-                            <div class="col-lg-6">
-                              <label>Email:</label>
-                              <input type="email" name="email" required>
-                            </div>
-                            <div class="col-lg-6">
-                                <label>Pincode:</label>
-                                <input type="text" name="pincode" maxlength="6" required oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)">
-                              </div>
-                            <div class="col-lg-12">
-                              <label>Address:</label>
-                              <textarea name="address" required minlength="10"></textarea>
-                            </div>
-                            
-                            <div class="col-lg-6">
-                              <label>City:</label>
-                              <input type="text" name="city" required>
-                            </div>
-                            <div class="col-lg-6">
-                              <label>State:</label>
-                              <input type="text" name="state" required>
-                            </div>
-                           
-                              <button type="submit">Submit Enquiry</button>
-                            </div>
-                            </form>
-                          </div>
-                        </div>
-
-                        <!-- CSS -->
-                        <style>
-                          .popup {
-                            display: none;
-                            position: fixed;
-                            z-index: 999;
-                            padding-top: 60px;
-                            left: 0;
-                            top: 0;
-                            width: 100%;
-                            height: 100%;
-                            overflow: auto;
-                            background-color: rgba(0,0,0,0.6);
-                          }
-                      
-                          .popup-content {
-                            background-color: #fff;
-                            margin: auto;
-                            padding: 30px;
-                            border-radius: 8px;
-                            width: 90%;
-                            max-width: 500px;
-                            box-shadow: 0 0 15px rgba(0,0,0,0.3);
-                          }
-                      
-                          .close {
-                            color: #aaa;
-                            float: right;
-                            font-size: 24px;
-                            cursor: pointer;
-                          }
-                      
-                          .popup-content input,
-                          .popup-content textarea {
-                            width: 100%;
-                            margin-bottom: 15px;
-                            padding: 10px;
-                            border-radius: 5px;
-                            border: 1px solid #ccc;
-                          }
-                      
-                          .popup-content button {
-                            width: 100%;
-                            padding: 10px;
-                            background-color: #1e88e5;
-                            color: white;
-                            border: none;
-                            border-radius: 5px;
-                            cursor: pointer;
-                          }
-                      
-                          .popup-content button:hover {
-                            background-color: #0d47a1;
-                          }
-                        </style>
-
-                        <!-- JS -->
                         <script>
-                          function openEnquiryForm() {
-                            document.getElementById("enquiryPopup").style.display = "block";
-                            
+                          function getCookie(name) {
+                              let cookieValue = null;
+                              if (document.cookie && document.cookie !== '') {
+                                  const cookies = document.cookie.split(';');
+                                  for (let i = 0; i < cookies.length; i++) {
+                                      const cookie = cookies[i].trim();
+                                      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                          break;
+                                      }
+                                  }
+                              }
+                              return cookieValue;
                           }
-                      
-                          function closeEnquiryForm() {
-                            document.getElementById("enquiryPopup").style.display = "none";
+                          const csrftoken = getCookie('csrftoken') || '';
+
+                          function updateBadges(cartCount, wishlistCount) {
+                              if (cartCount !== undefined) {
+                                  document.querySelectorAll('.cart-badge').forEach(b => {
+                                      b.textContent = cartCount;
+                                      b.style.display = cartCount > 0 ? 'inline-block' : 'none';
+                                  });
+                              }
+                              if (wishlistCount !== undefined) {
+                                  document.querySelectorAll('.wishlist-badge').forEach(b => {
+                                      b.textContent = wishlistCount;
+                                      b.style.display = wishlistCount > 0 ? 'inline-block' : 'none';
+                                  });
+                              }
                           }
+
+                          document.addEventListener('DOMContentLoaded', function () {
+                              const qtyInput = document.getElementById('ul-product-details-quantity');
+                              const btnInc = document.getElementById('btnQtyInc');
+                              const btnDec = document.getElementById('btnQtyDec');
+
+                              if (btnInc && qtyInput) {
+                                  btnInc.addEventListener('click', function () {
+                                      let val = parseInt(qtyInput.value) || 1;
+                                      qtyInput.value = val + 1;
+                                  });
+                              }
+                              if (btnDec && qtyInput) {
+                                  btnDec.addEventListener('click', function () {
+                                      let val = parseInt(qtyInput.value) || 1;
+                                      if (val > 1) qtyInput.value = val - 1;
+                                  });
+                              }
+
+                              // Add to Cart with Instant Toast Notification
+                              const btnCart = document.getElementById('btnAddToCart');
+                              if (btnCart) {
+                                  btnCart.addEventListener('click', function () {
+                                      const pid = this.getAttribute('data-id');
+                                      const qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
+                                      const originalHtml = this.innerHTML;
+                                      this.disabled = true;
+                                      this.innerHTML = 'Adding...';
+
+                                      const formData = new FormData();
+                                      formData.append('productId', pid);
+                                      formData.append('quantity', qty);
+
+                                      fetch('/add-to-cart/', {
+                                          method: 'POST',
+                                          headers: { 'X-CSRFToken': csrftoken },
+                                          body: formData
+                                      })
+                                      .then(r => r.json())
+                                      .then(data => {
+                                          if (data.status === 'success') {
+                                              this.innerHTML = 'Added to Cart ✓';
+                                              this.classList.add('bg-success', 'text-white');
+                                              updateBadges(data.cart_count, undefined);
+                                              if (typeof showCartToast === 'function') {
+                                                  showCartToast('{{ data.name|escapejs }}');
+                                              }
+                                              setTimeout(() => {
+                                                  this.disabled = false;
+                                                  this.innerHTML = originalHtml;
+                                                  this.classList.remove('bg-success', 'text-white');
+                                              }, 2000);
+                                          } else {
+                                              alert(data.error || 'Could not add to cart');
+                                              this.disabled = false;
+                                              this.innerHTML = originalHtml;
+                                          }
+                                      })
+                                      .catch(e => {
+                                          console.error(e);
+                                          this.disabled = false;
+                                          this.innerHTML = originalHtml;
+                                      });
+                                  });
+                              }
+
+                              // Buy Now Button (Direct Checkout)
+                              const btnBuy = document.getElementById('btnBuyNow');
+                              if (btnBuy) {
+                                  btnBuy.addEventListener('click', function () {
+                                      const pid = this.getAttribute('data-id');
+                                      const qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
+                                      this.disabled = true;
+                                      this.innerHTML = 'Redirecting...';
+
+                                      const formData = new FormData();
+                                      formData.append('productId', pid);
+                                      formData.append('quantity', qty);
+
+                                      fetch('/add-to-cart/', {
+                                          method: 'POST',
+                                          headers: { 'X-CSRFToken': csrftoken },
+                                          body: formData
+                                      })
+                                      .then(r => r.json())
+                                      .then(data => {
+                                          window.location.href = '/checkout/';
+                                      })
+                                      .catch(e => {
+                                          window.location.href = '/checkout/';
+                                      });
+                                  });
+                              }
+
+                              // Add to Wishlist
+                              const btnWish = document.getElementById('btnAddToWishlist');
+                              if (btnWish) {
+                                  btnWish.addEventListener('click', function () {
+                                      const pid = this.getAttribute('data-id');
+                                      const originalHtml = this.innerHTML;
+                                      this.disabled = true;
+                                      this.innerHTML = 'Saving...';
+
+                                      const formData = new FormData();
+                                      formData.append('productId', pid);
+
+                                      fetch('/add-to-wishlist/', {
+                                          method: 'POST',
+                                          headers: { 'X-CSRFToken': csrftoken },
+                                          body: formData
+                                      })
+                                      .then(r => r.json())
+                                      .then(data => {
+                                          if (data.status === 'success') {
+                                              this.innerHTML = 'Wishlisted ♥';
+                                              this.style.color = '#e91e63';
+                                              updateBadges(undefined, data.wishlist_count);
+                                              setTimeout(() => {
+                                                  this.disabled = false;
+                                                  this.innerHTML = originalHtml;
+                                              }, 2500);
+                                          } else {
+                                              alert(data.error || 'Could not add to wishlist');
+                                              this.disabled = false;
+                                              this.innerHTML = originalHtml;
+                                          }
+                                      })
+                                      .catch(e => {
+                                          console.error(e);
+                                          this.disabled = false;
+                                          this.innerHTML = originalHtml;
+                                      });
+                                  });
+                              }
+                          });
                         </script>
-                        
-                         <!--End Pop-->
 
 
                 </div>

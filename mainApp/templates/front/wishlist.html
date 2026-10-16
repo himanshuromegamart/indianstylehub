@@ -1,12 +1,11 @@
 {% extends "front/index.html" %}
-{%load static%}
-{%block body%}
-
+{% load static %}
+{% block body %}
     <main>
         <!-- BREADCRUMB SECTION START -->
         <div class="ul-container">
             <div class="ul-breadcrumb">
-                <h2 class="ul-breadcrumb-title">Wishlist</h2>
+                <h2 class="ul-breadcrumb-title">My Wishlist</h2>
                 <div class="ul-breadcrumb-nav">
                     <a href="/"><i class="flaticon-home"></i> Home</a>
                     <i class="flaticon-arrow-point-to-right"></i>
@@ -16,97 +15,199 @@
         </div>
         <!-- BREADCRUMB SECTION END -->
 
-        <div class="ul-cart-container">
-            <div class="cart-top">
-                <div class="text-center">
-                    <!-- cart header -->
-                    <div class="ul-cart-header ul-wishlist-header">
-                        <div>Product</div>
-                        <div>Price</div>
-                        <div>Stock</div>
-                        <div>Remove</div>
-                    </div>
+        <div class="ul-cart-container" id="wishlistContainer">
+            {% if wishlist_products %}
+            <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white" style="border: 1px solid #ECEFF2 !important;">
+                <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+                    <h4 class="fw-bold mb-0" style="font-size: 1.25rem;">Saved Items ({{ wishlist_products|length }})</h4>
+                    <a href="/cart/" class="text-decoration-none text-muted small"><i class="flaticon-shopping-bag me-1"></i> Go to Cart</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="ul-cart-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Stock Status</th>
+                                <th>Action</th>
+                                <th>Remove</th>
+                            </tr>
+                        </thead>
 
-                    <!-- cart body -->
-                    <div>
-                        <!-- single wishlist item -->
-                        <div class="ul-cart-item">
-                            <!-- product -->
-                            <div class="ul-cart-product">
-                                <a href="/shop-details" class="ul-cart-product-img"><img src="{%static 'assets/img/product-img-sm-6.jpg'%}" alt="Product"></a>
-                                <a href="/shop-details" class="ul-cart-product-title">Simple Things You to Save Book</a>
-                            </div>
-                            <!-- price -->
-                            <span class="ul-cart-item-price">$60.00</span>
+                        <tbody>
+                            {% for item in wishlist_products %}
+                            <tr id="wishlist-row-{{ item.id }}">
+                                <td>
+                                    <div class="ul-cart-product">
+                                        <a href="/product-details/{{ item.name|slugify }}/{{ item.id }}/" class="ul-cart-product-img">
+                                            {% if item.image1 %}
+                                            <img src="{{ item.image1 }}" alt="{{ item.name }}" style="width: 70px; height: 70px; object-fit: contain; border-radius: 8px;">
+                                            {% else %}
+                                            <img src="{% static 'assets/img/image.png' %}" alt="{{ item.name }}" style="width: 70px; height: 70px; object-fit: contain; border-radius: 8px;">
+                                            {% endif %}
+                                        </a>
+                                        <div class="d-flex flex-column text-start ms-2">
+                                            <a href="/product-details/{{ item.name|slugify }}/{{ item.id }}/" class="ul-cart-product-title fw-bold text-dark">{{ item.name }}</a>
+                                            {% if item.category %}
+                                            <small class="text-muted">{{ item.category.name }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="ul-cart-item-price fw-bold text-dark">&#8377;{{ item.price|floatformat:2 }}</span>
+                                    {% if item.base_price and item.base_price > item.price %}
+                                    <br><small class="text-muted text-decoration-line-through">&#8377;{{ item.base_price|floatformat:2 }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.quantity > 0 %}
+                                    <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-semibold">In Stock</span>
+                                    {% else %}
+                                    <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill fw-semibold">Out of Stock</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="ul-btn py-2 px-3 btn-move-to-cart" data-id="{{ item.id }}" style="font-size: 13px;">
+                                        Add to Cart <i class="flaticon-cart ms-1"></i>
+                                    </button>
+                                </td>
+                                <td>
+                                    <div class="ul-cart-item-remove">
+                                        <button type="button" class="btn-remove-wishlist text-danger border-0 bg-transparent" data-id="{{ item.id }}" title="Remove from wishlist">
+                                            <i class="flaticon-close"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
 
-                            <!-- subtotal -->
-                            <span class="ul-cart-item-subtotal ul-wislist-item-stock green">in stock</span>
-
-                            <!-- remove -->
-                            <div class="ul-cart-item-remove">
-                                <button><i class="flaticon-close"></i></button>
-                            </div>
-                        </div>
-
-                        <!-- single wishlist item -->
-                        <div class="ul-cart-item">
-                            <!-- product -->
-                            <div class="ul-cart-product">
-                                <a href="/shop-details" class="ul-cart-product-img"><img src="{%static 'assets/img/product-img-sm-6.jpg'%}" alt="Product"></a>
-                                <a href="/shop-details" class="ul-cart-product-title">Simple Things You to Save Book</a>
-                            </div>
-                            <!-- price -->
-                            <span class="ul-cart-item-price">$60.00</span>
-
-                            <!-- subtotal -->
-                            <span class="ul-cart-item-subtotal ul-wislist-item-stock red">Out of Stock</span>
-
-                            <!-- remove -->
-                            <div class="ul-cart-item-remove">
-                                <button><i class="flaticon-close"></i></button>
-                            </div>
-                        </div>
-
-                        <!-- single wishlist item -->
-                        <div class="ul-cart-item">
-                            <!-- product -->
-                            <div class="ul-cart-product">
-                                <a href="/shop-details" class="ul-cart-product-img"><img src="{%static 'assets/img/product-img-sm-6.jpg'%}" alt="Product"></a>
-                                <a href="/shop-details" class="ul-cart-product-title">Simple Things You to Save Book</a>
-                            </div>
-                            <!-- price -->
-                            <span class="ul-cart-item-price">$60.00</span>
-
-                            <!-- subtotal -->
-                            <span class="ul-cart-item-subtotal ul-wislist-item-stock green">in stock</span>
-
-                            <!-- remove -->
-                            <div class="ul-cart-item-remove">
-                                <button><i class="flaticon-close"></i></button>
-                            </div>
-                        </div>
-
-                        <!-- single wishlist item -->
-                        <div class="ul-cart-item">
-                            <!-- product -->
-                            <div class="ul-cart-product">
-                                <a href="/shop-details" class="ul-cart-product-img"><img src="{%static 'assets/img/product-img-sm-6.jpg'%}" alt="Product"></a>
-                                <a href="/shop-details" class="ul-cart-product-title">Simple Things You to Save Book</a>
-                            </div>
-                            <!-- price -->
-                            <span class="ul-cart-item-price">$60.00</span>
-
-                            <!-- subtotal -->
-                            <span class="ul-cart-item-subtotal ul-wislist-item-stock red">Out of Stock</span>
-
-                            <!-- remove -->
-                            <div class="ul-cart-item-remove">
-                                <button><i class="flaticon-close"></i></button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-4">
+                    <a href="/all" class="ul-btn secondary-btn"><i class="flaticon-left-arrow me-1"></i> Continue Shopping</a>
+                    <a href="/cart/" class="ul-btn"><i class="flaticon-shopping-bag me-1"></i> View Shopping Cart</a>
                 </div>
             </div>
+            {% else %}
+            <!-- Empty Wishlist State -->
+            <div class="text-center py-5 my-5" id="emptyWishlistState">
+                <div class="mb-4">
+                    <i class="flaticon-heart text-muted" style="font-size: 72px;"></i>
+                </div>
+                <h3 class="fw-bold mb-2">Your Wishlist is Empty</h3>
+                <p class="text-muted mb-4">You haven't saved any items to your wishlist yet.</p>
+                <a href="/all" class="ul-btn">BROWSE FAVORITE STYLES <i class="flaticon-up-right-arrow ms-1"></i></a>
+            </div>
+            {% endif %}
         </div>
     </main>
-{%endblock%}
+
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken') || '';
+
+        function updateBadges(cartCount, wishlistCount) {
+            if (cartCount !== undefined) {
+                document.querySelectorAll('.cart-badge').forEach(b => {
+                    b.textContent = cartCount;
+                    b.style.display = cartCount > 0 ? 'inline-block' : 'none';
+                });
+            }
+            if (wishlistCount !== undefined) {
+                document.querySelectorAll('.wishlist-badge').forEach(b => {
+                    b.textContent = wishlistCount;
+                    b.style.display = wishlistCount > 0 ? 'inline-block' : 'none';
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Remove from wishlist
+            document.querySelectorAll('.btn-remove-wishlist').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    removeWishlistItem(id);
+                });
+            });
+
+            // Move to cart
+            document.querySelectorAll('.btn-move-to-cart').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    moveToCart(id, this);
+                });
+            });
+        });
+
+        function removeWishlistItem(productId) {
+            if (!confirm('Remove this item from your wishlist?')) return;
+            const formData = new FormData();
+            formData.append('id', productId);
+
+            fetch('/remove-from-wishlist/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrftoken },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const row = document.getElementById('wishlist-row-' + productId);
+                    if (row) row.remove();
+                    updateBadges(undefined, data.wishlist_count);
+                    if (data.wishlist_count === 0) {
+                        location.reload();
+                    }
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        function moveToCart(productId, btn) {
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Adding...';
+
+            const formData = new FormData();
+            formData.append('productId', productId);
+            formData.append('quantity', 1);
+
+            fetch('/add-to-cart/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrftoken },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.innerHTML = 'Added! ✓';
+                btn.classList.add('bg-success', 'text-white');
+                updateBadges(data.cart_count, undefined);
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('bg-success', 'text-white');
+                }, 2000);
+            })
+            .catch(err => {
+                console.error(err);
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,211 @@
+{% extends "front/index.html" %}
+{% load static %}
+
+{% block title %}My Account | Nari Fashion Store{% endblock %}
+
+{% block body %}
+<main>
+    <div class="ul-container">
+        <div class="ul-breadcrumb">
+            <h2 class="ul-breadcrumb-title">My Account</h2>
+            <div class="ul-breadcrumb-nav">
+                <a href="/"><i class="flaticon-home"></i> Home</a>
+                <i class="flaticon-arrow-point-to-right"></i>
+                <span class="current-page">Dashboard</span>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* === ACCOUNT LAYOUT === */
+        .nf-account{display:grid;grid-template-columns:280px 1fr;gap:30px;padding:clamp(25px,4vw,50px) 0}
+        @media(max-width:991px){.nf-account{grid-template-columns:1fr}}
+        .nf-card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.05);border:1px solid #f0f0f0;overflow:hidden}
+
+        /* === SIDEBAR === */
+        .nf-sidebar-profile{padding:30px 24px;text-align:center;background:linear-gradient(135deg,#FFF5F4 0%,#FFF0EE 100%);border-bottom:1px solid #f0e6e4}
+        .nf-avatar{width:80px;height:80px;margin:0 auto 14px;background:linear-gradient(135deg,#F5224D,#FF941F);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px;font-weight:700;box-shadow:0 6px 20px rgba(245,34,77,.25);letter-spacing:1px}
+        .nf-sidebar-profile h4{font-size:18px;font-weight:700;color:#111827;margin:0 0 3px}
+        .nf-sidebar-profile .nf-phone{font-size:13px;color:#6b7280;margin:0 0 2px}
+        .nf-sidebar-profile .nf-email{font-size:12px;color:#9ca3af;margin:0}
+        .nf-sidebar-nav{padding:12px}
+        .nf-sidebar-nav a{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;color:#4b5563;font-size:14px;font-weight:500;text-decoration:none;transition:all .2s;margin-bottom:2px}
+        .nf-sidebar-nav a i{font-size:18px;width:22px;text-align:center}
+        .nf-sidebar-nav a:hover{background:#fef2f2;color:#F5224D}
+        .nf-sidebar-nav a.active{background:linear-gradient(135deg,#F5224D,#FF941F);color:#fff;font-weight:600;box-shadow:0 4px 15px rgba(245,34,77,.2)}
+        .nf-sidebar-nav a.active i{color:#fff}
+        .nf-sidebar-nav .nf-nav-logout{color:#ef4444;margin-top:8px;border-top:1px solid #f3f4f6;padding-top:14px}
+        .nf-sidebar-nav .nf-nav-logout:hover{background:#fef2f2;color:#dc2626}
+        @media(max-width:991px){
+            .nf-sidebar-profile{padding:18px 20px;display:flex;align-items:center;gap:14px;text-align:left}
+            .nf-avatar{width:52px;height:52px;font-size:22px;margin:0;flex-shrink:0}
+            .nf-sidebar-nav{display:flex;overflow-x:auto;gap:8px;padding:10px 14px;-webkit-overflow-scrolling:touch}
+            .nf-sidebar-nav::-webkit-scrollbar{display:none}
+            .nf-sidebar-nav a{white-space:nowrap;padding:8px 14px;font-size:13px;margin-bottom:0;background:#F9FAFB;flex-shrink:0}
+            .nf-sidebar-nav .nf-nav-logout{margin-top:0;border-top:none;padding-top:8px}
+        }
+
+        /* === STATS CARDS === */
+        .nf-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+        @media(max-width:600px){.nf-stats{grid-template-columns:1fr}}
+        .nf-stat{padding:24px 20px;border-radius:14px;text-align:center;position:relative;overflow:hidden}
+        .nf-stat::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.08}
+        .nf-stat-value{font-size:32px;font-weight:800;margin-bottom:4px;line-height:1}
+        .nf-stat-label{font-size:13px;color:#6b7280;font-weight:500}
+        .nf-stat-orders{background:linear-gradient(135deg,#FFF5F4,#FFF0EE)}
+        .nf-stat-orders .nf-stat-value{background:linear-gradient(135deg,#F5224D,#FF941F);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .nf-stat-orders::before{background:#F5224D}
+        .nf-stat-addresses{background:#f0f5ff}
+        .nf-stat-addresses .nf-stat-value{color:#3b82f6}
+        .nf-stat-addresses::before{background:#3b82f6}
+        .nf-stat-status{background:#f0fdf4}
+        .nf-stat-status .nf-stat-value{color:#22c55e;font-size:24px}
+        .nf-stat-status::before{background:#22c55e}
+
+        /* === WELCOME BANNER === */
+        .nf-welcome{background:linear-gradient(135deg,#F5224D 0%,#FF941F 100%);border-radius:16px;padding:30px 28px;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px}
+        .nf-welcome h3{font-size:22px;font-weight:700;margin:0 0 6px}
+        .nf-welcome p{font-size:14px;opacity:.9;margin:0;max-width:400px}
+        .nf-welcome-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.2);color:#fff;padding:12px 24px;border-radius:10px;font-weight:600;font-size:14px;text-decoration:none;transition:all .2s;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.25)}
+        .nf-welcome-btn:hover{background:rgba(255,255,255,.3);transform:translateY(-1px);color:#fff}
+
+        /* === TABLE === */
+        .nf-table-header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #f3f4f6}
+        .nf-table-header h4{font-size:17px;font-weight:700;color:#111827;margin:0}
+        .nf-table-header a{font-size:13px;color:#F5224D;font-weight:600;text-decoration:none}
+        .nf-table-header a:hover{text-decoration:underline}
+        .nf-table-wrap{padding:0 8px 8px}
+        .nf-table{width:100%;border-collapse:collapse;font-size:14px}
+        .nf-table th{padding:14px 16px;text-align:left;font-weight:600;color:#6b7280;font-size:12px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #f3f4f6;background:#fafafa}
+        .nf-table td{padding:14px 16px;border-bottom:1px solid #f9fafb;color:#374151}
+        .nf-table tr:last-child td{border-bottom:none}
+        .nf-table tr:hover td{background:#fefefe}
+        .nf-table .nf-order-id{font-weight:700;color:#111827}
+        .nf-table .nf-price{font-weight:700;color:#111827}
+        .nf-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600}
+        .nf-badge-pending{background:#fff7ed;color:#ea580c}
+        .nf-badge-delivered{background:#f0fdf4;color:#16a34a}
+        .nf-badge-cancelled{background:#fef2f2;color:#dc2626}
+        .nf-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+
+        /* === EMPTY STATE === */
+        .nf-empty{text-align:center;padding:50px 20px}
+        .nf-empty-icon{width:80px;height:80px;background:#f9fafb;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:36px;color:#d1d5db}
+        .nf-empty h5{font-size:18px;font-weight:700;color:#374151;margin:0 0 8px}
+        .nf-empty p{font-size:14px;color:#9ca3af;margin:0 0 24px;max-width:300px;margin-left:auto;margin-right:auto}
+        .nf-empty-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#F5224D,#FF941F);color:#fff;padding:12px 28px;border-radius:10px;font-weight:600;font-size:14px;text-decoration:none;transition:all .25s}
+        .nf-empty-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(245,34,77,.3);color:#fff}
+
+        .nf-alert{padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+        .nf-alert-success{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0}
+        .nf-alert-error{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+    </style>
+
+    <div class="ul-container">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="nf-alert {% if message.tags == 'error' %}nf-alert-error{% elif message.tags == 'success' %}nf-alert-success{% endif %}" style="margin-top:20px">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="nf-account">
+            <!-- Sidebar -->
+            <div>
+                <div class="nf-card" style="position:sticky;top:100px">
+                    <div class="nf-sidebar-profile">
+                        <div class="nf-avatar">{{ buyer.name|slice:":1"|upper }}</div>
+                        <h4>{{ buyer.name }}</h4>
+                        <p class="nf-phone">📞 {{ buyer.phone }}</p>
+                        {% if buyer.email %}<p class="nf-email">{{ buyer.email }}</p>{% endif %}
+                    </div>
+                    <nav class="nf-sidebar-nav">
+                        <a href="/my-account/" class="active"><i class="flaticon-user"></i> Dashboard</a>
+                        <a href="/my-account-orders/"><i class="flaticon-shopping-bag"></i> My Orders</a>
+                        <a href="/my-account-address/"><i class="flaticon-location"></i> Addresses</a>
+                        <a href="/my-account-edit/"><i class="flaticon-edit"></i> Edit Profile</a>
+                        <a href="/wishlist/"><i class="flaticon-heart"></i> Wishlist</a>
+                        <a href="/logout/" class="nf-nav-logout"><i class="flaticon-close"></i> Sign Out</a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div>
+                <!-- Welcome Banner -->
+                <div class="nf-welcome">
+                    <div>
+                        <h3>Hello, {{ buyer.name }}! 👋</h3>
+                        <p>Welcome back to your dashboard. From here you can manage your orders, addresses, and account details.</p>
+                    </div>
+                    <a href="/all" class="nf-welcome-btn"><i class="flaticon-shopping-bag"></i> Shop Now</a>
+                </div>
+
+                <!-- Stats -->
+                <div class="nf-stats">
+                    <div class="nf-stat nf-stat-orders">
+                        <div class="nf-stat-value">{{ total_orders|default:"0" }}</div>
+                        <div class="nf-stat-label">Total Orders</div>
+                    </div>
+                    <div class="nf-stat nf-stat-addresses">
+                        <div class="nf-stat-value">{{ addresses|length }}</div>
+                        <div class="nf-stat-label">Saved Addresses</div>
+                    </div>
+                    <div class="nf-stat nf-stat-status">
+                        <div class="nf-stat-value">● Active</div>
+                        <div class="nf-stat-label">Account Status</div>
+                    </div>
+                </div>
+
+                <!-- Recent Orders -->
+                <div class="nf-card">
+                    <div class="nf-table-header">
+                        <h4>Recent Orders</h4>
+                        <a href="/my-account-orders/">View All →</a>
+                    </div>
+                    {% if orders %}
+                    <div class="nf-table-wrap">
+                        <div class="table-responsive">
+                            <table class="nf-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order</th>
+                                        <th>Product</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ord in orders %}
+                                    <tr>
+                                        <td class="nf-order-id">#{{ ord.id }}</td>
+                                        <td>{% if ord.product %}{{ ord.product.name|truncatewords:4 }}{% else %}Order Item{% endif %}</td>
+                                        <td style="color:#6b7280">{{ ord.orderDate|default:"Recent" }}</td>
+                                        <td class="nf-price">₹{{ ord.finalPrice }}</td>
+                                        <td>
+                                            <span class="nf-badge {% if ord.orderStatus == 'Delivered' or ord.orderStatus == 'delivered' %}nf-badge-delivered{% elif ord.orderStatus == 'Cancelled' or ord.orderStatus == 'cancelled' %}nf-badge-cancelled{% else %}nf-badge-pending{% endif %}">
+                                                {{ ord.orderStatus|title }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="nf-empty">
+                        <div class="nf-empty-icon"><i class="flaticon-shopping-bag"></i></div>
+                        <h5>No Orders Yet</h5>
+                        <p>You haven't placed any orders. Explore our curated collections and find something you love!</p>
+                        <a href="/all" class="nf-empty-btn"><i class="flaticon-shopping-bag"></i> Start Shopping</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

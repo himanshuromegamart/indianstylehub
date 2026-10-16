@@ -1,0 +1,371 @@
+{% extends "front/index.html" %}
+{% load static %}
+
+{% block title %}Create Account | Nari Fashion Boutique{% endblock %}
+
+{% block body %}
+<main style="background: linear-gradient(180deg, #FFF9FA 0%, #FAF5F6 100%); min-height: 80vh; padding-bottom: 50px;">
+    <!-- BREADCRUMB SECTION START -->
+    <div class="ul-container">
+        <div class="ul-breadcrumb">
+            <h2 class="ul-breadcrumb-title">Create Account</h2>
+            <div class="ul-breadcrumb-nav">
+                <a href="/"><i class="flaticon-home"></i> Home</a>
+                <i class="flaticon-arrow-point-to-right"></i>
+                <span class="current-page">Register</span>
+            </div>
+        </div>
+    </div>
+    <!-- BREADCRUMB SECTION END -->
+
+    <style>
+        .nf-auth-wrapper {
+            padding: 10px 15px 40px;
+        }
+        .nf-auth-card {
+            max-width: 460px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 12px 35px rgba(239, 40, 83, 0.08), 0 2px 10px rgba(0, 0, 0, 0.04);
+            border: 1px solid #F5E5E8;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .nf-auth-top-bar {
+            height: 4px;
+            background: linear-gradient(90deg, #F5224D 0%, #FF6F61 50%, #FF941F 100%);
+        }
+        .nf-auth-body {
+            padding: 32px 28px 24px;
+        }
+        @media (max-width: 575px) {
+            .nf-auth-body {
+                padding: 24px 18px 20px;
+            }
+        }
+        .nf-auth-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #FFF0F3;
+            color: #EF2853;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid #FCD4DC;
+            margin-bottom: 12px;
+        }
+        .nf-auth-avatar {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 12px;
+            background: linear-gradient(135deg, #FFF0F3 0%, #FFE2E7 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #EF2853;
+            font-size: 24px;
+            box-shadow: 0 4px 14px rgba(239, 40, 83, 0.15);
+            border: 2px solid #FFFFFF;
+        }
+        .nf-auth-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1A1A1A;
+            margin-bottom: 6px;
+            text-align: center;
+            letter-spacing: -0.3px;
+        }
+        .nf-auth-sub {
+            color: #71717A;
+            font-size: 13.5px;
+            margin: 0 0 22px;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .nf-auth-field {
+            margin-bottom: 16px;
+        }
+        .nf-auth-field label {
+            display: block;
+            font-weight: 700;
+            font-size: 12px;
+            color: #3F3F46;
+            margin-bottom: 7px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .nf-input-wrap {
+            position: relative;
+        }
+        .nf-input-wrap input {
+            width: 100%;
+            height: 48px;
+            border: 1.5px solid #E4E4E7;
+            border-radius: 12px;
+            padding: 0 44px 0 16px;
+            font-size: 14.5px;
+            color: #18181B;
+            background: #FAFAFA;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+        .nf-input-wrap input:focus {
+            border-color: #EF2853;
+            background: #FFFFFF;
+            box-shadow: 0 0 0 4px rgba(239, 40, 83, 0.10);
+        }
+        .nf-input-wrap .field-icon {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #A1A1AA;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+        .nf-input-wrap .field-icon.clickable {
+            cursor: pointer;
+            padding: 4px;
+            color: #71717A;
+            transition: color 0.2s ease;
+        }
+        .nf-input-wrap .field-icon.clickable:hover {
+            color: #EF2853;
+        }
+        .nf-auth-btn {
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(135deg, #EF2853 0%, #D81A43 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 15px;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 6px 18px rgba(239, 40, 83, 0.28);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .nf-auth-btn:hover {
+            background: linear-gradient(135deg, #D81A43 0%, #B81335 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(239, 40, 83, 0.38);
+        }
+        .nf-auth-btn:active {
+            transform: translateY(0);
+        }
+        .nf-trust-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 14px 10px;
+            margin-top: 22px;
+            background: #FFF9FA;
+            border-radius: 12px;
+            border: 1px dashed #F8D2DA;
+            font-size: 11.5px;
+            color: #52525B;
+        }
+        .nf-trust-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
+        }
+        .nf-trust-item i {
+            color: #EF2853;
+            font-size: 13px;
+        }
+        .nf-auth-footer {
+            text-align: center;
+            padding: 18px 24px 22px;
+            background: #FAFAFA;
+            border-top: 1px solid #F4F4F5;
+        }
+        .nf-auth-footer p {
+            font-size: 13.5px;
+            color: #71717A;
+            margin: 0;
+        }
+        .nf-auth-footer a.nf-login-link {
+            color: #EF2853;
+            font-weight: 700;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nf-auth-footer a.nf-login-link:hover {
+            color: #C71B41;
+            text-decoration: underline;
+        }
+        .nf-auth-alert {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nf-auth-alert.error {
+            background: #FEF2F2;
+            color: #DC2626;
+            border: 1px solid #FECACA;
+        }
+        .nf-auth-alert.success {
+            background: #F0FDF4;
+            color: #16A34A;
+            border: 1px solid #BBF7D0;
+        }
+        .nf-terms-note {
+            font-size: 11.5px;
+            color: #71717A;
+            text-align: center;
+            margin-top: 12px;
+            line-height: 1.4;
+        }
+    </style>
+
+    <div class="nf-auth-wrapper">
+        <div class="nf-auth-card">
+            <div class="nf-auth-top-bar"></div>
+
+            <div class="nf-auth-body">
+                <div class="text-center">
+                    <span class="nf-auth-badge"><i class="flaticon-sparkle"></i> Join the Nari Club</span>
+                    <div class="nf-auth-avatar">
+                        <i class="flaticon-sparkle"></i>
+                    </div>
+                    <h3 class="nf-auth-title">Create Account</h3>
+                    <p class="nf-auth-sub">Enjoy exclusive offers, fast checkout &amp; order tracking.</p>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="nf-auth-alert {% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                        {% if message.tags == 'error' %}⚠{% else %}✓{% endif %} {{ message }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" action="/register/">
+                    {% csrf_token %}
+
+                    <div class="nf-auth-field">
+                        <label for="id_name">Full Name</label>
+                        <div class="nf-input-wrap">
+                            <input type="text" name="name" id="id_name" placeholder="e.g. Priya Sharma" required autocomplete="name">
+                            <span class="field-icon"><i class="flaticon-user"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="nf-auth-field">
+                        <label for="id_phone">Phone Number (10 digits)</label>
+                        <div class="nf-input-wrap">
+                            <input type="tel" name="phone" id="id_phone" placeholder="Enter 10-digit mobile number" required pattern="[0-9]{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,10);" autocomplete="tel">
+                            <span class="field-icon"><i class="flaticon-user"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="nf-auth-field">
+                        <label for="id_email">Email Address</label>
+                        <div class="nf-input-wrap">
+                            <input type="email" name="email" id="id_email" placeholder="priya@example.com" required autocomplete="email">
+                            <span class="field-icon"><i class="flaticon-email"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="nf-auth-field">
+                        <label for="id_reg_password">Password</label>
+                        <div class="nf-input-wrap">
+                            <input type="password" name="password" id="id_reg_password" placeholder="Create a secure password (min. 6 chars)" required minlength="6" autocomplete="new-password">
+                            <span class="field-icon clickable" onclick="toggleRegPassword()" title="Show/Hide Password" id="toggleRegPasswordBtn">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="regEyeSvg">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Optional Delivery Address -->
+                    <div class="mb-3 pt-2 border-top">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label mb-0 fw-bold small text-muted text-uppercase" style="font-size: 11.5px; letter-spacing: 0.5px;">
+                                <i class="flaticon-location me-1"></i> Delivery Address (Optional)
+                            </label>
+                            <span class="badge bg-light text-muted border" style="font-size: 10px;">For Easy Orders</span>
+                        </div>
+                        <div class="nf-input-wrap mb-2">
+                            <input type="text" name="address" placeholder="House / Flat No., Street, Colony">
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="nf-input-wrap">
+                                    <input type="text" name="city" placeholder="City">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="nf-input-wrap">
+                                    <input type="text" name="pincode" placeholder="PIN Code" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6);">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="nf-input-wrap">
+                                    <input type="text" name="state" placeholder="State (e.g. Delhi, UP, Maharashtra)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="nf-auth-btn">
+                        <span>CREATE MY ACCOUNT</span>
+                        <i class="flaticon-up-right-arrow"></i>
+                    </button>
+
+                    <p class="nf-terms-note">By signing up, you agree to our Terms of Service &amp; Privacy Policy.</p>
+                </form>
+
+                <div class="nf-trust-strip">
+                    <div class="nf-trust-item"><i class="flaticon-sparkle"></i> Member Perks</div>
+                    <div class="nf-trust-item"><i class="flaticon-shopping-bag"></i> 100% Safe</div>
+                    <div class="nf-trust-item"><i class="flaticon-left-arrow"></i> Easy Returns</div>
+                </div>
+            </div>
+
+            <div class="nf-auth-footer">
+                <p>Already have an account? <a href="/login/" class="nf-login-link">Sign In Here</a></p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+function toggleRegPassword() {
+    const passwordInput = document.getElementById('id_reg_password');
+    const eyeSvg = document.getElementById('regEyeSvg');
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeSvg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+    } else {
+        passwordInput.type = 'password';
+        eyeSvg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+    }
+}
+</script>
+{% endblock %}

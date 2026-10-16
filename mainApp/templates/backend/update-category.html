@@ -1,6 +1,8 @@
 {% extends 'backend/index.html' %}
 {% load static %}
+{% load rmeditor %}
 {% block body %}
+{% rmeditor_media %}
 <div class=" w-100">
     <div class="">
         <div class="container-fluid">
@@ -113,18 +115,18 @@
                                     </div>
 
                                     <!-- Meta Title -->
-                                    <div class="col-lg-6">
+                                    <div class="col-lg-12">
                                         <div class="mb-3">
-                                            <label class="form-label">Meta Title</label>
-                                            <input type="text" class="form-control" name="title" value="{{ data.title }}">
+                                            <label class="form-label">Page / SEO Title (Optional)</label>
+                                            <input type="text" class="form-control" name="title" value="{{ data.title|default:'' }}">
                                         </div>
                                     </div>
 
                                     <!-- Meta Description -->
-                                    <div class="col-lg-6">
+                                    <div class="col-lg-12">
                                         <div class="mb-3">
-                                            <label class="form-label">Meta Description</label>
-                                            <textarea name="description" class="form-control" rows="2">{{ data.description }}</textarea>
+                                            <label class="form-label">Category Blog / SEO Description (Rich Text Editor)</label>
+                                            <textarea name="description" class="form-control rmeditor" rows="6" placeholder="Write rich-text blog, article or description for this category...">{{ data.description|default:'' }}</textarea>
                                         </div>
                                     </div>
                                 </div>

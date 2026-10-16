@@ -4,3 +4,4 @@ djangorestframework==3.17.1
 requests==2.34.2
 whitenoise==6.12.0
 dj-database-url==2.3.0
+django-rmeditor>=0.1.15

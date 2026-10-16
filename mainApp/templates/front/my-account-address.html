@@ -1,0 +1,122 @@
+{% extends "front/index.html" %}
+{% load static %}
+
+{% block title %}Saved Addresses | Nari Fashion Store{% endblock %}
+
+{% block body %}
+<main>
+    <div class="ul-container">
+        <div class="ul-breadcrumb">
+            <h2 class="ul-breadcrumb-title">Saved Addresses</h2>
+            <div class="ul-breadcrumb-nav">
+                <a href="/"><i class="flaticon-home"></i> Home</a>
+                <i class="flaticon-arrow-point-to-right"></i>
+                <a href="/my-account/">My Account</a>
+                <i class="flaticon-arrow-point-to-right"></i>
+                <span class="current-page">Addresses</span>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .nf-account{display:grid;grid-template-columns:280px 1fr;gap:30px;padding:clamp(25px,4vw,50px) 0}
+        @media(max-width:991px){.nf-account{grid-template-columns:1fr}}
+        .nf-card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.05);border:1px solid #f0f0f0;overflow:hidden}
+        .nf-sidebar-profile{padding:30px 24px;text-align:center;background:linear-gradient(135deg,#FFF5F4 0%,#FFF0EE 100%);border-bottom:1px solid #f0e6e4}
+        .nf-avatar{width:80px;height:80px;margin:0 auto 14px;background:linear-gradient(135deg,#F5224D,#FF941F);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px;font-weight:700;box-shadow:0 6px 20px rgba(245,34,77,.25)}
+        .nf-sidebar-profile h4{font-size:18px;font-weight:700;color:#111827;margin:0 0 3px}
+        .nf-sidebar-profile .nf-phone{font-size:13px;color:#6b7280;margin:0}
+        .nf-sidebar-nav{padding:12px}
+        .nf-sidebar-nav a{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;color:#4b5563;font-size:14px;font-weight:500;text-decoration:none;transition:all .2s;margin-bottom:2px}
+        .nf-sidebar-nav a i{font-size:18px;width:22px;text-align:center}
+        .nf-sidebar-nav a:hover{background:#fef2f2;color:#F5224D}
+        .nf-sidebar-nav a.active{background:linear-gradient(135deg,#F5224D,#FF941F);color:#fff;font-weight:600;box-shadow:0 4px 15px rgba(245,34,77,.2)}
+        .nf-sidebar-nav a.active i{color:#fff}
+        .nf-sidebar-nav .nf-nav-logout{color:#ef4444;margin-top:8px;border-top:1px solid #f3f4f6;padding-top:14px}
+        .nf-sidebar-nav .nf-nav-logout:hover{background:#fef2f2;color:#dc2626}
+        @media(max-width:991px){
+            .nf-sidebar-profile{padding:18px 20px;display:flex;align-items:center;gap:14px;text-align:left}
+            .nf-avatar{width:52px;height:52px;font-size:22px;margin:0;flex-shrink:0}
+            .nf-sidebar-nav{display:flex;overflow-x:auto;gap:8px;padding:10px 14px;-webkit-overflow-scrolling:touch}
+            .nf-sidebar-nav::-webkit-scrollbar{display:none}
+            .nf-sidebar-nav a{white-space:nowrap;padding:8px 14px;font-size:13px;margin-bottom:0;background:#F9FAFB;flex-shrink:0}
+            .nf-sidebar-nav .nf-nav-logout{margin-top:0;border-top:none;padding-top:8px}
+        }
+        .nf-addr-header{padding:24px 28px;border-bottom:1px solid #f3f4f6;display:flex;justify-content:space-between;align-items:center}
+        .nf-addr-header h4{font-size:18px;font-weight:700;color:#111827;margin:0}
+        .nf-addr-header .nf-count{font-size:13px;color:#6b7280;background:#f3f4f6;padding:4px 14px;border-radius:20px;font-weight:500}
+        .nf-addr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding:24px}
+        .nf-addr-card{border:2px solid #f3f4f6;border-radius:14px;padding:22px;transition:all .25s;position:relative}
+        .nf-addr-card:hover{border-color:#fecdd3;box-shadow:0 4px 16px rgba(245,34,77,.06)}
+        .nf-addr-card-type{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#FFF5F4,#FFF0EE);color:#F5224D;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 12px;border-radius:6px;margin-bottom:14px}
+        .nf-addr-card-text{font-size:14px;color:#374151;line-height:1.7;margin:0 0 10px}
+        .nf-addr-card-phone{font-size:13px;color:#6b7280;display:flex;align-items:center;gap:6px}
+        .nf-empty{text-align:center;padding:60px 20px}
+        .nf-empty-icon{width:90px;height:90px;background:linear-gradient(135deg,#FFF5F4,#FFF0EE);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 22px;font-size:40px;color:#F5224D}
+        .nf-empty h5{font-size:20px;font-weight:700;color:#111827;margin:0 0 10px}
+        .nf-empty p{font-size:14px;color:#9ca3af;margin:0 0 28px;max-width:340px;margin-left:auto;margin-right:auto;line-height:1.7}
+        .nf-empty-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#F5224D,#FF941F);color:#fff;padding:13px 30px;border-radius:10px;font-weight:600;font-size:15px;text-decoration:none;transition:all .25s}
+        .nf-empty-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(245,34,77,.3);color:#fff}
+    </style>
+
+    <div class="ul-container">
+        <div class="nf-account">
+            <!-- Sidebar -->
+            <div>
+                <div class="nf-card" style="position:sticky;top:100px">
+                    <div class="nf-sidebar-profile">
+                        <div class="nf-avatar">{{ buyer.name|slice:":1"|upper }}</div>
+                        <h4>{{ buyer.name }}</h4>
+                        <p class="nf-phone">📞 {{ buyer.phone }}</p>
+                    </div>
+                    <nav class="nf-sidebar-nav">
+                        <a href="/my-account/"><i class="flaticon-user"></i> Dashboard</a>
+                        <a href="/my-account-orders/"><i class="flaticon-shopping-bag"></i> My Orders</a>
+                        <a href="/my-account-address/" class="active"><i class="flaticon-location"></i> Addresses</a>
+                        <a href="/my-account-edit/"><i class="flaticon-edit"></i> Edit Profile</a>
+                        <a href="/wishlist/"><i class="flaticon-heart"></i> Wishlist</a>
+                        <a href="/logout/" class="nf-nav-logout"><i class="flaticon-close"></i> Sign Out</a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div>
+                <div class="nf-card">
+                    <div class="nf-addr-header">
+                        <h4>📍 Delivery Addresses</h4>
+                        {% if addresses %}<span class="nf-count">{{ addresses|length }} saved</span>{% endif %}
+                    </div>
+
+                    {% if addresses %}
+                    <div class="nf-addr-grid">
+                        {% for addr in addresses %}
+                        <div class="nf-addr-card">
+                            <div class="nf-addr-card-type">
+                                {% if addr.addressType == 'Home' or addr.addressType == 'home' %}🏠{% elif addr.addressType == 'Office' or addr.addressType == 'office' %}🏢{% else %}📍{% endif %}
+                                {{ addr.addressType|default:"Home" }}
+                            </div>
+                            <p class="nf-addr-card-text">
+                                {{ addr.address }}{% if addr.landmark %}, {{ addr.landmark }}{% endif %}<br>
+                                {{ addr.city }}, {{ addr.state }} — {{ addr.pin }}
+                            </p>
+                            {% if addr.alternatePhone %}
+                            <p class="nf-addr-card-phone">📞 {{ addr.alternatePhone }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="nf-empty">
+                        <div class="nf-empty-icon"><i class="flaticon-location"></i></div>
+                        <h5>No Saved Addresses</h5>
+                        <p>Your delivery addresses will be automatically saved here when you place an order during checkout.</p>
+                        <a href="/cart/" class="nf-empty-btn">🛒 Go to Cart</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

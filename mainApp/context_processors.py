@@ -11,10 +11,17 @@ def navigation_context(request):
     if not catalog_sc:
         catalog_sc = list(all_sc)
 
+    cart = request.session.get('cart', {})
+    cart_count = sum(item.get('quantity', 1) for item in cart.values()) if isinstance(cart, dict) else 0
+    wishlist = request.session.get('wishlist', [])
+    wishlist_count = len(wishlist) if isinstance(wishlist, (list, set)) else 0
+
     return {
         'nav_supercategories': catalog_sc,
         'all_supercategories': all_sc,
         'all_maincategories': Maincategory.objects.select_related('supercategory').all(),
         'all_categories': Category.objects.select_related('maincategory').all(),
         'all_subcategories': Subcategory.objects.select_related('category').all(),
+        'header_cart_count': cart_count,
+        'header_wishlist_count': wishlist_count,
     }

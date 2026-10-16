@@ -1,9 +1,33 @@
 {% extends "front/index.html" %}
 {%load static%}
-{%block title%}{{ops.title}}{%endblock%}
+{%block title%}{% if ops.title %}{{ ops.title }}{% elif current_title %}{{ current_title }}{% else %}Shop{% endif %} &mdash; Nari Fashion Store{%endblock%}
 {%block description%}
-        <meta name="description" content="{{ops.description}}">
-    {%endblock%}
+    <meta name="description" content="{% if ops.description %}{{ ops.description|striptags|truncatewords:25 }}{% elif current_description %}{{ current_description|striptags|truncatewords:25 }}{% else %}Discover latest {{ current_title }} collection at Nari Fashion Store with premium quality and best offers.{% endif %}">
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+    <meta property="og:title" content="{% if ops.title %}{{ ops.title }}{% elif current_title %}{{ current_title }}{% else %}Shop{% endif %} &mdash; Nari Fashion Store">
+    <meta property="og:description" content="{% if ops.description %}{{ ops.description|striptags|truncatewords:25 }}{% elif current_description %}{{ current_description|striptags|truncatewords:25 }}{% else %}Discover latest {{ current_title }} collection at Nari Fashion Store.{% endif %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:type" content="website">
+
+    {% if breadcrumbs %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {% for b in breadcrumbs %}
+        {
+          "@type": "ListItem",
+          "position": {{ forloop.counter }},
+          "name": "{{ b.name|escapejs }}",
+          "item": "{{ request.scheme }}://{{ request.get_host }}{{ b.url }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ]
+    }
+    </script>
+    {% endif %}
+{%endblock%}
 {%block body%}
     <main>
         <!-- MAIN CONTENT SECTION START -->
@@ -79,52 +103,64 @@
                     </style>
                     
                     
-                    <!-- Breadcrumbs & Heading -->
-                    <div class="col-12 mb-3">
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb" style="--bs-breadcrumb-divider: '/'; background: transparent; padding: 0.5rem 0; margin-bottom: 0.5rem;">
-                                {% for b in breadcrumbs %}
-                                    {% if forloop.last %}
-                                        <li class="breadcrumb-item active" aria-current="page" style="font-weight: 600; color: #ff6f61;">{{ b.name }}</li>
-                                    {% else %}
-                                        <li class="breadcrumb-item"><a href="{{ b.url }}" style="color: #666; text-decoration: none;">{{ b.name }}</a></li>
-                                    {% endif %}
-                                {% endfor %}
-                            </ol>
-                        </nav>
-                        <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 15px;">{{ current_title }}</h2>
-                    </div>
-
-                    <!-- Circular Child Navigation -->
-                    {% if child_items %}
-                    <div class="col-lg-12 col-md-12 col-12 mb-4">
-                        <div class="row ul-bs-row justify-content-center text-center">
-                            {% for item in child_items %}
-                            <a href="{{ item.url }}" class="col-lg-2 col-md-3 col-4 text-center category-link" style="margin-bottom: 15px;">
-                                {% if item.image %}
-                                <img src="{{ item.image }}" alt="{{ item.name }}" style="border-radius: 50%; width: 85px; height: 85px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                                {% else %}
-                                <div style="border-radius: 50%; width: 85px; height: 85px; background: #f1f3f5; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; color: #495057; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                                    {{ item.name|slice:":3" }}
+                    <!-- Luxury Category Banner Header -->
+                    <div class="col-12 mb-4">
+                        <div class="category-hero-card" style="background: linear-gradient(135deg, #FFF5F7 0%, #FFF8F1 100%); border: 1px solid #FFE4EA; border-radius: 16px; padding: 22px 28px; box-shadow: 0 4px 16px rgba(245, 34, 77, 0.04);">
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb mb-2" style="--bs-breadcrumb-divider: '›'; font-size: 13px;">
+                                    {% for b in breadcrumbs %}
+                                        {% if forloop.last %}
+                                            <li class="breadcrumb-item active fw-bold" aria-current="page" style="color: #F5224D;">{{ b.name }}</li>
+                                        {% else %}
+                                            <li class="breadcrumb-item"><a href="{{ b.url }}" class="text-muted text-decoration-none">{{ b.name }}</a></li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ol>
+                            </nav>
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                                <div>
+                                    <h1 class="category-main-h1 m-0 d-inline-block" style="font-size: 26px; font-weight: 800; color: #111827; letter-spacing: -0.5px;">{{ current_title }}</h1>
+                                    <span class="badge rounded-pill ms-2 px-3 py-1" style="background: linear-gradient(135deg, #F5224D 0%, #FF941F 100%); color: #fff; font-size: 12px; font-weight: 600; vertical-align: middle;">
+                                        {% if page_posts.paginator.count %}{{ page_posts.paginator.count }}{% else %}{{ page_posts|length }}{% endif %} Products
+                                    </span>
                                 </div>
+                                {% if ops.description or current_description %}
+                                <p class="text-muted m-0" style="font-size: 13px; max-width: 600px;">{{ ops.description|default:current_description|truncatewords:20 }}</p>
                                 {% endif %}
-                                <h6 style="font-size: 14px; margin-top: 8px;">{{ item.name }}</h6>
-                            </a>
-                            {% endfor %}
+                            </div>
+
+                            <!-- Subcategories Shelf inside Header -->
+                            {% if child_items %}
+                            <div class="subcategories-shelf mt-3 pt-3 border-top" style="border-color: rgba(245, 34, 77, 0.1) !important;">
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <span class="text-uppercase fw-bold text-muted me-1" style="font-size: 11px; letter-spacing: 1px;">Categories:</span>
+                                    {% for item in child_items %}
+                                    <a href="{{ item.url }}" class="subcat-chip text-decoration-none d-inline-flex align-items-center gap-2 px-3 py-2 bg-white rounded-pill border" style="border-color: #FFE4EA !important; transition: all 0.25s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                                        {% if item.image %}
+                                        <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy" onerror="this.onerror=null; this.src='{%static 'assets/img/image.png'%}';" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                                        {% endif %}
+                                        <span class="fw-semibold text-dark" style="font-size: 13px;">{{ item.name }}</span>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% elif categories and not category and not subcategory %}
+                            <div class="subcategories-shelf mt-3 pt-3 border-top" style="border-color: rgba(245, 34, 77, 0.1) !important;">
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <span class="text-uppercase fw-bold text-muted me-1" style="font-size: 11px; letter-spacing: 1px;">Categories:</span>
+                                    {% for item in categories %}
+                                    <a href="{{ item.get_hierarchy_url }}" class="subcat-chip text-decoration-none d-inline-flex align-items-center gap-2 px-3 py-2 bg-white rounded-pill border" style="border-color: #FFE4EA !important; transition: all 0.25s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                                        {% if item.image %}
+                                        <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy" onerror="this.onerror=null; this.src='{%static 'assets/img/image.png'%}';" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                                        {% endif %}
+                                        <span class="fw-semibold text-dark" style="font-size: 13px;">{{ item.name }}</span>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
-                    {% elif categories and not category and not subcategory %}
-                    <div class="col-lg-12 col-md-12 col-12 mb-4">
-                        <div class="row ul-bs-row justify-content-center text-center">
-                            {% for item in categories %}
-                            <a href="{{ item.get_hierarchy_url }}" class="col-lg-2 col-md-3 col-4 text-center category-link" style="margin-bottom: 15px;">
-                                <img src="{{ item.image }}" alt="{{ item.name }}" style="border-radius: 50%; width: 85px; height: 85px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                                <h6 style="font-size: 14px; margin-top: 8px;">{{ item.name }}</h6>
-                            </a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
                     
 
                     <!-- left side bar -->
@@ -490,22 +526,42 @@
 
                     <!-- right products container -->
                     <div class="col-lg-9 col-md-8">
-                        <button class="btn btn-primary d-block d-md-none mb-3" onclick="toggleFilter()">
-                          <i class="fas fa-filter"></i> Filter
-                        </button>
+                        <!-- Listing Toolbar -->
+                        <div class="d-flex align-items-center justify-content-between p-3 mb-3 bg-white rounded-3 border" style="border-color: #ECEFF2 !important; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted" style="font-size: 14px;">Showing <strong class="text-dark">{% if page_posts.paginator.count %}{{ page_posts.paginator.count }}{% else %}{{ page_posts|length }}{% endif %}</strong> Results</span>
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger d-md-none rounded-pill px-3" onclick="toggleFilter()" style="border-color: #F5224D; color: #F5224D;">
+                                <i class="fas fa-filter me-1"></i> Filters
+                            </button>
+                        </div>
+
                         {%if page_posts%}
-                        <div class="row ul-bs-row row-cols-lg-3 row-cols-2 row-cols-xxs-1">
+                        <div class="row ul-bs-row row-cols-lg-3 row-cols-md-2 row-cols-2">
                             {%for item in page_posts%}
                             <!-- product card -->
                             <div class="col">
                                 <div class="ul-product">
                                     <div class="ul-product-heading">
-                                        <span class="ul-product-price">&#8377;{{item.price}}</span>
-                                        <span class="ul-product-discount-tag">{{item.discount}}% Off</span>
+                                        <div class="d-flex align-items-baseline gap-1">
+                                            <span class="ul-product-price">&#8377;{{item.price|floatformat:0}}</span>
+                                            {% if item.base_price and item.base_price > item.price %}
+                                            <span class="text-muted text-decoration-line-through ms-1" style="font-size: 12px;">&#8377;{{item.base_price|floatformat:0}}</span>
+                                            {% endif %}
+                                        </div>
+                                        {% if item.discount and item.discount > 0 %}
+                                        <span class="ul-product-discount-tag">{{item.discount|floatformat:0}}% Off</span>
+                                        {% endif %}
                                     </div>
 
                                     <div class="ul-product-img">
-                                        <img src="{{item.image1}}" alt="Product Image" style="border-radius: 15px; width: 100%; height: 250px;">
+                                        <img src="{{item.image1}}" alt="{{item.name}}" loading="lazy" onerror="this.onerror=null; this.src='{%static 'assets/img/image.png'%}';">
+
+                                        <div class="ul-product-actions">
+                                            <button type="button" class="btn-card-add-cart" data-id="{{item.id}}" title="Add to Cart"><i class="flaticon-shopping-bag"></i></button>
+                                            <a href="/product-details/{{item.name|slugify}}/{{item.id}}" aria-label="View {{item.name}}" title="View Details"><i class="flaticon-hide"></i></a>
+                                            <button type="button" class="btn-card-add-wishlist" data-id="{{item.id}}" title="Add to Wishlist"><i class="flaticon-heart"></i></button>
+                                        </div>
                                     </div>
 
                                     <div class="ul-product-txt">
@@ -903,7 +959,239 @@
                       }
                     </script>
                 </div>
+            <!-- POPULAR SEO REGIONAL SEARCHES SECTION (Romegamart SEO Pattern) -->
+            {% if popular_links %}
+            <div class="category-popular-links-section my-5 pt-4 border-top">
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+                        <div>
+                            <span class="badge rounded-pill px-3 py-2 text-uppercase fw-semibold" style="background: rgba(245, 34, 77, 0.08); color: #F5224D; letter-spacing: 0.5px; font-size: 11px;">
+                                <i class="fas fa-map-marked-alt me-1"></i> Regional Directory & Popular Searches
+                            </span>
+                            <h2 class="h5 fw-bold text-dark mt-2 mb-1" style="font-size: 1.35rem;">
+                                Popular Searches & Wholesale Locations for {{ current_title }}
+                            </h2>
+                            <p class="text-muted small mb-0">
+                                Browse top regional suppliers, verified manufacturers, and wholesale hubs for {{ current_title }} across India.
+                            </p>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="input-group input-group-sm" style="max-width: 260px;">
+                                <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted small"></i></span>
+                                <input type="text" id="popularLinkSearchInput" class="form-control bg-light border-start-0" placeholder="Filter by state (e.g. Maharashtra)...">
+                            </div>
+                            <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill flex-shrink-0" style="font-size: 12px;">
+                                <strong id="popularLinksTotalCount">{{ popular_links|length }}</strong> Locations
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Popular Links Grid -->
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-2 pt-2" id="popularLinksGrid">
+                        {% for link in popular_links %}
+                        <div class="col popular-seo-col {% if forloop.counter > 16 %}popular-link-extra d-none{% endif %}" data-keyword="{{ link.title|lower }} {{ link.state|lower }}">
+                            <a href="{{ link.url }}" class="popular-seo-card d-flex align-items-center justify-content-between text-decoration-none p-2 px-3 rounded-3 border" title="{{ link.title }}">
+                                <div class="d-flex align-items-center gap-2 text-truncate">
+                                    <i class="fas fa-map-marker-alt text-danger opacity-75 small flex-shrink-0"></i>
+                                    <span class="popular-seo-title text-truncate fw-medium" style="color: #2b3445; font-size: 13px;">{{ link.title }}</span>
+                                </div>
+                                {% if link.state %}
+                                <span class="badge bg-light text-muted border ms-2 flex-shrink-0 popular-seo-state-badge" style="font-size: 10px;">{{ link.state }}</span>
+                                {% endif %}
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if popular_links|length > 16 %}
+                    <div class="text-center mt-3 pt-2" id="togglePopularLinksWrap">
+                        <button type="button" id="btnTogglePopularLinks" class="btn btn-sm btn-outline-danger rounded-pill px-4" style="font-size: 12px; font-weight: 500;">
+                            <span>Show All Locations ({{ popular_links|length }})</span> <i class="fas fa-chevron-down ms-1"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
+
+            <style>
+                .popular-seo-card {
+                    background: #ffffff;
+                    border-color: #ECEFF2 !important;
+                    transition: all 0.22s ease-in-out;
+                    min-height: 44px;
+                }
+                .popular-seo-card:hover {
+                    border-color: #F5224D !important;
+                    background: #fffafa;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(245, 34, 77, 0.08);
+                }
+                .popular-seo-card:hover .popular-seo-title {
+                    color: #F5224D !important;
+                }
+                .popular-seo-card:hover .popular-seo-state-badge {
+                    background: #F5224D !important;
+                    color: #ffffff !important;
+                    border-color: #F5224D !important;
+                }
+                @media (max-width: 576px) {
+                    .popular-seo-card {
+                        padding: 8px 10px !important;
+                    }
+                    .popular-seo-title {
+                        font-size: 12px !important;
+                    }
+                }
+            </style>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const searchInput = document.getElementById('popularLinkSearchInput');
+                    const items = document.querySelectorAll('.popular-seo-col');
+                    const toggleBtn = document.getElementById('btnTogglePopularLinks');
+                    const toggleWrap = document.getElementById('togglePopularLinksWrap');
+                    let isExpanded = false;
+
+                    if (searchInput) {
+                        searchInput.addEventListener('input', function () {
+                            const filter = this.value.trim().toLowerCase();
+                            if (filter.length > 0) {
+                                if (toggleWrap) toggleWrap.classList.add('d-none');
+                                items.forEach(function (item) {
+                                    const text = item.getAttribute('data-keyword') || '';
+                                    if (text.includes(filter)) {
+                                        item.classList.remove('d-none');
+                                    } else {
+                                        item.classList.add('d-none');
+                                    }
+                                });
+                            } else {
+                                if (toggleWrap) toggleWrap.classList.remove('d-none');
+                                items.forEach(function (item, index) {
+                                    if (!isExpanded && index >= 16) {
+                                        item.classList.add('d-none');
+                                    } else {
+                                        item.classList.remove('d-none');
+                                    }
+                                });
+                            }
+                        });
+                    }
+
+                    if (toggleBtn) {
+                        toggleBtn.addEventListener('click', function () {
+                            isExpanded = !isExpanded;
+                            const extras = document.querySelectorAll('.popular-link-extra');
+                            if (isExpanded) {
+                                extras.forEach(el => el.classList.remove('d-none'));
+                                toggleBtn.innerHTML = '<span>Show Less</span> <i class="fas fa-chevron-up ms-1"></i>';
+                            } else {
+                                extras.forEach(el => el.classList.add('d-none'));
+                                toggleBtn.innerHTML = '<span>Show All Locations ({{ popular_links|length }})</span> <i class="fas fa-chevron-down ms-1"></i>';
+                                const section = document.querySelector('.category-popular-links-section');
+                                if (section) section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            }
+                        });
+                    }
+                });
+            </script>
+            {% endif %}
+
+            <!-- CATEGORY BLOG / SEO ARTICLE SECTION -->
+            {% if ops.description or description or related_blogs %}
+            <div class="category-seo-blog-section my-5 pt-4 border-top">
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+                    {% if ops.title %}
+                        <h2 class="category-seo-title mb-4 font-weight-bold" style="color: #222; font-size: 1.75rem; border-left: 4px solid #27338f; padding-left: 14px;">{{ ops.title }}</h2>
+                    {% elif current_title %}
+                        <h2 class="category-seo-title mb-4 font-weight-bold" style="color: #222; font-size: 1.75rem; border-left: 4px solid #27338f; padding-left: 14px;">{{ current_title }}</h2>
+                    {% endif %}
+                    
+                    {% if ops.description or description %}
+                    <div class="rich-text-content category-blog-content" style="line-height: 1.85; color: #444; font-size: 15px;">
+                        {{ ops.description|default:description|safe }}
+                    </div>
+                    {% endif %}
+
+                    {% if related_blogs %}
+                    <div class="category-related-blogs mt-4 pt-4 border-top">
+                        <h3 class="mb-3" style="font-size: 1.25rem; font-weight: 600; color: #222;"><i class="fa fa-book-open text-primary"></i> Style Guides & Articles for {{ current_title }}</h3>
+                        <div class="row row-cols-1 row-cols-md-3 g-3">
+                            {% for b in related_blogs %}
+                            <div class="col">
+                                <div class="card h-100 border shadow-none rounded-3 p-2 bg-light">
+                                    {% if b.image %}
+                                    <img src="{{ b.image }}" class="card-img-top rounded-2" alt="{{ b.title }}" style="height: 140px; object-fit: cover;">
+                                    {% endif %}
+                                    <div class="card-body p-2">
+                                        <h5 class="card-title fs-6"><a href="/blog-details/{{ b.slug }}" class="text-decoration-none text-dark fw-bold">{{ b.title }}</a></h5>
+                                        <p class="card-text small text-muted">{{ b.description|striptags|truncatewords:15 }}</p>
+                                        <a href="/blog-details/{{ b.slug }}" class="btn btn-sm btn-link p-0 text-primary">Read Article &rarr;</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <style>
+                .rich-text-content h1, .rich-text-content h2, .rich-text-content h3, .rich-text-content h4, .rich-text-content h5, .rich-text-content h6 {
+                    color: #222;
+                    margin-top: 1.25rem;
+                    margin-bottom: 0.75rem;
+                    font-weight: 600;
+                }
+                .rich-text-content p {
+                    margin-bottom: 1rem;
+                    line-height: 1.8;
+                    color: #4f4f4f;
+                }
+                .rich-text-content ul, .rich-text-content ol {
+                    margin-bottom: 1.2rem;
+                    padding-left: 1.5rem;
+                }
+                .rich-text-content li {
+                    margin-bottom: 0.4rem;
+                    line-height: 1.7;
+                }
+                .rich-text-content img {
+                    max-width: 100%;
+                    height: auto;
+                    border-radius: 8px;
+                    margin: 1rem 0;
+                }
+                .rich-text-content table {
+                    width: 100%;
+                    margin-bottom: 1.5rem;
+                    border-collapse: collapse;
+                }
+                .rich-text-content table th, .rich-text-content table td {
+                    padding: 10px 14px;
+                    border: 1px solid #dee2e6;
+                }
+                .rich-text-content table th {
+                    background: #f8f9fa;
+                    font-weight: 600;
+                }
+                .rich-text-content blockquote {
+                    border-left: 4px solid #27338f;
+                    padding-left: 15px;
+                    margin: 1.2rem 0;
+                    color: #666;
+                    font-style: italic;
+                }
+                .rich-text-content a {
+                    color: #27338f;
+                    text-decoration: underline;
+                }
+                .rich-text-content a:hover {
+                    color: #e65c00;
+                }
+            </style>
+            {% endif %}
         </div>
         <!-- MAIN CONTENT SECTION END -->
     </main>

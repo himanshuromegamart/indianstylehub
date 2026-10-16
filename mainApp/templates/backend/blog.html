@@ -32,7 +32,9 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Date</th>
+                                <th>Image</th>
                                 <th class="align-middle">Title</th>
+                                <th>Connected Target</th>
                                 <th>View</th>
                                 <th>Edit</th>
                                 <th>Delete</th>
@@ -41,10 +43,28 @@
                         <tbody>
                             {% for item in page_posts %}
                             <tr>
-                                <td>{{ item.date }}</td>
-                                <td>{{ item.title|slice:":100" }}</td>
+                                <td>{{ item.date|date:"d M Y" }}</td>
                                 <td>
-                                    <a href="/blog-details/{{ item.title_slug }}" target="_blank">
+                                    {% if item.image %}
+                                        <img src="{{ item.image }}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 5px;">
+                                    {% else %}
+                                        <span class="badge bg-secondary">No img</span>
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ item.title|slice:":75" }}</strong></td>
+                                <td>
+                                    {% if item.supercategory %}
+                                        <span class="badge bg-primary">Supercat: {{ item.supercategory.name }}</span>
+                                    {% elif item.category %}
+                                        <span class="badge bg-info">Cat: {{ item.category.name }}</span>
+                                    {% elif item.product %}
+                                        <span class="badge bg-success">Product: {{ item.product.name|truncatechars:22 }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">General</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="/blog-details/{{ item.slug }}" target="_blank">
                                         <i class="fa fa-eye"></i>
                                     </a>
                                 </td>

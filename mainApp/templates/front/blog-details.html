@@ -1,9 +1,35 @@
 {% extends "front/index.html" %}
 {%load static%}
-{%block title%}{{data.title}}{%endblock%}
+{%block title%}{{data.title}} - Nari Fashion Blog{%endblock%}
 {%block description%}
-        <meta name="description" content="{{data.meta_description}}">
-    {%endblock%}
+    <meta name="description" content="{% if data.meta_description %}{{ data.meta_description }}{% else %}{{ data.description|striptags|truncatewords:25 }}{% endif %}">
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+    <meta property="og:title" content="{{ data.title }} - Nari Fashion Blog">
+    <meta property="og:description" content="{% if data.meta_description %}{{ data.meta_description }}{% else %}{{ data.description|striptags|truncatewords:25 }}{% endif %}">
+    <meta property="og:image" content="{{ data.image }}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:type" content="article">
+
+    <!-- Schema.org Article Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "{{ data.title|escapejs }}",
+      "image": ["{{ data.image }}"],
+      "datePublished": "{{ data.date|date:'c' }}",
+      "author": {
+        "@type": "Organization",
+        "name": "Nari Fashion Store"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Nari Fashion Store"
+      },
+      "description": "{% if data.meta_description %}{{ data.meta_description|escapejs }}{% else %}{{ data.description|striptags|truncatewords:30|escapejs }}{% endif %}"
+    }
+    </script>
+{%endblock%}
 {%block body%}
 
     <main>
@@ -28,10 +54,10 @@
                     <!-- blog details -->
                     <div class="ul-blog-details">
                         <div class="ul-blog ul-blog-big">
-                            <h3 class="ul-blog-title">{{data.title}}</h3>
+                            <h1 class="ul-blog-title" style="font-size: 28px; font-weight: 700; color: #111; margin-bottom: 20px;">{{data.title}}</h1>
 
                             <div class="ul-blog-img">
-                                <img src="{{data.image}}" alt="Blog Image">
+                                <img src="{{data.image}}" alt="{{data.title}}">
 
                                 <div class="ul-blog-infos ul-blog-details-infos flex gap-x-[30px] mb-[16px]">
                                     <!-- single info -->
@@ -42,15 +68,41 @@
                                     <!-- single info -->
                                     <div class="ul-blog-info">
                                         <span class="icon"><i class="flaticon-calendar"></i></span>
-                                        <span class="text font-normal text-[14px] text-etGray">{{data.date}}</span>
+                                        <span class="text font-normal text-[14px] text-etGray">{{data.date|date:"F d, Y"}}</span>
                                     </div>
                                 </div>
                             </div>
 
+                            {% if data.product or data.category or data.supercategory %}
+                            <div class="alert alert-info d-flex align-items-center justify-content-between p-3 my-4 rounded-3 border-0" style="background: #eef2ff;">
+                                <div>
+                                    <span class="badge bg-primary me-2">Shop Collection</span>
+                                    <strong class="text-dark">
+                                        {% if data.product %}
+                                            Check out {{ data.product.name }}
+                                        {% elif data.category %}
+                                            Explore {{ data.category.name }} collection
+                                        {% elif data.supercategory %}
+                                            Explore {{ data.supercategory.name }}
+                                        {% endif %}
+                                    </strong>
+                                </div>
+                                <div>
+                                    {% if data.product %}
+                                    <a href="/product-details/{{ data.product.name|slugify }}/{{ data.product.id }}" class="btn btn-sm btn-primary">View Product &rarr;</a>
+                                    {% elif data.category %}
+                                    <a href="{{ data.category.get_hierarchy_url }}" class="btn btn-sm btn-primary">Explore Category &rarr;</a>
+                                    {% elif data.supercategory %}
+                                    <a href="/{{ data.supercategory.slug }}/" class="btn btn-sm btn-primary">Shop Now &rarr;</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+
                             <div class="ul-blog-txt">
-                                <p class="ul-blog-descr">
+                                <div class="rich-text-content" style="line-height: 1.85; color: #333; font-size: 16px;">
                                     {{data.description|safe}}
-                                </p>
+                                </div>
                             </div>
 
                             {% comment %} <!-- actions -->
@@ -239,4 +291,59 @@
         </div>
         <!-- BLOG SECTION END -->
     </main>
+
+    <style>
+        .rich-text-content h1, .rich-text-content h2, .rich-text-content h3, .rich-text-content h4, .rich-text-content h5, .rich-text-content h6 {
+            color: #1a1a1a;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+        .rich-text-content p {
+            margin-bottom: 1.15rem;
+            line-height: 1.85;
+            color: #3f3f3f;
+        }
+        .rich-text-content ul, .rich-text-content ol {
+            margin-bottom: 1.25rem;
+            padding-left: 1.75rem;
+        }
+        .rich-text-content li {
+            margin-bottom: 0.45rem;
+            line-height: 1.75;
+        }
+        .rich-text-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1.25rem 0;
+        }
+        .rich-text-content table {
+            width: 100%;
+            margin-bottom: 1.5rem;
+            border-collapse: collapse;
+        }
+        .rich-text-content table th, .rich-text-content table td {
+            padding: 10px 14px;
+            border: 1px solid #dee2e6;
+        }
+        .rich-text-content table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        .rich-text-content blockquote {
+            border-left: 4px solid #27338f;
+            padding-left: 18px;
+            margin: 1.25rem 0;
+            color: #555;
+            font-style: italic;
+        }
+        .rich-text-content a {
+            color: #27338f;
+            text-decoration: underline;
+        }
+        .rich-text-content a:hover {
+            color: #e65c00;
+        }
+    </style>
 {%endblock%}

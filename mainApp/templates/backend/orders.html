@@ -1,0 +1,226 @@
+{% extends 'backend/index.html' %}
+{% load static %}
+{% block body %}
+
+<div class="row">
+    <div class="col-lg-12">
+        {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+                    <div>
+                        <h4 class="card-title mb-1 text-primary">
+                            <i class="bx bx-shopping-bag me-1"></i> Customer Orders Management
+                        </h4>
+                        <p class="text-muted small mb-0">View, track, and update customer order fulfillment statuses.</p>
+                    </div>
+                </div>
+
+                <!-- Status Filter Pills -->
+                <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+                    <span class="text-muted small fw-bold me-1">Filter Status:</span>
+                    <a href="/admin-order/{% if search_query %}?search_query={{ search_query }}{% endif %}" 
+                       class="btn btn-sm {% if not status_filter %}btn-dark{% else %}btn-outline-secondary{% endif %} rounded-pill">
+                        All ({{ total_count }})
+                    </a>
+                    <a href="/admin-order/?status=pending{% if search_query %}&search_query={{ search_query }}{% endif %}" 
+                       class="btn btn-sm {% if status_filter == 'pending' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %} rounded-pill">
+                        Pending ({{ pending_count }})
+                    </a>
+                    <a href="/admin-order/?status=confirmed{% if search_query %}&search_query={{ search_query }}{% endif %}" 
+                       class="btn btn-sm {% if status_filter == 'confirmed' %}btn-info text-white{% else %}btn-outline-info{% endif %} rounded-pill">
+                        Confirmed ({{ confirmed_count }})
+                    </a>
+                    <a href="/admin-order/?status=shipped{% if search_query %}&search_query={{ search_query }}{% endif %}" 
+                       class="btn btn-sm {% if status_filter == 'shipped' %}btn-primary{% else %}btn-outline-primary{% endif %} rounded-pill">
+                        Shipped ({{ shipped_count }})
+                    </a>
+                    <a href="/admin-order/?status=delivered{% if search_query %}&search_query={{ search_query }}{% endif %}" 
+                       class="btn btn-sm {% if status_filter == 'delivered' %}btn-success{% else %}btn-outline-success{% endif %} rounded-pill">
+                        Delivered ({{ delivered_count }})
+                    </a>
+                    <a href="/admin-order/?status=cancelled{% if search_query %}&search_query={{ search_query }}{% endif %}" 
+                       class="btn btn-sm {% if status_filter == 'cancelled' %}btn-danger{% else %}btn-outline-danger{% endif %} rounded-pill">
+                        Cancelled ({{ cancelled_count }})
+                    </a>
+                </div>
+
+                <!-- Search Form -->
+                <div class="row mb-3">
+                    <div class="col-md-6 col-lg-5">
+                        <form method="get" action="/admin-order/" class="d-flex align-items-center">
+                            {% if status_filter %}
+                            <input type="hidden" name="status" value="{{ status_filter }}">
+                            {% endif %}
+                            <div class="input-group">
+                                <input type="text" name="search_query" class="form-control" 
+                                       placeholder="Search by Order ID, Name, Phone, Waybill..." 
+                                       value="{{ search_query }}">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fa fa-search"></i> Search
+                                </button>
+                                {% if search_query or status_filter %}
+                                <a href="/admin-order/" class="btn btn-outline-secondary btn-sm" title="Clear Filter">Clear</a>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Orders Table -->
+                <div class="table-responsive">
+                    <table class="table align-middle table-nowrap table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Order #</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Phone</th>
+                                <th>Product Details</th>
+                                <th>Qty</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Waybill / Tracking</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in page_posts %}
+                            <tr>
+                                <td>
+                                    <a href="/admin-order-details/{{ item.id }}/" class="fw-bold text-primary font-monospace">
+                                        #{{ item.id }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ item.orderDate|default:"-"|slice:":16" }}</small>
+                                </td>
+                                <td>
+                                    <span class="fw-semibold">{% if item.buyer %}{{ item.buyer.name|default:"Customer" }}{% else %}Guest Customer{% endif %}</span>
+                                    {% if item.address and item.address.city %}
+                                    <br><small class="text-muted">{{ item.address.city }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.buyer.phone %}
+                                    <a href="tel:{{ item.buyer.phone }}" class="text-dark">{{ item.buyer.phone }}</a>
+                                    {% elif item.address.alternatePhone %}
+                                    <a href="tel:{{ item.address.alternatePhone }}" class="text-dark">{{ item.address.alternatePhone }}</a>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.product %}
+                                    <div class="d-flex align-items-center">
+                                        {% if item.product.image1 %}
+                                        <img src="{{ item.product.image1 }}" alt="{{ item.product.name }}" class="rounded me-2" style="width: 36px; height: 36px; object-fit: cover;">
+                                        {% endif %}
+                                        <div style="max-width: 200px; white-space: normal;">
+                                            <a href="/product-details/{{ item.product.name|slugify }}/{{ item.product.id }}" target="_blank" class="text-dark small fw-semibold">
+                                                {{ item.product.name|truncatewords:5 }}
+                                            </a>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">{{ item.quantity }}</span>
+                                </td>
+                                <td>
+                                    <strong>₹{{ item.finalPrice }}</strong>
+                                </td>
+                                <td>
+                                    {% if item.orderStatus|lower == "pending" %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    {% elif item.orderStatus|lower == "confirmed" %}
+                                    <span class="badge bg-info text-white">Confirmed</span>
+                                    {% elif item.orderStatus|lower == "shipped" %}
+                                    <span class="badge bg-primary">Shipped</span>
+                                    {% elif item.orderStatus|lower == "delivered" %}
+                                    <span class="badge bg-success">Delivered</span>
+                                    {% elif item.orderStatus|lower == "cancelled" %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ item.orderStatus }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.waywill %}
+                                    <span class="font-monospace small bg-light px-2 py-1 rounded border">{{ item.waywill }}</span>
+                                    {% else %}
+                                    <span class="text-muted small">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/admin-order-details/{{ item.id }}/" class="btn btn-outline-primary" title="View & Update Status">
+                                            <i class="fa fa-eye"></i> Details
+                                        </a>
+                                        <a href="/admin-delete-order/{{ item.id }}/" class="btn btn-outline-danger" 
+                                           onclick="return confirm('Are you sure you want to delete order #{{ item.id }}?');" 
+                                           title="Delete Order">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="10" class="text-center py-4 text-muted">
+                                    <i class="bx bx-package fs-2 d-block mb-2"></i>
+                                    No orders found matching your criteria.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if page_posts.paginator.num_pages > 1 %}
+                <nav class="mt-4">
+                    <ul class="pagination pagination-rounded justify-content-center mb-0">
+                        {% if page_posts.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_posts.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search_query={{ search_query }}{% endif %}">
+                                <i class="mdi mdi-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for page in page_range %}
+                        <li class="page-item {% if page == page_posts.number %}active{% endif %}">
+                            <a class="page-link" href="?page={{ page }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search_query={{ search_query }}{% endif %}">{{ page }}</a>
+                        </li>
+                        {% endfor %}
+
+                        {% if page_posts.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_posts.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search_query={{ search_query }}{% endif %}">
+                                <i class="mdi mdi-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,12 +1,89 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    
-    {% for item in products %}
+    <!-- Homepage -->
     <url>
-        <loc>https://narifashionstore.com/product-details/{{ item.name|slugify }}/{{ item.id }}</loc>
-        <lastmod>{{ item.date|date:"Y-m-d" }}</lastmod>
+        <loc>https://narifashionstore.com/</loc>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>
+    <!-- Core Hub Pages -->
+    <url>
+        <loc>https://narifashionstore.com/men/</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://narifashionstore.com/kid/</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://narifashionstore.com/blog/</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://narifashionstore.com/about-us/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://narifashionstore.com/contact/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://narifashionstore.com/faq/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.5</priority>
+    </url>
+
+    <!-- Main Categories -->
+    {% for mc in maincategories %}
+    <url>
+        <loc>https://narifashionstore.com/{{ mc.slug }}/</loc>
+        <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     {% endfor %}
 
+    <!-- Categories -->
+    {% for cat in categories %}
+    <url>
+        <loc>https://narifashionstore.com/category/{{ cat.name }}/</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    {% endfor %}
+
+    <!-- Blog Posts -->
+    {% for b in blogs %}
+    <url>
+        <loc>https://narifashionstore.com/blog-details/{{ b.slug }}/</loc>
+        <lastmod>{{ b.date|date:"Y-m-d" }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    {% endfor %}
+
+    <!-- Products -->
+    {% for item in products %}
+    <url>
+        <loc>https://narifashionstore.com/product-details/{{ item.name|slugify }}/{{ item.id }}/</loc>
+        <lastmod>{{ item.date|date:"Y-m-d" }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <!-- Popular Regional SEO Links -->
+    {% for pl in popular_links %}
+    {% if pl.url %}
+    <url>
+        <loc>{% if "http" in pl.url %}{{ pl.url }}{% else %}https://narifashionstore.com{{ pl.url }}{% endif %}</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    {% endif %}
+    {% endfor %}
+
 </urlset>
+

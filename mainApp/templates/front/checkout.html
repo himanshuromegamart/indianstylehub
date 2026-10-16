@@ -1,652 +1,505 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "front/index.html" %}
+{% load static %}
+{% block body %}
+    <main style="background: #F9FAFB; padding: 15px 0 40px 0;">
+        <div class="container" style="max-width: 1040px; padding: 0 15px;">
+            <!-- COMPACT BREADCRUMB / CHECKOUT HEADER -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between py-2 px-3 mb-3 bg-white rounded-3 shadow-sm" style="border: 1px solid #ECEFF2;">
+                <div class="d-flex align-items-center gap-2">
+                    <a href="/cart/" class="text-decoration-none text-muted small d-inline-flex align-items-center">
+                        <i class="flaticon-left-arrow me-1" style="font-size: 11px;"></i> Back to Cart
+                    </a>
+                    <span class="text-muted small">/</span>
+                    <span class="fw-bold text-dark small">Checkout &amp; Place Order</span>
+                </div>
+                <div class="d-none d-sm-flex align-items-center gap-2 text-success small fw-semibold">
+                    <i class="flaticon-sparkle"></i> 100% Safe &amp; Verified Order
+                </div>
+            </div>
 
+            <style>
+                @media (min-width: 992px) {
+                    .checkout-summary-card {
+                        position: sticky;
+                        top: 90px;
+                        z-index: 10;
+                    }
+                }
+                @media (max-width: 576px) {
+                    .checkout-summary-card {
+                        position: static !important;
+                        margin-top: 10px;
+                    }
+                    .btn-order-action {
+                        min-height: 48px !important;
+                        font-size: 14px !important;
+                    }
+                    .email-action-btn {
+                        padding-left: 10px !important;
+                        padding-right: 10px !important;
+                        font-size: 11.5px !important;
+                    }
+                    #checkoutOtpInput {
+                        letter-spacing: 4px !important;
+                        font-size: 15px !important;
+                    }
+                }
+            </style>
 
-<!-- Mirrored from glamics.temptics.com/checkout.html by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 26 Feb 2025 10:10:27 GMT -->
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+            {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'danger' }} alert-dismissible fade show rounded-3 py-2 px-3 small" role="alert">
+                    <i class="flaticon-close me-1"></i> {{ message }}
+                    <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
 
-    <!-- libraries CSS -->
-    <link rel="stylesheet" href="assets/icon/flaticon_glamer.css">
-    <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/vendor/splide/splide.min.css">
-    <link rel="stylesheet" href="assets/vendor/swiper/swiper-bundle.min.css">
-    <link rel="stylesheet" href="assets/vendor/slim-select/slimselect.css">
-    <link rel="stylesheet" href="assets/vendor/animate-wow/animate.min.css">
-
-    <!-- custom CSS -->
-    <link rel="stylesheet" href="assets/css/style.css">
-</head>
-
-<body>
-    <div class="preloader" id="preloader">
-        <div class="loader"></div>
-    </div>
-
-
-    <!-- SIDEBAR SECTION START -->
-    <div class="ul-sidebar">
-        <!-- header -->
-        <div class="ul-sidebar-header">
-            <div class="ul-sidebar-header-logo">
-                <a href="index.html">
-                    <img src="assets/img/logo.svg" alt="logo" class="logo">
+            {% if user.is_authenticated %}
+            <div class="d-flex align-items-center justify-content-between p-2 px-3 rounded-3 mb-3 border shadow-sm" style="background-color: #F0FDF4; border-color: #BBF7D0 !important; font-size: 13px; color: #166534;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="flaticon-user"></i>
+                    <span>Logged in as: <strong>{{ buyer.name|default:user.first_name|default:user.username }}</strong> ({{ user.username }})</span>
+                </div>
+                <a href="/logout/" class="btn btn-outline-success btn-sm py-0 px-2 fw-semibold" style="font-size: 11px; border-radius: 20px;">Switch Account</a>
+            </div>
+            {% else %}
+            <div class="d-flex flex-wrap align-items-center justify-content-between p-2 px-3 rounded-3 mb-3 border shadow-sm" style="background-color: #F0F9FF; border-color: #BAE6FD !important; font-size: 13px; color: #0369A1;">
+                <div class="d-flex align-items-center gap-2 mb-1 mb-md-0">
+                    <i class="flaticon-sparkle"></i>
+                    <span><strong>Quick Checkout:</strong> Fill your delivery details below to place order and create your account.</span>
+                </div>
+                <a href="/login/?next=/checkout/" class="btn btn-primary btn-sm py-0 px-3 fw-bold" style="font-size: 11px; border-radius: 20px;">
+                    Log In
                 </a>
             </div>
-            <!-- sidebar closer -->
-            <button class="ul-sidebar-closer"><i class="flaticon-close"></i></button>
-        </div>
+            {% endif %}
 
-        <div class="ul-sidebar-header-nav-wrapper d-block d-lg-none"></div>
-
-        <div class="ul-sidebar-about d-none d-lg-block">
-            <span class="title">About glamer</span>
-            <p class="mb-0">Phasellus eget fermentum mauris. Suspendisse nec dignissim nulla. Integer non quam commodo, scelerisque felis id, eleifend turpis. Phasellus in nulla quis erat tempor tristique eget vel purus. Nulla pharetra pharetra pharetra. Praesent varius eget justo ut lacinia. Phasellus pharetra, velit viverra lacinia consequat, ipsum odio mollis dolor, nec facilisis arcu arcu ultricies sapien. Quisque ut dapibus nunc. Vivamus sit amet efficitur velit. Phasellus eget fermentum mauris. Suspendisse nec dignissim nulla. Integer non quam commodo, scelerisque felis id, eleifend turpis. Phasellus in nulla quis erat tempor tristique eget vel purus. Nulla pharetra pharetra pharetra. Praesent varius eget justo ut lacinia. Phasellus pharetra velit.</p>
-        </div>
-
-
-        <!-- product slider -->
-        <div class="ul-sidebar-products-wrapper d-none d-lg-flex">
-            <div class="ul-sidebar-products-slider swiper">
-                <div class="swiper-wrapper">
-                    <!-- product card -->
-                    <div class="swiper-slide">
-                        <div class="ul-product">
-                            <div class="ul-product-heading">
-                                <span class="ul-product-price">$99.00</span>
-                                <span class="ul-product-discount-tag">25% Off</span>
+            <form method="POST" action="/checkout/" id="checkoutForm">
+                {% csrf_token %}
+                <div class="row g-3 align-items-start">
+                    <!-- LEFT COLUMN: Delivery Details & Payment Method -->
+                    <div class="col-lg-7 col-12">
+                        <!-- Contact & Delivery Address Card -->
+                        <div class="card border-0 shadow-sm rounded-3 p-3 p-md-4 bg-white mb-3" style="border: 1px solid #E5E7EB !important;">
+                            <div class="d-flex align-items-center justify-content-between pb-2 border-bottom mb-3">
+                                <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 15px;">
+                                    <span class="d-inline-flex align-items-center justify-content-center text-white rounded-circle" style="width: 22px; height: 22px; background: #EF2853; font-size: 11px; font-weight: 700;">1</span>
+                                    Delivery Address
+                                </h6>
+                                <span class="text-muted" style="font-size: 11px;">* Mandatory fields</span>
                             </div>
 
-                            <div class="ul-product-img">
-                                <img src="assets/img/product-img-1.jpg" alt="Product Image">
-
-                                <div class="ul-product-actions">
-                                    <button><i class="flaticon-shopping-bag"></i></button>
-                                    <a href="#"><i class="flaticon-hide"></i></a>
-                                    <button><i class="flaticon-heart"></i></button>
+                            <div class="row g-2">
+                                <!-- Full Name -->
+                                <div class="col-md-6 col-12">
+                                    <label class="form-label text-dark fw-semibold small mb-1">Full Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="name" class="form-control form-control-sm py-2 px-3 rounded-2" placeholder="e.g. Priya Sharma" required 
+                                           style="font-size: 13.5px; border-color: #D1D5DB;"
+                                           value="{{ form_data.name|default:initial_name|default:'' }}">
                                 </div>
-                            </div>
 
-                            <div class="ul-product-txt">
-                                <h4 class="ul-product-title"><a href="shop-details.html">Orange Airsuit</a></h4>
-                                <h5 class="ul-product-category"><a href="shop.html">Fashion Bag</a></h5>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- product card -->
-                    <div class="swiper-slide">
-                        <div class="ul-product">
-                            <div class="ul-product-heading">
-                                <span class="ul-product-price">$99.00</span>
-                                <span class="ul-product-discount-tag">25% Off</span>
-                            </div>
-
-                            <div class="ul-product-img">
-                                <img src="assets/img/product-img-2.jpg" alt="Product Image">
-
-                                <div class="ul-product-actions">
-                                    <button><i class="flaticon-shopping-bag"></i></button>
-                                    <a href="#"><i class="flaticon-hide"></i></a>
-                                    <button><i class="flaticon-heart"></i></button>
+                                <!-- Mobile Number -->
+                                <div class="col-md-6 col-12">
+                                    <label class="form-label text-dark fw-semibold small mb-1">Mobile Number <span class="text-danger">*</span></label>
+                                    <input type="tel" name="phone" maxlength="10" class="form-control form-control-sm py-2 px-3 rounded-2" placeholder="10-digit number" required 
+                                           style="font-size: 13.5px; border-color: #D1D5DB;"
+                                           oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
+                                           value="{{ form_data.phone|default:initial_phone|default:'' }}">
                                 </div>
-                            </div>
 
-                            <div class="ul-product-txt">
-                                <h4 class="ul-product-title"><a href="shop-details.html">Orange Airsuit</a></h4>
-                                <h5 class="ul-product-category"><a href="shop.html">Fashion Bag</a></h5>
-                            </div>
-                        </div>
-                    </div>
+                                <!-- Email Address with OTP Verification -->
+                                <div class="col-12 mt-2">
+                                    <label class="form-label text-dark fw-semibold small mb-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
+                                        <span>Email Address <span class="text-danger">*</span> <small class="text-muted fw-normal">(Verification required to place order)</small></span>
+                                        <span id="emailVerifiedBadge" class="badge bg-success text-white fw-semibold px-2 py-1 shadow-sm" style="font-size: 11px; display: {% if is_email_verified %}inline-flex{% else %}none{% endif %}; align-items: center; gap: 4px; border-radius: 6px;">
+                                            <i class="fa fa-check-circle"></i> Verified
+                                        </span>
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="email" id="checkoutEmail" name="email" class="form-control form-control-sm py-2 px-3 rounded-start-2" placeholder="name@example.com" required 
+                                               style="font-size: 13.5px; border-color: #D1D5DB;"
+                                               value="{{ form_data.email|default:initial_email|default:'' }}"
+                                               {% if is_email_verified %}readonly{% endif %}>
+                                        <button type="button" class="btn btn-outline-danger fw-semibold px-2 px-sm-3 email-action-btn" id="btnSendOtp" onclick="sendCheckoutOtp()" style="font-size: 12.5px; border-color: #EF2853; color: #EF2853; {% if is_email_verified %}display: none;{% endif %}">
+                                            Send OTP
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary fw-semibold px-2 px-sm-3 email-action-btn" id="btnChangeEmail" onclick="changeEmail()" style="font-size: 12.5px; {% if not is_email_verified %}display: none;{% endif %}">
+                                            Change Email
+                                        </button>
+                                    </div>
+                                    <small id="emailHelpText" class="{% if is_email_verified %}text-success fw-semibold{% else %}text-muted{% endif %} d-block mt-1" style="font-size: 11px;">
+                                        {% if is_email_verified %}
+                                            ✓ Email verified! Order confirmation &amp; invoice will be sent here.
+                                        {% else %}
+                                            Enter email and click "Send OTP" to verify before buying.
+                                        {% endif %}
+                                    </small>
 
-                    <!-- product card -->
-                    <div class="swiper-slide">
-                        <div class="ul-product">
-                            <div class="ul-product-heading">
-                                <span class="ul-product-price">$99.00</span>
-                                <span class="ul-product-discount-tag">25% Off</span>
-                            </div>
-
-                            <div class="ul-product-img">
-                                <img src="assets/img/product-img-2.jpg" alt="Product Image">
-
-                                <div class="ul-product-actions">
-                                    <button><i class="flaticon-shopping-bag"></i></button>
-                                    <a href="#"><i class="flaticon-hide"></i></a>
-                                    <button><i class="flaticon-heart"></i></button>
-                                </div>
-                            </div>
-
-                            <div class="ul-product-txt">
-                                <h4 class="ul-product-title"><a href="shop-details.html">Orange Airsuit</a></h4>
-                                <h5 class="ul-product-category"><a href="shop.html">Fashion Bag</a></h5>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="ul-sidebar-products-slider-nav flex-shrink-0">
-                <button class="prev"><i class="flaticon-left-arrow"></i></button>
-                <button class="next"><i class="flaticon-arrow-point-to-right"></i></button>
-            </div>
-        </div>
-
-        <div class="ul-sidebar-about d-none d-lg-block">
-            <p class="mb-0">Phasellus eget fermentum mauris. Suspendisse nec dignissim nulla. Integer non quam commodo, scelerisque felis id, eleifend turpis. Phasellus in nulla quis erat tempor tristique eget vel purus. Nulla pharetra pharetra pharetra. Praesent varius eget justo ut lacinia. Phasellus pharetra, velit viverra lacinia consequat, ipsum odio mollis dolor, nec facilisis arcu arcu ultricies sapien. Quisque ut dapibus nunc. Vivamus sit amet efficitur velit. Phasellus eget fermentum mauris. Suspendisse nec dignissim nulla. Integer non quam commodo, scelerisque felis id, eleifend turpis. Phasellus in nulla quis erat tempor tristique eget vel purus. Nulla pharetra pharetra pharetra. Praesent varius eget justo ut lacinia. Phasellus pharetra velit.</p>
-        </div>
-
-        <!-- sidebar footer -->
-        <div class="ul-sidebar-footer">
-            <span class="ul-sidebar-footer-title">Follow us</span>
-
-            <div class="ul-sidebar-footer-social">
-                <a href="#"><i class="flaticon-facebook-app-symbol"></i></a>
-                <a href="#"><i class="flaticon-twitter"></i></a>
-                <a href="#"><i class="flaticon-instagram"></i></a>
-                <a href="#"><i class="flaticon-youtube"></i></a>
-            </div>
-        </div>
-    </div>
-    <!-- SIDEBAR SECTION END -->
-
-    <!-- HEADER SECTION START -->
-    <header class="ul-header">
-        <!-- header top -->
-        <div class="ul-header-top">
-            <div class="ul-header-top-slider splide">
-                <div class="splide__track">
-                    <ul class="splide__list">
-                        <li class="splide__slide">
-                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
-                        </li>
-                        <li class="splide__slide">
-                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
-                        </li>
-                        <li class="splide__slide">
-                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
-                        </li>
-                        <li class="splide__slide">
-                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
-                        </li>
-                        <li class="splide__slide">
-                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
-                        </li>
-                        <li class="splide__slide">
-                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
-                        </li>
-                        <li class="splide__slide">
-                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
-                        </li>
-                        <li class="splide__slide">
-                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
-                        </li>
-                        <li class="splide__slide">
-                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
-                        </li>
-                        <li class="splide__slide">
-                            <p class="ul-header-top-slider-item"><i class="flaticon-sparkle"></i> limited time offer</p>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- header bottom -->
-        <div class="ul-header-bottom">
-            <div class="ul-container">
-                <div class="ul-header-bottom-wrapper">
-                    <!-- header left -->
-                    <div class="header-bottom-left">
-                        <div class="logo-container">
-                            <a href="index.html" class="d-inline-block"><img src="assets/img/logo.svg" alt="logo" class="logo"></a>
-                        </div>
-
-                        <!-- search form -->
-                        <div class="ul-header-search-form-wrapper flex-grow-1 flex-shrink-0">
-                            <form action="#" class="ul-header-search-form">
-                                <div class="dropdown-wrapper">
-                                    <select name="search-category" id="ul-header-search-category">
-                                        <option data-placeholder="true">Select Category</option>
-                                        <option value="1">Clothing</option>
-                                        <option value="2">Watches</option>
-                                        <option value="3">Jewellery</option>
-                                        <option value="4">Glasses</option>
-                                    </select>
-                                </div>
-                                <div class="ul-header-search-form-right">
-                                    <input type="search" name="header-search" id="ul-header-search" placeholder="Search Here">
-                                    <button type="submit"><span class="icon"><i class="flaticon-search-interface-symbol"></i></span></button>
-                                </div>
-                            </form>
-
-                            <button class="ul-header-mobile-search-closer d-xxl-none"><i class="flaticon-close"></i></button>
-                        </div>
-                    </div>
-
-                    <!-- header nav -->
-                    <div class="ul-header-nav-wrapper">
-                        <div class="to-go-to-sidebar-in-mobile">
-                            <nav class="ul-header-nav">
-                                <a href="index.html">Home</a>
-                                <a href="shop.html">Shop</a>
-                                <a href="shop.html">Women</a>
-                                <a href="shop.html">Men's</a>
-                                <a href="shop.html">Kids</a>
-                                <a href="blog.html">Blog</a>
-
-                                <div class="has-sub-menu has-mega-menu">
-                                    <a role="button">Pages</a>
-
-                                    <div class="ul-header-submenu ul-header-megamenu">
-                                        <div class="single-col">
-                                            <span class="single-col-title">Inner Pages</span>
-                                            <ul>
-                                                <li><a href="about.html">About</a></li>
-                                                <li><a href="blog.html">Blogs</a></li>
-                                                <li><a href="blog-2.html">Blogs Layout 2</a></li>
-                                                <li><a href="blog-details.html">Blog Details</a></li>
-                                                <li><a href="contact.html">Contact</a></li>
-                                                <li><a href="faq.html">FAQ</a></li>
-                                                <li><a href="our-store.html">Our Store</a></li>
-                                                <li><a href="reviews.html">Reviews</a></li>
-                                            </ul>
+                                    <!-- OTP Input Box -->
+                                    <div id="otpVerificationBox" class="mt-2 p-3 rounded-3 shadow-sm" style="display: none; background: #FFF5F7; border: 1.5px dashed #EF2853;">
+                                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-2">
+                                            <span class="fw-bold text-dark" style="font-size: 13px;">
+                                                <i class="fa fa-shield-alt text-danger me-1"></i> Enter 6-Digit Email OTP
+                                            </span>
+                                            <span id="otpTimerText" class="text-muted fw-semibold" style="font-size: 11.5px;"></span>
                                         </div>
-
-                                        <div class="single-col">
-                                            <span class="single-col-title">Shop Pages</span>
-                                            <ul>
-                                                <li><a href="shop.html">Shop Left Sidebar</a></li>
-                                                <li><a href="shop-right-sidebar.html">Shop Right Sidebar</a></li>
-                                                <li><a href="shop-no-sidebar.html">Shop Full Width</a></li>
-                                                <li><a href="shop-details.html">Shop Details</a></li>
-                                                <li><a href="wishlist.html">Wishlist</a></li>
-                                                <li><a href="cart.html">Cart</a></li>
-                                                <li><a href="checkout.html">Checkout</a></li>
-                                            </ul>
+                                        <div class="input-group">
+                                            <input type="text" id="checkoutOtpInput" maxlength="6" class="form-control form-control-sm py-2 px-2 px-sm-3 text-center fw-bold text-danger" placeholder="• • • • • •" style="font-size: 16px; letter-spacing: 6px; font-family: monospace; border-color: #EF2853;" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)" onkeypress="if(event.key === 'Enter'){ event.preventDefault(); verifyCheckoutOtp(); }">
+                                            <button type="button" class="btn btn-danger fw-bold px-3 email-action-btn" id="btnVerifyOtp" onclick="verifyCheckoutOtp()" style="background: #EF2853; border-color: #EF2853; font-size: 12.5px;">
+                                                Verify OTP &rarr;
+                                            </button>
                                         </div>
-
-                                        <div class="single-col">
-                                            <span class="single-col-title">Men's</span>
-                                            <ul>
-                                                <li><a href="#">Clothing</a></li>
-                                                <li><a href="#">Footwear</a></li>
-                                                <li><a href="#">Accessories</a></li>
-                                                <li><a href="#">Activewear</a></li>
-                                                <li><a href="#">Grooming</a></li>
-                                                <li><a href="#">Ethnic Wear</a></li>
-                                            </ul>
-                                        </div>
-
-                                        <div class="single-col">
-                                            <span class="single-col-title">Women's</span>
-                                            <ul>
-                                                <li><a href="#">Clothing</a></li>
-                                                <li><a href="#">Footwear</a></li>
-                                                <li><a href="#">Bags & Accessories</a></li>
-                                                <li><a href="#">Activewear</a></li>
-                                                <li><a href="#">Beauty & Grooming</a></li>
-                                                <li><a href="#">Ethnic Wear</a></li>
-                                            </ul>
-                                        </div>
-
-                                        <div class="single-col">
-                                            <span class="single-col-title">Children's</span>
-                                            <ul>
-                                                <li><a href="#">Clothing</a></li>
-                                                <li><a href="#">Footwear</a></li>
-                                                <li><a href="#">Accessories</a></li>
-                                                <li><a href="#">Toys & Games</a></li>
-                                                <li><a href="#">Baby Essentials</a></li>
-                                            </ul>
-                                        </div>
-
-                                        <div class="single-col">
-                                            <span class="single-col-title">Jewellery</span>
-                                            <ul>
-                                                <li><a href="#">Ethnic & Traditional Jewellery</a></li>
-                                                <li><a href="#">Bridal Jewellery</a></li>
-                                                <li><a href="#">Bracelets</a></li>
-                                                <li><a href="#">Rings</a></li>
-                                                <li><a href="#">Earrings</a></li>
-                                                <li><a href="#">Chains & Pendants</a></li>
-                                            </ul>
+                                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-1 mt-2">
+                                            <small id="otpStatusMsg" class="text-muted" style="font-size: 11.5px;">We have sent a verification code to your email.</small>
+                                            <button type="button" class="btn btn-link p-0 text-decoration-none text-danger fw-semibold" id="btnResendOtp" onclick="sendCheckoutOtp()" style="font-size: 11.5px; display: none;">
+                                                Resend OTP
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                            </nav>
-                        </div>
-                    </div>
 
-                    <!-- actions -->
-                    <div class="ul-header-actions">
-                        <button class="ul-header-mobile-search-opener d-xxl-none"><i class="flaticon-search-interface-symbol"></i></button>
-                        <button><i class="flaticon-user"></i></button>
-                        <a href="wishlist.html"><i class="flaticon-heart"></i></a>
-                        <a href="cart.html"><i class="flaticon-shopping-bag"></i></a>
-                    </div>
+                                <!-- Street Address -->
+                                <div class="col-12 mt-2">
+                                    <label class="form-label text-dark fw-semibold small mb-1">House / Flat No., Building, Area, Street <span class="text-danger">*</span></label>
+                                    <textarea name="address" rows="2" class="form-control form-control-sm px-3 py-2 rounded-2" placeholder="Flat No., Building Name, Street / Locality, Landmark" required style="font-size: 13.5px; border-color: #D1D5DB; resize: none;">{{ form_data.address|default:initial_address|default:'' }}</textarea>
+                                </div>
 
-                    <!-- sidebar opener -->
-                    <div class="d-inline-flex">
-                        <button class="ul-header-sidebar-opener"><i class="flaticon-hamburger"></i></button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-    <!-- HEADER SECTION END -->
+                                <!-- City -->
+                                <div class="col-md-4 col-12 mt-2">
+                                    <label class="form-label text-dark fw-semibold small mb-1">City / Town <span class="text-danger">*</span></label>
+                                    <input type="text" name="city" class="form-control form-control-sm py-2 px-3 rounded-2" placeholder="e.g. Mumbai" required 
+                                           style="font-size: 13.5px; border-color: #D1D5DB;"
+                                           value="{{ form_data.city|default:initial_city|default:'' }}">
+                                </div>
 
-    <main>
-        <!-- BREADCRUMB SECTION START -->
-        <div class="ul-container">
-            <div class="ul-breadcrumb">
-                <h2 class="ul-breadcrumb-title">Checkout</h2>
-                <div class="ul-breadcrumb-nav">
-                    <a href="index.html"><i class="flaticon-home"></i> Home</a>
-                    <i class="flaticon-arrow-point-to-right"></i>
-                    <span class="current-page">Checkout</span>
-                </div>
-            </div>
-        </div>
-        <!-- BREADCRUMB SECTION END -->
+                                <!-- State -->
+                                <div class="col-md-4 col-12 mt-2">
+                                    <label class="form-label text-dark fw-semibold small mb-1">State <span class="text-danger">*</span></label>
+                                    <input type="text" name="state" class="form-control form-control-sm py-2 px-3 rounded-2" placeholder="e.g. Maharashtra" required 
+                                           style="font-size: 13.5px; border-color: #D1D5DB;"
+                                           value="{{ form_data.state|default:initial_state|default:'' }}">
+                                </div>
 
-        <!-- CHEKOUT SECTION START -->
-        <div class="ul-cart-container">
-            <h3 class="ul-checkout-title">Billing Details</h3>
-            <form action="#" class="ul-checkout-form">
-                <div class="row ul-bs-row row-cols-2 row-cols-xxs-1">
-                    <!-- left side / checkout form -->
-                    <div class="col">
-                        <div class="row row-cols-lg-2 row-cols-1 ul-bs-row">
-                            <!-- first name -->
-                            <div class="form-group">
-                                <label for="firstname">First Name*</label>
-                                <input type="text" name="firstname" id="firstname" placeholder="Enter Your First Name">
-                            </div>
+                                <!-- Pincode -->
+                                <div class="col-md-4 col-12 mt-2">
+                                    <label class="form-label text-dark fw-semibold small mb-1">Pincode <span class="text-danger">*</span></label>
+                                    <input type="text" name="pincode" maxlength="6" class="form-control form-control-sm py-2 px-3 rounded-2" placeholder="6-digit PIN" required 
+                                           style="font-size: 13.5px; border-color: #D1D5DB;"
+                                           oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)"
+                                           value="{{ form_data.pincode|default:initial_pin|default:'' }}">
+                                </div>
 
-                            <!-- last name -->
-                            <div class="form-group">
-                                <label for="lastname">Last Name*</label>
-                                <input type="text" name="lastname" id="lastname" placeholder="Enter Your First Name">
-                            </div>
-
-                            <!-- company name -->
-                            <div class="form-group">
-                                <label for="companyname">Company Name</label>
-                                <input type="text" name="companyname" id="companyname" placeholder="Enter Your Company Name">
-                            </div>
-
-                            <!-- country -->
-                            <div class="form-group ul-checkout-country-wrapper">
-                                <label for="ul-checkout-country">Country*</label>
-                                <select name="country" id="ul-checkout-country">
-                                    <option data-placeholder="true">Select Country</option>
-                                    <option value="2">United States</option>
-                                    <option value="3">United Kingdom</option>
-                                    <option value="4">Germany</option>
-                                    <option value="5">France</option>
-                                    <option value="6">India</option>
-                                </select>
-                            </div>
-
-                            <!-- address 1 -->
-                            <div class="form-group">
-                                <label for="address1">Street Address*</label>
-                                <input type="text" name="address1" id="address1" placeholder="1837 E Homer M Adams Pkwy">
-                            </div>
-
-                            <!-- address 2 -->
-                            <div class="form-group">
-                                <label for="address2">Address 2*</label>
-                                <input type="text" name="address2" id="address2" placeholder="1837 E Homer M Adams Pkwy">
-                            </div>
-
-                            <!-- city -->
-                            <div class="form-group">
-                                <label for="city">City or Town*</label>
-                                <input type="text" name="city" id="city" placeholder="Enter Your City or Town">
-                            </div>
-
-                            <!-- state -->
-                            <div class="form-group">
-                                <label for="state">State*</label>
-                                <input type="text" name="state" id="state" placeholder="Enter Your State">
-                            </div>
-
-                            <!-- postcode -->
-                            <div class="form-group">
-                                <label for="zipcode">ZIP Code*</label>
-                                <input type="text" name="zipcode" id="zipcode" placeholder="Enter Your Postcode">
-                            </div>
-
-                            <!-- phone -->
-                            <div class="form-group">
-                                <label for="phone">Phone*</label>
-                                <input type="text" name="phone" id="phone" placeholder="Enter Your Phone Number">
-                            </div>
-
-                            <!-- email -->
-                            <div class="form-group col-lg-12">
-                                <label for="email">Email Address*</label>
-                                <input type="email" name="email" id="email" placeholder="Enter Your Email">
+                                <!-- Order Notes -->
+                                <div class="col-12 mt-2">
+                                    <label class="form-label text-dark fw-semibold small mb-1">Delivery Instructions <span class="text-muted fw-normal">(Optional)</span></label>
+                                    <input type="text" name="notes" class="form-control form-control-sm py-2 px-3 rounded-2" placeholder="e.g. Call before delivery, landmark near temple" 
+                                           style="font-size: 13.5px; border-color: #D1D5DB;"
+                                           value="{{ form_data.notes|default:'' }}">
+                                </div>
                             </div>
                         </div>
 
+                        <!-- Payment Method Card -->
+                        <div class="card border-0 shadow-sm rounded-3 p-3 p-md-4 bg-white" style="border: 1px solid #E5E7EB !important;">
+                            <div class="pb-2 border-bottom mb-3">
+                                <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 15px;">
+                                    <span class="d-inline-flex align-items-center justify-content-center text-white rounded-circle" style="width: 22px; height: 22px; background: #28a745; font-size: 11px; font-weight: 700;">2</span>
+                                    Payment Method
+                                </h6>
+                            </div>
+
+                            <div class="p-3 rounded-2 border d-flex align-items-center justify-content-between" style="background: #F9FDFA; border-color: #28A745 !important;">
+                                <div class="d-flex align-items-center gap-3">
+                                    <input class="form-check-input mt-0" type="radio" name="payment_method" id="payCOD" value="COD" checked style="width: 18px; height: 18px; accent-color: #28a745; cursor: pointer;">
+                                    <label class="form-check-label mb-0 cursor-pointer" for="payCOD">
+                                        <span class="d-block fw-bold text-dark" style="font-size: 14px;">Cash on Delivery (COD)</span>
+                                        <small class="text-muted" style="font-size: 12px;">Pay with cash or UPI directly to delivery agent at your doorstep.</small>
+                                    </label>
+                                </div>
+                                <span class="badge bg-success-subtle text-success px-2 py-1 fw-semibold" style="font-size: 11px;">Available</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- right side / different address -->
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="ul-checkout-different-address-field">Shift to A Different Address</label>
-                            <textarea name="different-address" id="ul-checkout-different-address-field" placeholder="2801 Lafayette Blvd, Norfolk, Vermont 23509, united state"></textarea>
-                        </div>
-
-                        <!-- different address checkbox -->
-                        <div class="ul-checkout-payment-methods">
-                            <div class="form-group">
-                                <label for="payment-option-1">
-                                    <input type="radio" name="payment-methods" id="payment-option-1" hidden checked>
-                                    <span class="ul-radio-wrapper"></span>
-                                    <span class="ul-checkout-payment-method">
-                                        <span class="title">Direct Bank Transfer</span>
-                                        <span class="descr">Neque porro est qui dolorem ipsum quia quaed inventor veritatis et quasi architecto beatae vitae dicta sunt explicabo. Aelltes port lacus quis enim var sed efficitur</span>
-                                    </span>
-                                </label>
+                    <!-- RIGHT COLUMN: Order Review & Submit Button -->
+                    <div class="col-lg-5 col-12">
+                        <div class="card border-0 shadow-sm rounded-3 p-3 p-md-4 bg-white" style="border: 1px solid #E5E7EB !important; position: sticky; top: 90px; z-index: 10;">
+                            <div class="d-flex align-items-center justify-content-between pb-2 border-bottom mb-3">
+                                <h6 class="fw-bold mb-0 text-dark" style="font-size: 15px;">Order Summary</h6>
+                                <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 11px;">{{ cart_items|length }} item{% if cart_items|length > 1 %}s{% endif %}</span>
                             </div>
 
-                            <div class="form-group">
-                                <label for="payment-option-2">
-                                    <input type="radio" name="payment-methods" id="payment-option-2" hidden>
-                                    <span class="ul-radio-wrapper"></span>
-                                    <span class="ul-checkout-payment-method">
-                                        <span class="title">Ship To A Different Address?</span>
-                                    </span>
-                                </label>
+                            <!-- Items List -->
+                            <div class="order-items-scroll mb-3 pe-1" style="max-height: 220px; overflow-y: auto;">
+                                {% for item in cart_items %}
+                                <div class="d-flex align-items-center justify-content-between py-2 border-bottom {% if forloop.last %}border-bottom-0{% endif %}">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div style="width: 44px; height: 44px; border-radius: 6px; overflow: hidden; background: #F8FAFC; border: 1px solid #E2E8F0; flex-shrink: 0;">
+                                            {% if item.image %}
+                                            <img src="{{ item.image }}" alt="{{ item.name }}" style="width: 100%; height: 100%; object-fit: contain;">
+                                            {% else %}
+                                            <img src="{% static 'assets/img/image.png' %}" alt="{{ item.name }}" style="width: 100%; height: 100%; object-fit: contain;">
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <span class="d-block fw-semibold text-dark text-truncate" style="max-width: 170px; font-size: 12.5px;" title="{{ item.name }}">{{ item.name }}</span>
+                                            <small class="text-muted" style="font-size: 11.5px;">Qty: {{ item.quantity }} &times; &#8377;{{ item.price|floatformat:0 }}</small>
+                                        </div>
+                                    </div>
+                                    <span class="fw-bold text-dark" style="font-size: 13.5px;">&#8377;{{ item.subtotal|floatformat:2 }}</span>
+                                </div>
+                                {% endfor %}
                             </div>
-                            <button type="submit" class="ul-checkout-form-btn">Place Your Order</button>
+
+                            <!-- Cost Breakdown -->
+                            <div class="border-top pt-2 mb-3" style="font-size: 13px;">
+                                <div class="d-flex justify-content-between mb-1 text-muted">
+                                    <span>Bag Total</span>
+                                    <span class="fw-semibold text-dark">&#8377;{{ subtotal|floatformat:2 }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 text-muted">
+                                    <span>Delivery Charges</span>
+                                    <span class="fw-bold text-success">FREE</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                    <span class="fw-bold text-dark" style="font-size: 15px;">Total Payable</span>
+                                    <span class="fw-bold text-danger" style="font-size: 19px;">&#8377;{{ total|floatformat:2 }}</span>
+                                </div>
+                                <small class="text-muted d-block text-end mt-1" style="font-size: 11px;">No advance payment required</small>
+                            </div>
+
+                            <!-- Submit Order Button -->
+                            <button type="submit" class="btn w-100 py-2 fw-bold text-uppercase shadow-sm" id="btnPlaceOrder" 
+                                    {% if not is_email_verified %}disabled{% endif %}
+                                    style="{% if is_email_verified %}background: #28a745; border-color: #28a745; cursor: pointer;{% else %}background: #9CA3AF; border-color: #9CA3AF; cursor: not-allowed; opacity: 0.85;{% endif %} color: #ffffff; border-radius: 8px; font-size: 13.5px; letter-spacing: 0.3px; transition: all 0.3s ease;">
+                                {% if is_email_verified %}
+                                    Place Order (Cash on Delivery) &rarr;
+                                {% else %}
+                                    <i class="fa fa-lock me-1"></i> Verify Email First to Buy
+                                {% endif %}
+                            </button>
+
+                            <div class="mt-3 pt-2 text-center text-muted" style="font-size: 11px; border-top: 1px dashed #E5E7EB;">
+                                <span>🔒 100% Verified Order &bull; Pay After Delivery &bull; Free Shipping</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </form>
-
-            <!-- bill summary -->
-            <div class="row ul-bs-row row-cols-2 row-cols-xxs-1">
-                <div class="ul-checkout-bill-summary">
-                    <h4 class="ul-checkout-bill-summary-title">Your Order</h4>
-
-                    <div>
-                        <div class="ul-checkout-bill-summary-header">
-                            <span class="left">Product</span>
-                            <span class="right">Sub Total</span>
-                        </div>
-
-
-                        <div class="ul-checkout-bill-summary-body">
-                            <div class="single-row"><span class="left">Pain Relievers</span><span class="right">$15.00</span></div>
-                            <div class="single-row"><span class="left">Sub Total</span><span class="right">$15.00</span></div>
-                            <div class="single-row"><span class="left">Shipping</span><span class="right">Free</span></div>
-                        </div>
-
-                        <div class="ul-checkout-bill-summary-footer ul-checkout-bill-summary-header">
-                            <span class="left">Total</span>
-                            <span class="right">$15.00</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
-        <!-- CHEKOUT SECTION END -->
     </main>
 
-    <!-- FOOTER SECTION START -->
-    <footer class="ul-footer">
-        <div class="ul-inner-container">
-            <div class="ul-footer-top">
-                <!-- single links column -->
-                <div class="ul-footer-top-widget">
-                    <h3 class="ul-footer-top-widget-title">Brands</h3>
+    <script>
+        let isEmailVerified = {% if is_email_verified %}true{% else %}false{% endif %};
+        let otpCooldownInterval = null;
 
-                    <div class="ul-footer-top-widget-links">
-                        <a href="#">Zara</a>
-                        <a href="#">Guess</a>
-                        <a href="#">Mango</a>
-                        <a href="#">LCWaikiki</a>
-                        <a href="#">Monda</a>
-                    </div>
-                </div>
+        function sendCheckoutOtp() {
+            const emailInput = document.getElementById('checkoutEmail');
+            const email = (emailInput.value || '').trim();
+            const nameInput = document.querySelector('input[name="name"]');
+            const name = nameInput ? nameInput.value.trim() : '';
 
-                <!-- single links column -->
-                <div class="ul-footer-top-widget">
-                    <h3 class="ul-footer-top-widget-title">Categories</h3>
+            if (!email || !email.includes('@') || !email.includes('.')) {
+                alert('Please enter a valid email address first.');
+                emailInput.focus();
+                return;
+            }
 
-                    <div class="ul-footer-top-widget-links">
-                        <a href="#">Watches</a>
-                        <a href="#">Watch Accessories</a>
-                        <a href="#">Clocks</a>
-                        <a href="#">Jewellery</a>
-                        <a href="#">Women’s Collection</a>
-                    </div>
-                </div>
+            const btn = document.getElementById('btnSendOtp');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Sending...';
 
-                <!-- single links column -->
-                <div class="ul-footer-top-widget">
-                    <h3 class="ul-footer-top-widget-title">Accessories</h3>
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '';
 
-                    <div class="ul-footer-top-widget-links">
-                        <a href="#">Order Tracking</a>
-                        <a href="#">Terms & Conditions</a>
-                        <a href="#">Privacy Policy</a>
-                        <a href="#">Tutorials</a>
-                        <a href="#">FAQ</a>
-                    </div>
-                </div>
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('name', name);
+            if (csrfToken) formData.append('csrfmiddlewaretoken', csrfToken);
 
-                <!-- single links column -->
-                <div class="ul-footer-top-widget">
-                    <h3 class="ul-footer-top-widget-title">Services</h3>
+            fetch('/send-checkout-email-otp/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                if (data.status === 'success') {
+                    document.getElementById('otpVerificationBox').style.display = 'block';
+                    const msgEl = document.getElementById('otpStatusMsg');
+                    msgEl.className = 'text-success fw-semibold';
+                    msgEl.innerText = data.message;
+                    const otpInput = document.getElementById('checkoutOtpInput');
+                    otpInput.value = '';
+                    otpInput.focus();
+                    startOtpCooldown(60);
+                } else {
+                    alert(data.message || 'Failed to send OTP. Please check your email and try again.');
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                alert('Network error while sending OTP. Please try again.');
+            });
+        }
 
-                    <div class="ul-footer-top-widget-links">
-                        <a href="#">Sale</a>
-                        <a href="#">Quick Ship</a>
-                        <a href="#">New Designs</a>
-                        <a href="#">Protection Plan</a>
-                        <a href="#">Gift Cards</a>
-                    </div>
-                </div>
+        function verifyCheckoutOtp() {
+            const emailInput = document.getElementById('checkoutEmail');
+            const email = (emailInput.value || '').trim();
+            const otpInput = document.getElementById('checkoutOtpInput');
+            const otp = (otpInput.value || '').trim();
 
-                <!-- single links column -->
-                <div class="ul-footer-top-widget">
-                    <h3 class="ul-footer-top-widget-title">Policies</h3>
+            if (!otp || otp.length !== 6) {
+                alert('Please enter the 6-digit OTP code sent to your email.');
+                otpInput.focus();
+                return;
+            }
 
-                    <div class="ul-footer-top-widget-links">
-                        <a href="#">Policy</a>
-                        <a href="#">Dressy Inside</a>
-                        <a href="#">About Us</a>
-                        <a href="#">Company</a>
-                        <a href="#">Careers</a>
-                    </div>
-                </div>
+            const btn = document.getElementById('btnVerifyOtp');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Verifying...';
 
-                <!-- single links column -->
-                <div class="ul-footer-top-widget">
-                    <h3 class="ul-footer-top-widget-title">Help</h3>
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '';
 
-                    <div class="ul-footer-top-widget-links">
-                        <a href="#">Contact us</a>
-                        <a href="#">About us</a>
-                        <a href="#">Reviews</a>
-                        <a href="#">Terms of Service</a>
-                        <a href="#">Refund policy</a>
-                    </div>
-                </div>
-            </div>
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('otp', otp);
+            if (csrfToken) formData.append('csrfmiddlewaretoken', csrfToken);
 
-            <div class="ul-footer-middle">
-                <!-- single widget -->
-                <div class="ul-footer-middle-widget">
-                    <h3 class="ul-footer-middle-widget-title">Download Our Apps</h3>
-                    <div class="ul-footer-middle-widget-content">
-                        <div class="app-links">
-                            <a href="#"><img src="assets/img/android.png" alt="Play Store Link Image"></a>
-                            <a href="#"><img src="assets/img/ios.png" alt="App Store Link Image"></a>
-                        </div>
-                    </div>
-                </div>
+            fetch('/verify-checkout-email-otp/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                if (data.status === 'success') {
+                    isEmailVerified = true;
+                    document.getElementById('otpVerificationBox').style.display = 'none';
+                    document.getElementById('emailVerifiedBadge').style.display = 'inline-flex';
+                    document.getElementById('btnSendOtp').style.display = 'none';
+                    document.getElementById('btnChangeEmail').style.display = 'inline-block';
+                    document.getElementById('checkoutEmail').readOnly = true;
+                    
+                    const helpText = document.getElementById('emailHelpText');
+                    helpText.innerText = '✓ Email verified! You can now place your order.';
+                    helpText.className = 'text-success fw-semibold d-block mt-1';
+                    
+                    if (otpCooldownInterval) clearInterval(otpCooldownInterval);
 
-                <!-- single widget -->
-                <div class="ul-footer-middle-widget">
-                    <h3 class="ul-footer-middle-widget-title">Follow us</h3>
-                    <div class="ul-footer-middle-widget-content">
-                        <div class="social-links">
-                            <a href="#"><i class="flaticon-facebook-app-symbol"></i></a>
-                            <a href="#"><i class="flaticon-twitter"></i></a>
-                            <a href="#"><i class="flaticon-linkedin-big-logo"></i></a>
-                            <a href="#"><i class="flaticon-youtube"></i></a>
-                        </div>
-                    </div>
-                </div>
+                    // Activate Place Order button
+                    updatePlaceOrderButton();
 
-                <!-- single widget -->
-                <div class="ul-footer-middle-widget">
-                    <h3 class="ul-footer-middle-widget-title">Need help? Call now!</h3>
-                    <div class="ul-footer-middle-widget-content">
-                        <div class="contact-nums">
-                            <a href="tel:1234567890">(500) 8001 8588</a>, <a href="tel:1234567890">(500) 544 6550</a>
-                        </div>
-                    </div>
-                </div>
+                    // Smooth scroll to Place Order button
+                    const placeBtn = document.getElementById('btnPlaceOrder');
+                    placeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    const msgEl = document.getElementById('otpStatusMsg');
+                    msgEl.className = 'text-danger fw-semibold';
+                    msgEl.innerText = data.message || 'Invalid or expired OTP. Please check the code.';
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                alert('Network error while verifying OTP.');
+            });
+        }
 
-                <!-- single widget -->
-                <div class="ul-footer-middle-widget align-self-center">
-                    <a href="index.html"><img src="assets/img/logo-white.svg" alt="logo" class="logo"></a>
-                </div>
-            </div>
+        function updatePlaceOrderButton() {
+            const placeBtn = document.getElementById('btnPlaceOrder');
+            if (!placeBtn) return;
+            if (isEmailVerified) {
+                placeBtn.disabled = false;
+                placeBtn.style.background = '#28a745';
+                placeBtn.style.borderColor = '#28a745';
+                placeBtn.style.color = '#ffffff';
+                placeBtn.style.cursor = 'pointer';
+                placeBtn.style.opacity = '1';
+                placeBtn.innerHTML = 'Place Order (Cash on Delivery) &rarr;';
+            } else {
+                placeBtn.disabled = true;
+                placeBtn.style.background = '#9CA3AF';
+                placeBtn.style.borderColor = '#9CA3AF';
+                placeBtn.style.color = '#ffffff';
+                placeBtn.style.cursor = 'not-allowed';
+                placeBtn.style.opacity = '0.85';
+                placeBtn.innerHTML = '<i class="fa fa-lock me-1"></i> Verify Email First to Buy';
+            }
+        }
 
-            <div class="ul-footer-bottom">
-                <p class="copyright-txt">Copyright 2024 © <a href="https://temptics.com/" class="ul-footer-bottom-link">Temptics</a></p>
-                <img src="assets/img/payment-methods.png" alt="payment methods logos">
-            </div>
-        </div>
-    </footer>
-    <!-- FOOTER SECTION END -->
+        function changeEmail() {
+            isEmailVerified = false;
+            const emailInput = document.getElementById('checkoutEmail');
+            emailInput.readOnly = false;
+            emailInput.focus();
+            document.getElementById('emailVerifiedBadge').style.display = 'none';
+            document.getElementById('btnSendOtp').style.display = 'inline-block';
+            document.getElementById('btnChangeEmail').style.display = 'none';
+            document.getElementById('otpVerificationBox').style.display = 'none';
+            const helpText = document.getElementById('emailHelpText');
+            helpText.innerText = 'Enter email and click "Send OTP" to verify before buying.';
+            helpText.className = 'text-muted d-block mt-1';
 
-    <!-- libraries JS -->
-    <script src="assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
-    <script src="assets/vendor/splide/splide.min.js"></script>
-    <script src="assets/vendor/splide/splide-extension-auto-scroll.min.js"></script>
-    <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-    <script src="assets/vendor/slim-select/slimselect.min.js"></script>
-    <script src="assets/vendor/animate-wow/wow.min.js"></script>
-    <script src="assets/vendor/splittype/index.min.js"></script>
-    <script src="assets/vendor/mixitup/mixitup.min.js"></script>
-    <script src="assets/vendor/fslightbox/fslightbox.js"></script>
+            // Deactivate Place Order button
+            updatePlaceOrderButton();
+        }
 
-    <!-- custom JS -->
-    <script src="assets/js/main.js"></script>
-</body>
+        function startOtpCooldown(seconds) {
+            const timerText = document.getElementById('otpTimerText');
+            const resendBtn = document.getElementById('btnResendOtp');
+            resendBtn.style.display = 'none';
 
+            if (otpCooldownInterval) clearInterval(otpCooldownInterval);
 
-<!-- Mirrored from glamics.temptics.com/checkout.html by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 26 Feb 2025 10:10:27 GMT -->
-</html>
+            let remaining = seconds;
+            timerText.innerText = `Resend in ${remaining}s`;
+
+            otpCooldownInterval = setInterval(() => {
+                remaining -= 1;
+                if (remaining <= 0) {
+                    clearInterval(otpCooldownInterval);
+                    timerText.innerText = '';
+                    resendBtn.style.display = 'inline-block';
+                } else {
+                    timerText.innerText = `Resend in ${remaining}s`;
+                }
+            }, 1000);
+        }
+
+        // Initialize button state on load
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePlaceOrderButton();
+        });
+
+        // Form Submit Validation: Enforce Verified Email before placing order
+        document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+            if (!isEmailVerified) {
+                e.preventDefault();
+                e.stopPropagation();
+                alert('Please verify your email address using the OTP code before placing your order.');
+                const emailInput = document.getElementById('checkoutEmail');
+                emailInput.focus();
+                emailInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
+            }
+
+            const btn = document.getElementById('btnPlaceOrder');
+            btn.disabled = true;
+            btn.innerHTML = 'Placing Your Order... <span class="spinner-border spinner-border-sm ms-2"></span>';
+        });
+    </script>
+{% endblock %}

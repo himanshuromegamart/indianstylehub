@@ -1,6 +1,8 @@
 {%extends 'backend/index.html'%}
 {%load static%}
+{%load rmeditor%}
 {%block body%}
+{%rmeditor_media%}
 <!-- ============================================================== -->
 <div class="main-contentw-100">
     <div class="page-nt">
@@ -457,8 +459,8 @@
                                 
                                 <div class="col-lg-12">
                                     <div class="mb-3">
-                                        <label class="form-label">Product Description <span class="text-danger">*</span></label>
-                                        <textarea name="description" class="form-control" cols="30" rows="3" placeholder="Product Description" >{{data.description}}</textarea>
+                                        <label class="form-label">Product Description / Blog Article (Rich Text Editor) <span class="text-danger">*</span></label>
+                                        <textarea name="description" class="form-control rmeditor" cols="30" rows="6" placeholder="Write rich-text product description, article, styling tips, etc...">{{ data.description|default:'' }}</textarea>
                                     </div>
                                 </div>
                                

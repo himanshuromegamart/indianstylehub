@@ -22,7 +22,9 @@ urlpatterns = [
     path('remove-from-cart/',views.remove_from_cart),
     path('cart/',views.cart_page),
     path('wishlist/',views.wishlist_page),
-    path('compare/',views.compare_page),
+    path('add-to-wishlist/',views.add_to_wishlist),
+    path('remove-from-wishlist/',views.remove_from_wishlist),
+    path('products/', views.dynamic_category_view, {'supercat': 'all'}),
     path('checkout/',views.checkout_page),
     path('blog/',views.blog_page),
     path('blog-details/<str:ops>/',views.blog_details_page),
@@ -37,6 +39,11 @@ urlpatterns = [
     path('login/',views.login_page),
     path('logout/',views.logout_page),
     path('register/',views.register),
+    path('forgot-password/',views.forgot_password_page, name='forgot_password'),
+    path('verify-reset-otp/',views.verify_reset_otp, name='verify_reset_otp'),
+    path('resend-reset-otp/',views.resend_reset_otp, name='resend_reset_otp'),
+    path('send-checkout-email-otp/', views.send_checkout_email_otp, name='send_checkout_email_otp'),
+    path('verify-checkout-email-otp/', views.verify_checkout_email_otp, name='verify_checkout_email_otp'),
     path('my-account/',views.my_account),
     path('my-account-address/',views.my_account_address),
     path('my-account-edit/',views.my_account_edit),
@@ -48,11 +55,14 @@ urlpatterns = [
     path('filter/',views.web_filter),
     path('sitemap.xml/',views.sitemap_page),
     path('robots.txt/',views.robots_txt),
+    path('firebase-messaging-sw.js',views.firebase_messaging_sw),
 
     #Backend
     #Image Upload
     path('prduct-store/',backend.product_store),
     path('admin-login/',backend.admin_login),
+    path('admin-logout/',backend.admin_logout),
+    path('admin-logout',backend.admin_logout),
     path('admin-dashboard/',backend.admin_dashboard),
 
 
@@ -112,6 +122,23 @@ urlpatterns = [
     #updating offers
     path('update-product-offers/<int:id>/<str:ops>/',backend.update_product_offers),
 
+    #Orders
+    path('admin-order/',backend.admin_orders_page),
+    path('admin-order-details/<int:id>/',backend.admin_order_details),
+    path('admin-delete-order/<int:id>/',backend.admin_delete_order),
+
+    # Registered Customers / Buyers
+    path('admin-buyer/',backend.admin_buyer),
+    path('admin-buyer-details/<int:id>/',backend.admin_buyer_details),
+    path('admin-delete-buyer/<int:id>/',backend.admin_delete_buyer),
+
+    #Firebase Push Notifications
+    path('save-device-token/',backend.save_device_token),
+    path('send',backend.send_notification),
+    path('send/',backend.send_notification),
+    path('admin-notifications/',backend.push_notifications_page),
+    path('admin-delete-device-token/<int:id>/',backend.delete_device_token),
+
     #Enquiry
     path('admin-enquiry/',backend.enquiry),
     path('enquiry-details/<int:id>/',backend.enquiry_details),
@@ -126,8 +153,15 @@ urlpatterns = [
     path('gallery/',backend.gallery_page),
     path('delete-gallery/<int:id>/',backend.delete_gallery),
 
+    # Popular Links (SEO)
+    path('popular-links/', backend.popular_links_page),
+    path('add-popular-link/', backend.add_popular_link),
+    path('update-popular-link/<int:id>/', backend.update_popular_link),
+    path('delete-popular-link/<int:id>/', backend.delete_popular_link),
+
     # Media files serving (works in production as well)
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+
 
     path('<str:supercat>/<str:mcat>/<str:cat>/<str:scat>/', views.dynamic_category_view, name='subcategory_view'),
     path('<str:supercat>/<str:mcat>/<str:cat>/', views.dynamic_category_view, name='category_view'),

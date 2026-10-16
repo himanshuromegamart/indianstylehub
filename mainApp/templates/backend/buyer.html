@@ -1,401 +1,196 @@
-{%extends 'superadmin/index.html'%}
-{%load static%}
-{%block body%}
-<!-- ============================================================== -->
-<style>
-    /* Style for the search button */
-    .search-btn {
-        padding: 10px 20px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        cursor: pointer;
-    }
+{% extends 'backend/index.html' %}
+{% load static %}
 
-    /* The Modal (background) */
-    .modal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1; /* Sit on top */
-        left: 0;
-        top: 0;
-        width: 100%; /* Full width */
-        height: 100%; /* Full height */
-        overflow: auto; /* Enable scroll if needed */
-        background-color: rgb(0,0,0); /* Fallback color */
-        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-    }
+{% block title %}Registered Users | Nari Fashion Admin{% endblock %}
 
-    /* Modal Content */
-    .modal-content {
-        background-color: #fefefe;
-        margin: 15% 55%; /* 15% from the top and centered */
-        padding: 20px;
-        border: 1px solid #888;
-        width: 40%; /* Could be more or less, depending on screen size */
-    }
+{% block body %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0 font-size-18">Registered Users &amp; Customers</h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/admin-dashboard/">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Users</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
 
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %} alert-dismissible fade show" role="alert">
+        <i class="mdi {% if message.tags == 'error' %}mdi-alert-circle{% else %}mdi-check-all{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+{% endif %}
 
-    /* Close button style */
-    .close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-    }
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pb-3 border-bottom mb-4">
+                    <div>
+                        <h4 class="card-title mb-1 fw-bold">All Registered Customers</h4>
+                        <p class="text-muted small mb-0">Total <span class="badge bg-primary rounded-pill px-2 py-1">{{ total_buyers }} Registered Users</span> in store</p>
+                    </div>
 
-    .close:hover, .close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-    /* Input field style */
-    .modal-content input {
-        width: 100%;
-        padding: 10px;
-        margin-top: 10px;
-        margin-bottom: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-    }
-
-    /* Submit button */
-    .modal-content button {
-        padding: 10px 20px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        cursor: pointer;
-        border-radius: 5px;
-    }
-
-    .modal-content button:hover {
-        background-color: #45a049;
-    }
-</style>
-<div class="main-contentw-100">
-    <div class="">
-        <div class="container-fluid">
-            
-            <div class="row">
-                
-                <div class="col-lg-12 mt-2">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-lg-4">
-                                    <form method="post" action="/admin-search-buyer/" class="d-flex align-items-center">
-                                        {%csrf_token%}
-                                        <div class="input-group">
-                                            <input type="text" name="name" class="form-control" placeholder="Search Here..." aria-label="Search" required>
-                                            <button type="submit" class="btn btn-primary btn-sm">Search</button>
-                                        </div>
-                                    </form>
-                                </div>
-                                
-                                
-                                <div class="col-lg-6">
-                            <h4 class="card-title mb-4 text-center">
-                                <button id="searchBtn" class="search-btn btn-sm">Filter</button>
-
-                                <!-- The Modal -->
-                                <div id="searchModal" class="modal">
-                                
-                                    <!-- Modal content -->
-                                    <div class="modal-content">
-                                        <span class="close">&times;</span>
-                                        <h2>Filter Buyer</h2>
-                                
-                                        <!-- Search form -->
-                                        <form method="POST" action="/admin-filter-buyer/">
-                                            {% csrf_token %}
-                                            <div class="row">
-                                                <div class="col-lg-6 col-12">
-                                                    <input type="date" name="from_date" value="{{from_date}}">
-                                                </div>
-                                                <div class="col-lg-6 col-12">
-                                            <input type="date" name="to_date" value="{{to_date}}" >
-                                        </div>
-                                        <div class="col-lg-4 col-12">
-                                            <select name="seller_type" class="form-control">
-                                                <option value="" selected  disabled>Select Buyer Type</option>
-                                                    <option value="Shopkeeper" {%if seller_type == "Shopkeeper"%} selected {%endif%}>Shopkeeper</option>
-                                                    <option value="Technician" {%if seller_type == "Technician"%} selected {%endif%}>Technician</option>
-                                                    <option value="Salesman" {%if seller_type == "Salesman"%} selected {%endif%}>Salesman</option>
-                                                    <option value="Wholesaler" {%if seller_type == "Wholesaler"%} selected {%endif%}>Wholesaler</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-lg-4 col-12">
-                                            <select name="verification" class="form-control">
-                                                <option value="" selected  disabled>Select Verification</option>
-                                                <option value="Pending" {%if verification == "Pending"%} selected {%endif%}>Pending</option>
-                                                <option value="Done" {%if verification == "Done"%} selected {%endif%}>Done</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-lg-4 col-12 ">
-                                            <select name="status" class="form-control">
-                                                <option value="" selected  disabled>Select Status</option>
-                                                <option value="Active"  {%if status == "Active"%} selected {%endif%}>Active</option>
-                                                <option value="Deactive"  {%if status == "Deactive"%} selected {%endif%}>Deactive</option>
-                                            </select>
-                                        </div>
-                                            <button type="submit" class="mt-4">Search</button>
-                                        </form>
-                                    </div>
-                                    </div>
-                                
-                                </div>
-                                
-                                <script>
-                                    // Get the modal
-                                    var modal = document.getElementById("searchModal");
-                                
-                                    // Get the button that opens the modal
-                                    var btn = document.getElementById("searchBtn");
-                                
-                                    // Get the <span> element that closes the modal
-                                    var span = document.getElementsByClassName("close")[0];
-                                
-                                    // When the user clicks the button, open the modal 
-                                    btn.onclick = function() {
-                                        modal.style.display = "block";
-                                    }
-                                
-                                    // When the user clicks on <span> (x), close the modal
-                                    span.onclick = function() {
-                                        modal.style.display = "none";
-                                    }
-                                
-                                    // When the user clicks anywhere outside of the modal, close it
-                                    window.onclick = function(event) {
-                                        if (event.target == modal) {
-                                            modal.style.display = "none";
-                                        }
-                                    }
-                                </script>
-                                Total Buyer( {{buy}} )</h4>
-                            </div>
+                    <!-- Search Box -->
+                    <form method="GET" action="/admin-buyer/" class="d-flex align-items-center gap-2">
+                        <div class="input-group">
+                            <input type="text" name="search" class="form-control form-control-sm" placeholder="Search by name, phone, email, city..." value="{{ search_query }}" style="min-width: 260px;">
+                            <button type="submit" class="btn btn-primary btn-sm"><i class="bx bx-search-alt"></i> Search</button>
                         </div>
-                            <div class="table-responsive">
-                                <table class="table align-middle table-nowrap mb-0" id="productTable">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th class="align-middle">Date</th>
-                                            <th class="align-middle">Type</th>
-                                            <th class="align-middle">Name</th>
-                                            <th class="align-middle">Email</th>
-                                            <th class="align-middle">Phone</th>
-                                            <th class="align-middle">Address</th>
-                                            <th class="align-middle">Login</th>
-                                            <th class="align-middle">Transfer</th>
-                                            <th class="align-middle">Verification</th>
-                                            <th class="align-middle">Status</th>
-                                            <th class="align-middle">View</th>
-                                            <th class="align-middle">Order</th>
-                                            <th class="align-middle">Delete</th>
-                                            <th class="align-middle">Notes</th>
-                                            
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {%for item in page_posts%}
-                                        <tr>
-                                            
-                                            <td> {{item.date}}</td>
-                                            <td> {{item.user_subtype}}</td>
-                                            <td> {{item.name|slice:"50"}}</td>
-                                            <td>
-                                                
-                                                {{item.email}}
-                                            
-                                            </td>
-                                            <td>
-                                                {{item.phone}}</td>
-                                                
-                                            <td title="{{item.address}}">
-                                                {{item.address|slice:"60"}}
-                                            </td> 
+                        {% if search_query %}
+                        <a href="/admin-buyer/" class="btn btn-outline-secondary btn-sm" title="Clear Search"><i class="bx bx-x"></i> Clear</a>
+                        {% endif %}
+                    </form>
+                </div>
 
-                                            <td>
-                                                <!-- Login as a Seller Section -->
-                                                <div class="">
-                                                    <form method="post" action="/users/login/" onsubmit="return confirmSubmission1()">
-                                                        {%csrf_token%}
-                                                        <input type="hidden" name="phone" value="{{ item.phone }}">
-                                                        <input type="hidden" name="password" value="{{ item.password }}">
-                                                        <button type="submit" class="btn btn-success ">Login</button>
-                                                    </form>
-                                                </div>
-                            
-                                                <script>
-                                                    function confirmSubmission1() {
-                                                        return confirm("Are you sure you want to login as a buyer?");
-                                                    }
-                                                </script>
-                                                </td>
-
-                                            <td>
-                                                <!-- Become Seller Section -->
-                                            <div class="">
-                                                <form method="post" action="/convert-buyer-into-seller/" onsubmit="return confirmSubmission()">
-                                                    {%csrf_token%}
-                                                    <input type="hidden" name="phone" value="{{ item.phone }}">
-                                                    <button type="submit" class="btn btn-warning ">Transfer as a Seller</button>
-                                                </form>
-                                            </div>
-                        
-                                            <script>
-                                                function confirmSubmission() {
-                                                    return confirm("Are you sure you want to transfer as a seller?");
-                                                }
-                                            </script>
-                                            </td>
-                                            <td>
-                                                {{item.verification}}
-                                            </td>
-                                            <td>
-                                                <div class="dropdown" >
-                                                    {%if item.status == "Active"%}
-                                                    <button class="btn btn-success btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                      {{item.status}}
-                                                    </button>
-                                                    {%else%}
-                                                    <button class="btn btn-danger btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                        {{item.status}}
-                                                      </button>
-                                                    {%endif%}
-                                                    <ul class="dropdown-menu">
-                                                      <li><a class="dropdown-item" href="/admin-buyer-status/{{item.id}}/Active">Active</a></li>
-                                                      <li><a class="dropdown-item" href="/admin-buyer-status/{{item.id}}/Deactive">Deactive</a></li>
-                                                     
-                                                    </ul>
-                                                  </div>
-                                            </td>
-                                            <td>
-                                                <a href="/admin-view-buyer/{{item.id}}"><i class="fa fa-eye"></i></a>
-                                            </td>
-
-                                            <td>
-                                                <a href="/admin-view-buyer-order/{{item.phone}}"><i class="fa fa-eye"></i></a>
-                                            </td>
-
-                                            <td>
-                                                <a href="#" onclick="confirmDelete('{{item.id}}')"><i class="fa fa-trash text-danger"></i></a>
-                                            </td>
-                                            <script>
-                                                function confirmDelete(id){
-                                                    if(confirm("Are You Sure?")){
-                                                     window.location.href="/admin-delete-buyer/"+id;
-                                                    }
-                                                    else {
-                                                        return false;
-                                                    }
-                                                }
-                                            </script>
-                                            {% if item.notes %}
-                                            <td>
-                                                <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling-{{item.id}}" aria-controls="offcanvasScrolling">Notes</button>
-                                            </td>
-                                            {% else %}
-                                            <td>
-                                                <!-- Link to trigger the modal to add notes -->
-                                                <button class="btn btn-warning btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling-{{item.id}}" aria-controls="offcanvasScrolling">Add</button>
-                                            </td>
+                {% if buyers_data %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle table-nowrap mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 50px;">#ID</th>
+                                <th>Customer Name</th>
+                                <th>Phone Number</th>
+                                <th>Email Address</th>
+                                <th>Saved Delivery Address</th>
+                                <th class="text-center">Orders</th>
+                                <th>Registered On</th>
+                                <th class="text-center" style="width: 140px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in buyers_data %}
+                            {% with b=item.buyer addr=item.primary_address %}
+                            <tr>
+                                <td class="fw-bold text-muted">#{{ b.id }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar-xs">
+                                            <span class="avatar-title rounded-circle bg-primary-subtle text-primary fw-bold" style="background: #FFF0F3; color: #EF2853;">
+                                                {{ b.name|slice:":1"|upper|default:"U" }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <a href="/admin-buyer-details/{{ b.id }}/" class="text-dark fw-bold text-decoration-none">
+                                                {{ b.name|default:"Unnamed User" }}
+                                            </a>
+                                            {% if b.verification == "verified" %}
+                                            <span class="badge bg-success-subtle text-success ms-1" style="font-size: 10px;">Verified</span>
                                             {% endif %}
-                                            <div class="offcanvas offcanvas-start bg-dark text-light" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling-{{item.id}}" aria-labelledby="offcanvasScrollingLabel">
-                                                <div class="offcanvas-header">
-                                                    <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Seller Notes:</h5>
-                                                    <button type="button" class="btn-close text-light" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                                                </div>
-                                                <div class="offcanvas-body overflow-auto">
-                                                    {%if item.notes%}
-                                                    <div class="border p-2" style="white-space: normal; word-wrap: break-word;">
-                                                       <span class="text-warning">{{item.notes_date}}</span><br>{{item.notes}}
-                                                    </div>
-                                                   {%endif%}
-                                                    <div class="mt-2">
-                                                        <form method="post" action="/admin-update-buyer-notes/{{item.id}}/">
-                                                            {% csrf_token %}
-                                                            <textarea rows="3" cols="10" name="notes" placeholder="Enter New Notes" class="form-control" required></textarea>
-                                                            <div class="text-center">
-                                                                <button type="submit" class="btn btn-light mt-2">Update</button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </tr>
-                                        {%endfor%}
-                                        
-                                    </tbody>
-                                </table>
-                            </div>
-                            <!-- end table-responsive -->
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <a href="tel:{{ b.phone }}" class="text-dark text-decoration-none fw-semibold">
+                                            <i class="bx bx-phone text-muted me-1"></i>{{ b.phone }}
+                                        </a>
+                                        {% if b.phone %}
+                                        <a href="https://wa.me/91{{ b.phone }}" target="_blank" class="text-success ms-1" title="Chat on WhatsApp">
+                                            <i class="bx bxl-whatsapp font-size-16"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if b.email %}
+                                    <a href="mailto:{{ b.email }}" class="text-muted text-decoration-none small">
+                                        <i class="bx bx-envelope me-1"></i>{{ b.email }}
+                                    </a>
+                                    {% else %}
+                                    <span class="text-muted small fst-italic">No email</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if addr and addr.address %}
+                                    <div style="max-width: 260px; white-space: normal;" class="small text-muted">
+                                        <span class="badge bg-light text-dark border me-1">{{ addr.addressType|default:"Home" }}</span>
+                                        {{ addr.address }}{% if addr.city %}, {{ addr.city }}{% endif %}{% if addr.state %}, {{ addr.state }}{% endif %}{% if addr.pin %} - <strong>{{ addr.pin }}</strong>{% endif %}
+                                    </div>
+                                    {% else %}
+                                    <span class="badge bg-light text-muted border">No address saved</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if item.order_count > 0 %}
+                                    <span class="badge bg-success-subtle text-success px-2 py-1 fw-bold">{{ item.order_count }} Order{{ item.order_count|pluralize }}</span>
+                                    <div class="small text-muted mt-1 fw-semibold">&#8377;{{ item.order_total|floatformat:2 }}</div>
+                                    {% else %}
+                                    <span class="badge bg-light text-muted border">0 Orders</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ b.date|date:"d M Y, h:i A"|default:"Recently" }}</small>
+                                </td>
+                                <td class="text-center">
+                                    <a href="/admin-buyer-details/{{ b.id }}/" class="btn btn-sm btn-outline-primary" title="View Full Profile &amp; Orders">
+                                        <i class="bx bx-show font-size-14 align-middle"></i> Details
+                                    </a>
+                                    <a href="/admin-delete-buyer/{{ b.id }}/" class="btn btn-sm btn-outline-danger ms-1" onclick="return confirm('Are you sure you want to delete customer {{ b.name }}?');" title="Delete Customer">
+                                        <i class="bx bx-trash font-size-14 align-middle"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endwith %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if page_posts.has_other_pages %}
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4 pt-3 border-top">
+                    <div class="small text-muted">
+                        Showing page {{ page_posts.number }} of {{ page_posts.paginator.num_pages }}
+                    </div>
+                    <ul class="pagination pagination-sm mb-0">
+                        {% if page_posts.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_posts.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">&laquo;</a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in page_range %}
+                        <li class="page-item {% if page_posts.number == num %}active{% endif %}">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                        </li>
+                        {% endfor %}
+
+                        {% if page_posts.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_posts.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">&raquo;</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="text-center py-5">
+                    <div class="avatar-lg mx-auto mb-3">
+                        <div class="avatar-title rounded-circle bg-light text-muted font-size-24">
+                            <i class="bx bx-user-x font-size-36"></i>
                         </div>
                     </div>
+                    <h5 class="fw-bold">No registered customers found</h5>
+                    <p class="text-muted small">
+                        {% if search_query %}
+                        No results matched your search "{{ search_query }}". <a href="/admin-buyer/">View all customers</a>
+                        {% else %}
+                        When users register on your website, their full details (Name, Phone, Email, Delivery Address) will appear here automatically.
+                        {% endif %}
+                    </p>
                 </div>
-                {%if page_posts%}
-                <div class="blog-pagination">
-                    <nav>
-                        <ul class="pagination">
-                            <li class="page-item previtem {% if not page_posts.has_previous %}disabled{% endif %}">
-                                <a class="page-link" href="{% if page_posts.has_previous %}?page={{ page_posts.previous_page_number }}&name={{ search_query }}{% endif %}">
-                                    <i class="fas fa-regular fa-arrow-left"></i> Prev
-                                </a>
-                            </li>
-                            <li class="justify-content-center pagination-center">
-                                <div class="pagelink">
-                                    <ul class="d-flex">
-                                        {% for page_num in page_range %}
-                                        <li class="page-item {% if page_posts.number == page_num %}active{% endif %}">
-                                            <a class="page-link" href="?page={{ page_num }}&name={{ search_query }}">
-                                                {{ page_num }}
-                                                {% if page_posts.number == page_num %}
-                                                <span class="visually-hidden">(current)</span>
-                                                {% endif %}
-                                            </a>
-                                        </li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                            </li>
-                            <li class="page-item nextlink {% if not page_posts.has_next %}disabled{% endif %}">
-                                <a class="page-link" href="{% if page_posts.has_next %}?page={{ page_posts.next_page_number }}&name={{ search_query }}{% endif %}">
-                                    Next <i class="fas fa-regular fa-arrow-right"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-                
-                {%endif%}
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const searchInput = document.getElementById('searchInput');
-                        const tableRows = document.querySelectorAll('#productTable tbody tr');
-                
-                        searchInput.addEventListener('input', function() {
-                            const searchTerm = searchInput.value.trim().toLowerCase();
-                
-                            tableRows.forEach(row => {
-                                const nameColumn = row.querySelector('td:nth-child(5)');
-                                if (nameColumn) {
-                                    const textContent = nameColumn.textContent.trim().toLowerCase();
-                                    if (textContent.includes(searchTerm)) {
-                                        row.style.display = '';
-                                    } else {
-                                        row.style.display = 'none';
-                                    }
-                                }
-                            });
-                        });
-                    });
-                </script>
-            </div> 
-        </div> 
-            
+                {% endif %}
+            </div>
+        </div>
     </div>
-    <!-- End Page-content -->
-
-{%endblock%}
+</div>
+{% endblock %}
