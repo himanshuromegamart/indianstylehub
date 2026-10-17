@@ -380,12 +380,40 @@ def dynamic_category_view(request, supercat=None, mcat=None, cat=None, scat=None
                 'url': f"/{maincategory_obj.slug}/{c.slug}/"
             } for c in cats]
 
+    elif supercat and Category.objects.filter(slug__iexact=supercat).exists():
+        # Direct Category URL: e.g. /handbags/ or /test111/
+        category_obj = Category.objects.filter(slug__iexact=supercat).first()
+        maincategory_obj = category_obj.maincategory
+        supercategory_obj = maincategory_obj.supercategory if maincategory_obj else None
+        current_title = category_obj.name
+        current_description = category_obj.description or ""
+        breadcrumbs.append({'name': category_obj.name, 'url': category_obj.get_hierarchy_url()})
+        products = Product.objects.filter(category=category_obj)
+        scats = Subcategory.objects.filter(category=category_obj)
+        child_items = [{
+            'name': s.name,
+            'image': s.image or (category_obj.image if category_obj else ''),
+            'url': f"/{supercategory_obj.slug if supercategory_obj else 'all'}/{maincategory_obj.slug if maincategory_obj else 'all'}/{category_obj.slug}/{s.slug}/"
+        } for s in scats]
+
+    elif supercat and Subcategory.objects.filter(slug__iexact=supercat).exists():
+        # Direct Subcategory URL: e.g. /tote-handbags/
+        subcategory_obj = Subcategory.objects.filter(slug__iexact=supercat).first()
+        category_obj = subcategory_obj.category
+        maincategory_obj = category_obj.maincategory if category_obj else None
+        supercategory_obj = maincategory_obj.supercategory if maincategory_obj else None
+        current_title = subcategory_obj.name
+        current_description = subcategory_obj.description or ""
+        breadcrumbs.append({'name': subcategory_obj.name, 'url': subcategory_obj.get_hierarchy_url()})
+        products = Product.objects.filter(subcategory=subcategory_obj)
+        child_items = []
+
     else:
         # Fallback if unknown slug
         products = Product.objects.filter(name__icontains=raw_supercat or '')
-        if not products.exists():
-            products = Product.objects.all()
         current_title = raw_supercat.title() if raw_supercat else "Products"
+        current_description = ""
+        breadcrumbs.append({'name': current_title, 'url': f"/{raw_supercat}/"})
 
     # Facet Filters
     selected_maincategory = request.GET.get('maincategory')
@@ -467,9 +495,10 @@ def dynamic_category_view(request, supercat=None, mcat=None, cat=None, scat=None
         'child_items': child_items,
         'breadcrumbs': breadcrumbs,
         'current_title': current_title,
+        'current_description': current_description or '',
         'ops': subcategory_obj or category_obj or maincategory_obj or supercategory_obj,
         'title': current_title,
-        'description': current_description,
+        'description': current_description or '',
         'related_blogs': related_blogs,
         'popular_links': get_popular_links(
             current_title=current_title,
@@ -588,44 +617,8 @@ def web_filter(request):
 
 
 
-def category_page(request,cat):
-    maincategories=Maincategory.objects.all()
-    print("Maincategory is :",maincategories)
-    categories=Category.objects.all()
-    subcategories=Subcategory.objects.all()
-    brands=Brand.objects.all()
-    size=Size.objects.all()
-    color=Color.objects.all()
-    try:
-        # Fetch products with offers
-        if cat == "all":
-            data = Product.objects.all().order_by('-id')  # Filter products with non-empty offers
-        else:
-            # Get the Supercategory object
-            data = Product.objects.filter(category=Category.objects.get(slug=cat))
-        paginator = Paginator(data, 100)  # Show 10 posts per page
-        page_number = request.GET.get('page')
-        page_posts = paginator.get_page(page_number)
-        current_page = page_posts.number
-        total_pages = paginator.num_pages
-        page_range = range(max(current_page - 2, 1), min(current_page + 3, total_pages + 1))
-    except Exception as e:
-        print(f"Error occurred: {e}")  # Log the error for debugging
-        data = Product.objects.none()  # Return an empty queryset
-        
-    cat_title = cat.replace('-', ' ').title() if cat else "Products"
-    return render(request, 'front/products.html', {
-        'page_posts':page_posts,
-        'page_range': page_range,
-        'maincategories':maincategories,
-        'categories':categories,
-        'subcategories':subcategories,
-        'brands':brands,
-        'size':size,
-        'color':color,
-        'current_title': cat_title,
-        'popular_links': get_popular_links(current_title=cat_title),
-    })
+def category_page(request, cat):
+    return dynamic_category_view(request, supercat=cat)
 
 
 def product_by_maincategory_category_subcategiry(request, mcat, cat, scat):

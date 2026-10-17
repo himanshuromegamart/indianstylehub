@@ -2,10 +2,10 @@
 {%load static%}
 {%block title%}{% if ops.title %}{{ ops.title }}{% elif current_title %}{{ current_title }}{% else %}Shop{% endif %} &mdash; Nari Fashion Store{%endblock%}
 {%block description%}
-    <meta name="description" content="{% if ops.description %}{{ ops.description|striptags|truncatewords:25 }}{% elif current_description %}{{ current_description|striptags|truncatewords:25 }}{% else %}Discover latest {{ current_title }} collection at Nari Fashion Store with premium quality and best offers.{% endif %}">
+    <meta name="description" content="{% if ops.description %}{{ ops.description|striptags|truncatewords:25 }}{% elif current_description %}{{ current_description|striptags|truncatewords:25 }}{% elif description %}{{ description|striptags|truncatewords:25 }}{% else %}Discover latest {{ current_title }} collection at Nari Fashion Store with premium quality and best offers.{% endif %}">
     <link rel="canonical" href="{{ request.build_absolute_uri }}">
     <meta property="og:title" content="{% if ops.title %}{{ ops.title }}{% elif current_title %}{{ current_title }}{% else %}Shop{% endif %} &mdash; Nari Fashion Store">
-    <meta property="og:description" content="{% if ops.description %}{{ ops.description|striptags|truncatewords:25 }}{% elif current_description %}{{ current_description|striptags|truncatewords:25 }}{% else %}Discover latest {{ current_title }} collection at Nari Fashion Store.{% endif %}">
+    <meta property="og:description" content="{% if ops.description %}{{ ops.description|striptags|truncatewords:25 }}{% elif current_description %}{{ current_description|striptags|truncatewords:25 }}{% elif description %}{{ description|striptags|truncatewords:25 }}{% else %}Discover latest {{ current_title }} collection at Nari Fashion Store.{% endif %}">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
     <meta property="og:type" content="website">
 
@@ -124,8 +124,8 @@
                                         {% if page_posts.paginator.count %}{{ page_posts.paginator.count }}{% else %}{{ page_posts|length }}{% endif %} Products
                                     </span>
                                 </div>
-                                {% if ops.description or current_description %}
-                                <p class="text-muted m-0" style="font-size: 13px; max-width: 600px;">{{ ops.description|default:current_description|truncatewords:20 }}</p>
+                                {% if ops.description or current_description or description %}
+                                <p class="text-muted m-0" style="font-size: 13px; max-width: 600px;">{% if ops.description %}{{ ops.description|striptags|truncatewords:20 }}{% elif current_description %}{{ current_description|striptags|truncatewords:20 }}{% elif description %}{{ description|striptags|truncatewords:20 }}{% endif %}</p>
                                 {% endif %}
                             </div>
 
@@ -605,9 +605,16 @@
                             </ul>
                         </div>
                         {%else%}
-                            <div class="alert alert-danger text-center" role="alert">
-                                No products found.
+                        <div class="card border-0 shadow-sm rounded-4 text-center py-5 px-3 my-4 bg-white" style="border: 1px dashed rgba(245, 34, 77, 0.25) !important;">
+                            <div class="mb-3">
+                                <i class="flaticon-shopping-bag text-muted" style="font-size: 48px; opacity: 0.35;"></i>
                             </div>
+                            <h4 class="fw-bold text-dark mb-2">No Products in this Collection Yet</h4>
+                            <p class="text-muted small mx-auto" style="max-width: 480px;">We are currently adding fresh, exclusive designs to this section. Please explore our other trending collections below or check back soon!</p>
+                            <div class="mt-3">
+                                <a href="/products/" class="btn btn-danger rounded-pill px-4 py-2" style="background: linear-gradient(135deg, #F5224D 0%, #FF941F 100%); border: none;">Explore All Products &rarr;</a>
+                            </div>
+                        </div>
                         {%endif%}
                     </div>
 
@@ -1098,7 +1105,7 @@
             {% endif %}
 
             <!-- CATEGORY BLOG / SEO ARTICLE SECTION -->
-            {% if ops.description or description or related_blogs %}
+            {% if ops.description or current_description or description or related_blogs %}
             <div class="category-seo-blog-section my-5 pt-4 border-top">
                 <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
                     {% if ops.title %}
@@ -1107,9 +1114,9 @@
                         <h2 class="category-seo-title mb-4 font-weight-bold" style="color: #222; font-size: 1.75rem; border-left: 4px solid #27338f; padding-left: 14px;">{{ current_title }}</h2>
                     {% endif %}
                     
-                    {% if ops.description or description %}
+                    {% if ops.description or current_description or description %}
                     <div class="rich-text-content category-blog-content" style="line-height: 1.85; color: #444; font-size: 15px;">
-                        {{ ops.description|default:description|safe }}
+                        {% if ops.description %}{{ ops.description|safe }}{% elif current_description %}{{ current_description|safe }}{% elif description %}{{ description|safe }}{% endif %}
                     </div>
                     {% endif %}
 

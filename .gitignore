@@ -6,3 +6,5 @@ staticfiles_build/
 .DS_Store
 .env
 .vscode/
+.vscode/
+
