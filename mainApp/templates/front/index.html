@@ -732,10 +732,198 @@
                 <div>
                     <img src="https://img.freepik.com/free-photo/close-up-woman-front-clothing-pile_23-2150950851.jpg?uid=R189317073&ga=GA1.1.1725747204.1721378766&semt=ais_hybrid&w=740" alt="Video Banner" class="ul-video-cover">
                 </div>
-                <a href="https://www.youtube.com/watch?v=1gTvEIpl8K0" data-fslightbox="video" class="ul-video-btn" aria-label="Watch Fashion Collection Video"><i class="flaticon-play-button-arrowhead"></i></a>
+                <button type="button" class="ul-video-btn" id="openFashionVideoModal" aria-label="Watch Fashion Collection Video">
+                    <i class="flaticon-play-button-arrowhead"></i>
+                </button>
             </div>
         </div>
         <!-- VIDEO SECTION END -->
+
+        <!-- MODERN RESPONSIVE VIDEO MODAL (Error 153 Immune) -->
+        <div id="fashionVideoModal" class="fashion-video-modal" aria-hidden="true" role="dialog" style="display: none;">
+            <div class="fashion-video-backdrop" id="fashionVideoBackdrop"></div>
+            <div class="fashion-video-dialog">
+                <div class="fashion-video-header">
+                    <span class="fashion-video-title">
+                        <i class="flaticon-youtube" style="color: #ff0000; margin-right: 8px; font-size: 18px;"></i> Nari Fashion Collection
+                    </span>
+                    <div class="fashion-video-actions">
+                        <a href="https://www.youtube.com/watch?v=1gTvEIpl8K0" target="_blank" rel="noopener noreferrer" class="fashion-video-external-btn" title="Open directly on YouTube">
+                            <i class="flaticon-up-right-arrow"></i> Watch on YouTube
+                        </a>
+                        <button type="button" class="fashion-video-close" id="closeFashionVideoModal" aria-label="Close video">&times;</button>
+                    </div>
+                </div>
+                <div class="fashion-video-body">
+                    <div class="fashion-video-wrapper" id="fashionVideoWrapper">
+                        <!-- iframe is dynamically injected here with strict-origin referrerpolicy -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .fashion-video-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                z-index: 999999;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                padding: 16px;
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.25s ease, visibility 0.25s ease;
+            }
+            .fashion-video-modal.active {
+                opacity: 1;
+                visibility: visible;
+                display: flex !important;
+            }
+            .fashion-video-backdrop {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(15, 17, 23, 0.88);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+            }
+            .fashion-video-dialog {
+                position: relative;
+                z-index: 2;
+                width: 100%;
+                max-width: 900px;
+                background: #11141d;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 25px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.12);
+                transform: scale(0.94);
+                transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            .fashion-video-modal.active .fashion-video-dialog {
+                transform: scale(1);
+            }
+            .fashion-video-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 18px;
+                background: #181c28;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+            }
+            .fashion-video-title {
+                color: #ffffff;
+                font-size: 14px;
+                font-weight: 600;
+                display: inline-flex;
+                align-items: center;
+            }
+            .fashion-video-actions {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            .fashion-video-external-btn {
+                color: #ff4757;
+                font-size: 12px;
+                font-weight: 600;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                padding: 4px 12px;
+                background: rgba(255, 71, 87, 0.12);
+                border-radius: 20px;
+                border: 1px solid rgba(255, 71, 87, 0.25);
+                transition: all 0.2s ease;
+            }
+            .fashion-video-external-btn:hover {
+                background: #ff4757;
+                color: #ffffff;
+            }
+            .fashion-video-close {
+                background: transparent;
+                border: none;
+                color: #aaa;
+                font-size: 28px;
+                line-height: 1;
+                cursor: pointer;
+                padding: 0 4px;
+                transition: color 0.2s ease;
+            }
+            .fashion-video-close:hover {
+                color: #ffffff;
+            }
+            .fashion-video-wrapper {
+                position: relative;
+                width: 100%;
+                padding-top: 56.25%; /* 16:9 Aspect Ratio */
+                background: #000000;
+            }
+            .fashion-video-wrapper iframe {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                border: 0;
+            }
+        </style>
+
+        <script>
+            (function() {
+                function initFashionVideoModal() {
+                    var videoBtn = document.getElementById('openFashionVideoModal');
+                    var videoModal = document.getElementById('fashionVideoModal');
+                    var videoClose = document.getElementById('closeFashionVideoModal');
+                    var videoBackdrop = document.getElementById('fashionVideoBackdrop');
+                    var videoWrapper = document.getElementById('fashionVideoWrapper');
+                    var videoId = '1gTvEIpl8K0';
+
+                    if (!videoBtn || !videoModal || !videoWrapper) return;
+
+                    function openVideo(e) {
+                        if (e) e.preventDefault();
+                        var origin = window.location.origin || 'https://narifashionstore.com';
+                        var embedUrl = 'https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&playsinline=1&rel=0&modestbranding=1&origin=' + encodeURIComponent(origin);
+                        videoWrapper.innerHTML = '<iframe src="' + embedUrl + '" title="Fashion Collection Video" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe>';
+                        videoModal.style.display = 'flex';
+                        void videoModal.offsetWidth;
+                        videoModal.classList.add('active');
+                        document.body.style.overflow = 'hidden';
+                    }
+
+                    function closeVideo() {
+                        videoModal.classList.remove('active');
+                        setTimeout(function() {
+                            videoModal.style.display = 'none';
+                            videoWrapper.innerHTML = '';
+                            document.body.style.overflow = '';
+                        }, 260);
+                    }
+
+                    videoBtn.addEventListener('click', openVideo);
+                    if (videoClose) videoClose.addEventListener('click', closeVideo);
+                    if (videoBackdrop) videoBackdrop.addEventListener('click', closeVideo);
+                    document.addEventListener('keydown', function(e) {
+                        if (e.key === 'Escape' && videoModal.classList.contains('active')) {
+                            closeVideo();
+                        }
+                    });
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initFashionVideoModal);
+                } else {
+                    initFashionVideoModal();
+                }
+            })();
+        </script>
 
 
         <!-- SUB BANNER SECTION START -->

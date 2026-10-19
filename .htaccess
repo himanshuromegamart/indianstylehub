@@ -60,5 +60,6 @@ RewriteRule ^media/(.*)$ /media/$1 [L]
     <FilesMatch "\.(ico|pdf|flv|jpg|jpeg|png|gif|webp|js|css|swf|woff2)$">
         Header set Cache-Control "max-age=2592000, public"
     </FilesMatch>
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
