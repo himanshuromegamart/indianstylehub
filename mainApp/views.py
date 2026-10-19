@@ -27,23 +27,85 @@ def firebase_messaging_sw(request):
 
 # Create your views here.
 def home_page(request):
-    supercategories=Supercategory.objects.all()[:7]
-    maincategories=Maincategory.objects.all()
-    categories=Category.objects.all()
-    subcategories=Subcategory.objects.all()
-    filteredProduct=Product.objects.all().order_by('id').reverse()[:12]
-    brands=Brand.objects.all()
-    slider=Slider.objects.all()
-    products=Product.objects.all().order_by('id').reverse()[:6]
-    blogs=Blog.objects.all().order_by('-id')[:3]
-    gallery=Gallery.objects.all().order_by('-id')[:10]
+    supercategories = Supercategory.objects.all()[:7]
+    maincategories = Maincategory.objects.all()
+    categories = Category.objects.all()
+    subcategories = Subcategory.objects.all()
+    filteredProduct = Product.objects.all().order_by('id').reverse()[:12]
+    brands = Brand.objects.all()
+    slider = Slider.objects.all()
+    products = Product.objects.all().order_by('id').reverse()[:6]
+    blogs = Blog.objects.all().order_by('-id')[:3]
+    gallery = Gallery.objects.all().order_by('-id')[:10]
     popular_links = get_home_popular_links()
+
+    # Dynamic Category Sections (Only categories that have active products!)
+    category_sections = []
+    seen_category_names = set()
+
+    # 1. Maincategories with products
+    for mc in Maincategory.objects.all().order_by('id'):
+        prods = Product.objects.filter(Q(maincategory=mc) | Q(category__maincategory=mc)).distinct().order_by('-id')[:12]
+        if prods.exists():
+            banner_img = mc.banner or mc.banner1 or mc.banner2 or mc.image or ''
+            if not banner_img and prods.first() and prods.first().image1:
+                banner_img = prods.first().image1
+            category_sections.append({
+                'id': f"mc_{mc.id}",
+                'name': mc.name,
+                'slug': mc.slug,
+                'url': f"/{mc.slug}/",
+                'banner_img': banner_img,
+                'products': prods,
+            })
+            seen_category_names.add(mc.name.strip().lower())
+
+    # 2. Standalone Categories with products (if not already included under maincategory)
+    for cat in Category.objects.all().order_by('id'):
+        if cat.name.strip().lower() in seen_category_names:
+            continue
+        prods = Product.objects.filter(category=cat).order_by('-id')[:12]
+        if prods.exists():
+            banner_img = cat.image or ''
+            if not banner_img and prods.first() and prods.first().image1:
+                banner_img = prods.first().image1
+            category_sections.append({
+                'id': f"cat_{cat.id}",
+                'name': cat.name,
+                'slug': cat.slug,
+                'url': f"/{cat.slug}/",
+                'banner_img': banner_img,
+                'products': prods,
+            })
+            seen_category_names.add(cat.name.strip().lower())
+
+    # Fallback if no categories are assigned to products, so homepage is never blank
+    if not category_sections and Product.objects.exists():
+        prods = Product.objects.all().order_by('-id')[:12]
+        category_sections.append({
+            'id': 'featured',
+            'name': 'Featured Collection',
+            'slug': 'all',
+            'url': '/all/',
+            'banner_img': prods.first().image1 if prods.first() else '',
+            'products': prods,
+        })
+
     context = {
-        'supercategories': supercategories,'maincategories': maincategories, 'categories': categories, 'subcategories': subcategories,
-        'products': products,'slider':slider,'filteredProduct':filteredProduct,'blogs':blogs,'brands':brands,'gallery':gallery,
+        'supercategories': supercategories,
+        'maincategories': maincategories,
+        'categories': categories,
+        'subcategories': subcategories,
+        'products': products,
+        'slider': slider,
+        'filteredProduct': filteredProduct,
+        'blogs': blogs,
+        'brands': brands,
+        'gallery': gallery,
         'popular_links': popular_links,
+        'category_sections': category_sections,
     }
-    return render(request,'front/index.html',context)
+    return render(request, 'front/index.html', context)
 
 
 from urllib.parse import quote_plus

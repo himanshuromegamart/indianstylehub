@@ -588,48 +588,56 @@
         <!-- CATEGORY SECTION END -->
 
 
-        <!-- PRODUCTS SECTION START -->
-        <div class="ul-container">
+        <!-- DYNAMIC CATEGORY PRODUCTS SECTIONS START -->
+        {% for sec in category_sections %}
+        {% if sec.products %}
+        <div class="ul-container mb-5">
             <section class="ul-products">
                 <div class="ul-inner-container">
                     <div class="ul-section-heading">
                         <div class="left">
-                            <span class="ul-section-sub-title">Latest collection</span>
-                            <h2 class="ul-section-title">Our Latest Product</h2>
+                            <span class="ul-section-sub-title">Collection</span>
+                            <h2 class="ul-section-title">{{sec.name}}</h2>
                         </div>
 
-                        <div class="right"><a href="/all" class="ul-btn">More Collection <i class="flaticon-up-right-arrow"></i></a></div>
+                        <div class="right"><a href="{{sec.url}}" class="ul-btn">View All <i class="flaticon-up-right-arrow"></i></a></div>
                     </div>
-
 
                     <div class="row ul-bs-row">
                         <div class="col-lg-3 col-md-4 col-12">
-                            <!-- sub bannner -->
-                            <div class="ul-products-sub-banner">
-                                <div class="ul-products-sub-banner-img">
-                                    <img src="{%static 'assets/img/products-sub-banner-2.jpg'%}" alt="Sub Banner Image">
+                            <!-- Category sub banner -->
+                            <div class="ul-products-sub-banner" style="min-height: 100%; display: flex; flex-direction: column; justify-content: flex-end; position: relative; overflow: hidden; border-radius: 12px; background: #111;">
+                                <div class="ul-products-sub-banner-img" style="position: absolute; top:0; left:0; width:100%; height:100%;">
+                                    {% if sec.banner_img %}
+                                    <img src="{{sec.banner_img}}" alt="{{sec.name}}" style="width: 100%; height: 100%; object-fit: cover; filter: brightness(0.75);">
+                                    {% else %}
+                                    <img src="{%static 'assets/img/products-sub-banner-2.jpg'%}" alt="{{sec.name}}" style="width: 100%; height: 100%; object-fit: cover; filter: brightness(0.75);">
+                                    {% endif %}
                                 </div>
-                                <div class="ul-products-sub-banner-txt">
-                                    <h3 class="ul-products-sub-banner-title">Latest Collection For You</h3>
-                                    <a href="/all" class="ul-btn">Shop Now <i class="flaticon-up-right-arrow"></i></a>
+                                <div class="ul-products-sub-banner-txt" style="position: relative; z-index: 2; padding: 25px 20px;">
+                                    <span style="color: #EF2853; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 5px;">Category Special</span>
+                                    <h3 class="ul-products-sub-banner-title" style="color: #ffffff; font-size: 22px; font-weight: 700; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">{{sec.name}}</h3>
+                                    <a href="{{sec.url}}" class="ul-btn">Shop Now <i class="flaticon-up-right-arrow"></i></a>
                                 </div>
                             </div>
                         </div>
                         <div class="col-lg-9 col-md-8 col-12">
-                            <!-- products grid -->
-                            <div class="swiper ul-products-slider-1">
+                            <!-- products grid / slider -->
+                            <div class="swiper dynamic-category-slider dynamic-category-slider-{{forloop.counter}}">
                                 <div class="swiper-wrapper">
-                                    {%for item in products%}
+                                    {% for item in sec.products %}
                                     <!-- product card -->
                                     <div class="swiper-slide">
                                         <div class="ul-product">
                                             <div class="ul-product-heading">
                                                 <span class="ul-product-price">&#8377;{{item.price}}</span>
+                                                {% if item.discount %}
                                                 <span class="ul-product-discount-tag">{{item.discount}}% Off</span>
+                                                {% endif %}
                                             </div>
 
                                             <div class="ul-product-img">
-                                                <img src="{{item.image1}}" alt="Product Image">
+                                                <img src="{{item.image1}}" alt="{{item.name}}">
 
                                                 <div class="ul-product-actions">
                                                     <button type="button" class="btn-card-add-cart" data-id="{{item.id}}" title="Add to Cart"><i class="flaticon-shopping-bag"></i></button>
@@ -640,32 +648,27 @@
 
                                             <div class="ul-product-txt">
                                                 <h4 class="ul-product-title"><a href="/product-details/{{item.name|slugify}}/{{item.id}}">{{item.name}}</a></h4>
-                                                <h5 class="ul-product-category"><a href="/{{item.maincategory.slug}}">{{item.maincategory.name}}</a></h5>
+                                                <h5 class="ul-product-category"><a href="{{sec.url}}">{{sec.name}}</a></h5>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- product card -->
-                                     {%endfor%}
-                                    
-
-                                    
+                                    {% endfor %}
                                 </div>
                             </div>
 
                             <!-- slider navigation -->
-                            <div class="ul-products-slider-nav ul-products-slider-1-nav">
+                            <div class="ul-products-slider-nav dynamic-category-nav-{{forloop.counter}}">
                                 <button class="prev"><i class="flaticon-left-arrow"></i></button>
                                 <button class="next"><i class="flaticon-arrow-point-to-right"></i></button>
                             </div>
                         </div>
-
-                        
                     </div>
                 </div>
             </section>
         </div>
-        <!-- PRODUCTS SECTION END -->
+        {% endif %}
+        {% endfor %}
+        <!-- DYNAMIC CATEGORY PRODUCTS SECTIONS END -->
 
 
         <!-- AD SECTION START -->
@@ -1616,6 +1619,49 @@
                     restartTimer();
                 });
             }
+        });
+
+        // Dynamic Category Product Sliders (Right-to-left scrollable with scoped navigation)
+        document.addEventListener("DOMContentLoaded", function () {
+            const sliders = document.querySelectorAll(".dynamic-category-slider");
+            sliders.forEach(function (sliderEl, idx) {
+                const count = idx + 1;
+                const slides = sliderEl.querySelectorAll(".swiper-slide");
+                const shouldLoop = slides.length > 3;
+
+                new Swiper(sliderEl, {
+                    slidesPerView: 3,
+                    loop: shouldLoop,
+                    autoplay: {
+                        delay: 4000 + (idx * 400),
+                        disableOnInteraction: false,
+                        pauseOnMouseEnter: true,
+                    },
+                    spaceBetween: 15,
+                    navigation: {
+                        nextEl: ".dynamic-category-nav-" + count + " .next",
+                        prevEl: ".dynamic-category-nav-" + count + " .prev",
+                    },
+                    breakpoints: {
+                        0: {
+                            slidesPerView: 1,
+                            spaceBetween: 10,
+                        },
+                        480: {
+                            slidesPerView: 2,
+                            spaceBetween: 15,
+                        },
+                        992: {
+                            slidesPerView: 3,
+                            spaceBetween: 20,
+                        },
+                        1200: {
+                            slidesPerView: 3,
+                            spaceBetween: 20,
+                        }
+                    }
+                });
+            });
         });
 
         // Global Cart Toast Notification System
