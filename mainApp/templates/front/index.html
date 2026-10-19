@@ -1619,25 +1619,47 @@
                     restartTimer();
                 });
             }
+
+            mainSliderEl.addEventListener("mouseenter", function () {
+                clearInterval(autoTimer);
+            });
+            mainSliderEl.addEventListener("mouseleave", function () {
+                restartTimer();
+            });
         });
 
-        // Dynamic Category Product Sliders (Right-to-left scrollable with scoped navigation)
+        // Dynamic Category Product Sliders (Seamless Right-to-Left Auto-Gliding with Scoped Navigation)
         document.addEventListener("DOMContentLoaded", function () {
             const sliders = document.querySelectorAll(".dynamic-category-slider");
             sliders.forEach(function (sliderEl, idx) {
                 const count = idx + 1;
-                const slides = sliderEl.querySelectorAll(".swiper-slide");
-                const shouldLoop = slides.length > 3;
+                const wrapper = sliderEl.querySelector(".swiper-wrapper");
+                if (!wrapper) return;
+
+                // Ensure enough slides in queue (>= 10) for seamless infinite right-to-left motion
+                // even when a category only has 2 or 3 products
+                const originalSlides = Array.from(wrapper.children);
+                if (originalSlides.length > 0 && originalSlides.length < 10) {
+                    while (wrapper.children.length < 12) {
+                        originalSlides.forEach(function (node) {
+                            wrapper.appendChild(node.cloneNode(true));
+                        });
+                    }
+                }
 
                 new Swiper(sliderEl, {
                     slidesPerView: 3,
-                    loop: shouldLoop,
+                    loop: true,
+                    loopAdditionalSlides: 4,
+                    speed: 750,
                     autoplay: {
-                        delay: 4000 + (idx * 400),
+                        delay: 2200,
                         disableOnInteraction: false,
                         pauseOnMouseEnter: true,
                     },
-                    spaceBetween: 15,
+                    spaceBetween: 20,
+                    grabCursor: true,
+                    allowTouchMove: true,
                     navigation: {
                         nextEl: ".dynamic-category-nav-" + count + " .next",
                         prevEl: ".dynamic-category-nav-" + count + " .prev",
@@ -1645,11 +1667,15 @@
                     breakpoints: {
                         0: {
                             slidesPerView: 1,
-                            spaceBetween: 10,
+                            spaceBetween: 12,
                         },
                         480: {
                             slidesPerView: 2,
                             spaceBetween: 15,
+                        },
+                        768: {
+                            slidesPerView: 2.5,
+                            spaceBetween: 18,
                         },
                         992: {
                             slidesPerView: 3,
