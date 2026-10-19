@@ -12,7 +12,18 @@ def navigation_context(request):
         catalog_sc = list(all_sc)
 
     cart = request.session.get('cart', {})
-    cart_count = sum(item.get('quantity', 1) for item in cart.values()) if isinstance(cart, dict) else 0
+    cart_count = 0
+    if isinstance(cart, dict):
+        for item in cart.values():
+            if isinstance(item, dict):
+                cart_count += int(item.get('quantity', 1) or 1)
+            elif isinstance(item, (int, float, str)) and str(item).isdigit():
+                cart_count += int(item)
+            else:
+                cart_count += 1
+    elif isinstance(cart, (list, tuple)):
+        cart_count = len(cart)
+
     wishlist = request.session.get('wishlist', [])
     wishlist_count = len(wishlist) if isinstance(wishlist, (list, set)) else 0
 

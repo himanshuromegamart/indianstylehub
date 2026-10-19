@@ -1,0 +1,63 @@
+{% extends "front/index.html" %}
+{% load static %}
+{% block title %}Our Brands — Nari Fashion Store{% endblock %}
+{% block body %}
+<main>
+    <!-- BREADCRUMB SECTION START -->
+    <div class="ul-container">
+        <div class="ul-breadcrumb">
+            <h2 class="ul-breadcrumb-title">Our Brands</h2>
+            <div class="ul-breadcrumb-nav">
+                <a href="/"><i class="flaticon-home"></i> Home</a>
+                <i class="flaticon-arrow-point-to-right"></i>
+                <span class="current-page">Brands</span>
+            </div>
+        </div>
+    </div>
+    <!-- BREADCRUMB SECTION END -->
+
+    <!-- BRANDS LIST SECTION -->
+    <div class="ul-container my-5">
+        <div class="ul-inner-container">
+            <div class="ul-section-heading mb-4">
+                <div class="left">
+                    <span class="ul-section-sub-title">Authentic Designers & Labels</span>
+                    <h2 class="ul-section-title">Explore Premium Brands</h2>
+                </div>
+            </div>
+
+            <div class="row row-cols-lg-4 row-cols-md-3 row-cols-2 g-4">
+                {% for item in brands %}
+                <div class="col">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 text-center p-3 transition-all hover-elevate bg-white">
+                        <div class="d-flex align-items-center justify-content-center p-3 mb-3 bg-light rounded-3" style="min-height: 120px;">
+                            {% if item.image %}
+                            <img src="{{ item.image }}" alt="{{ item.name }}" class="img-fluid" style="max-height: 90px; object-fit: contain;">
+                            {% else %}
+                            <i class="flaticon-ribbon-badge text-muted" style="font-size: 48px; opacity: 0.35;"></i>
+                            {% endif %}
+                        </div>
+                        <h5 class="fw-bold text-dark mb-1">{{ item.name }}</h5>
+                        <p class="text-muted small mb-3">Authentic Ethnic & Fusion Wear</p>
+                        <div class="mt-auto">
+                            <a href="/products/?brand={{ item.name|urlencode }}" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1">View Collection &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <div class="card border-0 shadow-sm rounded-4 p-5">
+                        <i class="flaticon-ribbon-badge text-muted mb-3" style="font-size: 48px; opacity: 0.4;"></i>
+                        <h4>Discovering New Brands</h4>
+                        <p class="text-muted">We are curating brand partnerships. In the meantime, browse our trending collections!</p>
+                        <div>
+                            <a href="/products/" class="btn btn-danger rounded-pill px-4 py-2">Explore All Products</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

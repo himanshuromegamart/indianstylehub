@@ -554,8 +554,15 @@ def web_filter(request):
     
 
     if selected_maincategories:
-        categories = Category.objects.filter(maincategory=Maincategory.objects.get(id=selected_maincategories))
-        data = data.filter(maincategory__id=selected_maincategories)
+        try:
+            m_obj = Maincategory.objects.filter(id=selected_maincategories).first() if str(selected_maincategories).isdigit() else Maincategory.objects.filter(slug=selected_maincategories).first()
+            if m_obj:
+                categories = Category.objects.filter(maincategory=m_obj)
+                data = data.filter(maincategory=m_obj)
+            else:
+                data = Product.objects.none()
+        except Exception:
+            data = Product.objects.none()
     if selected_categories:
         data = data.filter(category__id__in=selected_categories)
     if selected_subcategories:
@@ -587,7 +594,7 @@ def web_filter(request):
 
 
     # Pagination
-    paginator = Paginator(data, 30)
+    paginator = Paginator(data.order_by('-id'), 30)
     page_number = request.GET.get('page')
     page_posts = paginator.get_page(page_number)
     current_page = page_posts.number
@@ -633,14 +640,11 @@ def kid_home_page(request):
     return dynamic_category_view(request, supercat='kids')
 
 def brand_page(request):
-    return render(request,'front/brands.html')
+    brands = Brand.objects.all()
+    return render(request, 'front/brands.html', {'brands': brands})
 
-def product_page(request,cat):
-    try:
-       data=Product.objects.filter(cateory=Category.objects.get(slug=cat))
-    except:
-        data=''
-    return render(request,'front/products.html',{'data':data})
+def product_page(request, cat):
+    return dynamic_category_view(request, supercat=cat)
 
 
 from django.db.models import Min
@@ -888,9 +892,23 @@ def cart_page(request):
     cart = request.session.get('cart', {})
     cart_items = []
     subtotal = 0.0
-    for pid, item in cart.items():
-        qty = int(item.get('quantity', 1))
-        price = float(item.get('price', 0.0))
+    for pid, item in (cart.items() if isinstance(cart, dict) else []):
+        if not isinstance(item, dict):
+            prod = Product.objects.filter(id=pid).first()
+            if prod:
+                item = {
+                    'name': prod.name,
+                    'price': float(prod.price or 0.0),
+                    'quantity': int(item) if str(item).isdigit() else 1,
+                    'image': prod.image or '',
+                    'size': 'Free Size',
+                    'color': 'Standard',
+                    'slug': prod.name.replace(' ', '-'),
+                }
+            else:
+                continue
+        qty = int(item.get('quantity', 1) or 1)
+        price = float(item.get('price', 0.0) or 0.0)
         item_total = price * qty
         subtotal += item_total
         cart_items.append({
@@ -1010,9 +1028,23 @@ def checkout_page(request):
 
     cart_items = []
     subtotal = 0.0
-    for pid, item in cart.items():
-        qty = int(item.get('quantity', 1))
-        price = float(item.get('price', 0.0))
+    for pid, item in (cart.items() if isinstance(cart, dict) else []):
+        if not isinstance(item, dict):
+            prod = Product.objects.filter(id=pid).first()
+            if prod:
+                item = {
+                    'name': prod.name,
+                    'price': float(prod.price or 0.0),
+                    'quantity': int(item) if str(item).isdigit() else 1,
+                    'image': prod.image or '',
+                    'size': 'Free Size',
+                    'color': 'Standard',
+                    'slug': prod.name.replace(' ', '-'),
+                }
+            else:
+                continue
+        qty = int(item.get('quantity', 1) or 1)
+        price = float(item.get('price', 0.0) or 0.0)
         item_total = price * qty
         subtotal += item_total
         cart_items.append({
