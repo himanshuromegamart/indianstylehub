@@ -17,7 +17,9 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th class="align-middle">Name</th>
-                                            <th class="align-middle">Price</th>
+                                            <th class="align-middle">Selling Price</th>
+                                            <th class="align-middle">Seller Price (Cost)</th>
+                                            <th class="align-middle">Profit</th>
                                             <th class="align-middle">Qty</th>
                                             <th class="align-middle">Maincategory</th>
                                             <th class="align-middle">Category</th>
@@ -39,8 +41,32 @@
                                             </td>
                                             
                                             <td>
-                                                {{item.price}}
-                                            
+                                                <strong>₹{{ item.price }}</strong>
+                                                {% if item.discount %}
+                                                    <span class="badge bg-light text-muted" style="font-size: 10px;">-{{ item.discount }}%</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if item.seller_price %}
+                                                    <span class="fw-semibold text-secondary">₹{{ item.seller_price }}</span>
+                                                {% else %}
+                                                    <span class="text-muted small">₹0</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if item.seller_price %}
+                                                    {% if item.profit >= 0 %}
+                                                        <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold" style="font-size: 11px;">
+                                                            +₹{{ item.profit }} ({{ item.profit_percentage }}%)
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold" style="font-size: 11px;">
+                                                            -₹{{ item.profit }}
+                                                        </span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-muted small" title="Add seller price in edit product to track profit">-</span>
+                                                {% endif %}
                                             </td>
                                             <td>
                                                 {{item.quantity}}</td>

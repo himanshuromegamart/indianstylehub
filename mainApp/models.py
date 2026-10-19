@@ -132,6 +132,7 @@ class Product(models.Model):
     base_price=models.FloatField(default=0,null=True,blank=True)
     discount=models.FloatField(default=0,null=True,blank=True)
     price=models.FloatField()
+    seller_price=models.FloatField(default=0,null=True,blank=True)
     quantity=models.IntegerField(default=1)
     size=models.CharField(max_length=300,null=True,blank=True)
     color=models.CharField(max_length=300,null=True,blank=True)
@@ -151,6 +152,27 @@ class Product(models.Model):
     faq = models.JSONField(default=dict)
     sku=models.CharField(max_length=200,default='',null=True,blank=True)
     date=models.DateTimeField(auto_now_add=True)
+
+    @property
+    def profit(self):
+        try:
+            p = float(self.price or 0.0)
+            sp = float(self.seller_price or 0.0)
+            return round(p - sp, 2)
+        except (ValueError, TypeError):
+            return 0.0
+
+    @property
+    def profit_percentage(self):
+        try:
+            p = float(self.price or 0.0)
+            sp = float(self.seller_price or 0.0)
+            if sp > 0:
+                return round(((p - sp) / sp) * 100, 1)
+            return 0.0
+        except (ValueError, TypeError):
+            return 0.0
+
     def __str__(self):
         return str(self.name)
 

@@ -10,7 +10,6 @@ admin.site.register((
     Brand,
     Color,
     Size,
-    Product,
     Buyer,
     Order,
     Address,
@@ -19,6 +18,19 @@ admin.site.register((
     Gallery,
     Blog,
 ))
+
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'price', 'seller_price', 'display_profit', 'quantity', 'category', 'brand')
+    list_filter = ('supercategory', 'maincategory', 'category', 'brand')
+    search_fields = ('name', 'sku')
+
+    def display_profit(self, obj):
+        if obj.seller_price:
+            return f"₹{obj.profit} ({obj.profit_percentage}%)"
+        return "-"
+    display_profit.short_description = "Profit"
 
 
 @admin.register(DeviceToken)

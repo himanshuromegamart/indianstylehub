@@ -273,14 +273,30 @@
                                 <div class="col-lg-2">
                                     <div class="mb-3">
                                         <label class="form-label">Price<span class="text-danger">*</span></label>
-                                        <input type="number" class="form-control" placeholder="Price"name="price" step="any" value="{{data.base_price}}">
+                                        <input type="number" class="form-control" placeholder="Price" id="input_price_update" name="price" step="any" value="{{data.base_price}}">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-2">
+                                    <div class="mb-3">
+                                        <label class="form-label">Seller Price (Cost)</label>
+                                        <input type="number" class="form-control" placeholder="Seller Cost" id="input_seller_price_update" name="seller_price" step="any" value="{{data.seller_price|default:''}}">
+                                        <small class="d-block mt-1" id="profit_preview_update" style="font-size: 11px;">
+                                            {% if data.seller_price %}
+                                                {% if data.profit >= 0 %}
+                                                    <b style="color: #198754;">Profit: ₹{{ data.profit }} ({{ data.profit_percentage }}%)</b>
+                                                {% else %}
+                                                    <b style="color: #dc3545;">Loss: -₹{{ data.profit|slice:"1:" }}</b>
+                                                {% endif %}
+                                            {% endif %}
+                                        </small>
                                     </div>
                                 </div>
 
                                 <div class="col-lg-2">
                                     <div class="mb-3">
                                         <label class="form-label"> Discount<span class="text-danger">*</span></label>
-                                        <input type="number" class="form-control" placeholder="Enter Discount"name="discount"value="{{data.discount}}" >
+                                        <input type="number" class="form-control" placeholder="Enter Discount" id="input_discount_update" name="discount" value="{{data.discount}}" >
                                     </div>
                                 </div>
 
@@ -533,6 +549,31 @@
                                 function removeFaqRow(button) {
                                     button.closest('tr').remove();
                                 }
+
+                                // Real-time Profit Preview for Update Product
+                                function updateEditProfitPreview() {
+                                    var price = parseFloat(document.getElementById('input_price_update')?.value || 0);
+                                    var discount = parseFloat(document.getElementById('input_discount_update')?.value || 0);
+                                    var sellerPrice = parseFloat(document.getElementById('input_seller_price_update')?.value || 0);
+                                    var finalSelling = price - (price * discount / 100);
+                                    var previewElem = document.getElementById('profit_preview_update');
+                                    if (previewElem) {
+                                        if (sellerPrice > 0) {
+                                            var profit = finalSelling - sellerPrice;
+                                            var pct = ((profit / sellerPrice) * 100).toFixed(1);
+                                            var colorClass = profit >= 0 ? '#198754' : '#dc3545';
+                                            previewElem.innerHTML = '<b style="color:' + colorClass + ';">Profit: ₹' + profit.toFixed(2) + ' (' + pct + '%)</b>';
+                                        } else {
+                                            previewElem.innerHTML = '';
+                                        }
+                                    }
+                                }
+                                ['input_price_update', 'input_discount_update', 'input_seller_price_update'].forEach(function(id) {
+                                    var el = document.getElementById(id);
+                                    if (el) {
+                                        el.addEventListener('input', updateEditProfitPreview);
+                                    }
+                                });
                             </script>
                             
                         <div class="text-center">

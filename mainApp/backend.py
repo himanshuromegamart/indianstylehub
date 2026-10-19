@@ -951,6 +951,12 @@ def add_product(request):
             product.discount = discount
             product.price = round(final_price, 2)  # Round the price to 2 decimal places
 
+            try:
+                seller_price = float(request.POST.get('seller_price', 0) or 0)
+            except (ValueError, TypeError):
+                seller_price = 0.0
+            product.seller_price = seller_price
+
         except ValueError:
             # Handle invalid inputs (e.g., non-numeric values)
             return JsonResponse({'error': 'Invalid price or discount format'}, status=400)
@@ -1103,6 +1109,12 @@ def update_product(request,id,pn):
             product.base_price = base_price
             product.discount = discount
             product.price = round(final_price, 2)  # Round the price to 2 decimal places
+
+            try:
+                seller_price = float(request.POST.get('seller_price', 0) or 0)
+            except (ValueError, TypeError):
+                seller_price = 0.0
+            product.seller_price = seller_price
 
         except ValueError:
             # Handle invalid inputs (e.g., non-numeric values)
@@ -1265,6 +1277,12 @@ def duplicate_product(request,id,pn):
             product.base_price = base_price
             product.discount = discount
             product.price = round(final_price, 2)  # Round the price to 2 decimal places
+
+            try:
+                seller_price = float(request.POST.get('seller_price', 0) or getattr(data, 'seller_price', 0) or 0)
+            except (ValueError, TypeError):
+                seller_price = 0.0
+            product.seller_price = seller_price
 
         except ValueError:
             # Handle invalid inputs (e.g., non-numeric values)

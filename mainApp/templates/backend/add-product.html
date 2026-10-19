@@ -164,14 +164,22 @@
                                 <div class="col-lg-2">
                                     <div class="mb-3">
                                         <label class="form-label">Price<span class="text-danger">*</span></label>
-                                        <input type="number" class="form-control" placeholder="Price"name="price" step="any">
+                                        <input type="number" class="form-control" placeholder="Price" id="input_price" name="price" step="any">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-2">
+                                    <div class="mb-3">
+                                        <label class="form-label">Seller Price (Cost)</label>
+                                        <input type="number" class="form-control" placeholder="Seller Cost" id="input_seller_price" name="seller_price" step="any">
+                                        <small class="d-block mt-1" id="profit_preview_add" style="font-size: 11px;"></small>
                                     </div>
                                 </div>
 
                                 <div class="col-lg-2">
                                     <div class="mb-3">
                                         <label class="form-label"> Discount<span class="text-danger">*</span></label>
-                                        <input type="number" class="form-control" placeholder="Enter Discount"name="discount" >
+                                        <input type="number" class="form-control" placeholder="Enter Discount" id="input_discount" name="discount" >
                                     </div>
                                 </div>
 
@@ -400,6 +408,31 @@
                             function removeFaqRow(button) {
                                 button.closest('tr').remove();
                             }
+
+                            // Real-time Profit Preview
+                            function updateAddProfitPreview() {
+                                var price = parseFloat(document.getElementById('input_price')?.value || 0);
+                                var discount = parseFloat(document.getElementById('input_discount')?.value || 0);
+                                var sellerPrice = parseFloat(document.getElementById('input_seller_price')?.value || 0);
+                                var finalSelling = price - (price * discount / 100);
+                                var previewElem = document.getElementById('profit_preview_add');
+                                if (previewElem) {
+                                    if (sellerPrice > 0) {
+                                        var profit = finalSelling - sellerPrice;
+                                        var pct = ((profit / sellerPrice) * 100).toFixed(1);
+                                        var colorClass = profit >= 0 ? '#198754' : '#dc3545';
+                                        previewElem.innerHTML = '<b style="color:' + colorClass + ';">Profit: ₹' + profit.toFixed(2) + ' (' + pct + '%)</b>';
+                                    } else {
+                                        previewElem.innerHTML = '';
+                                    }
+                                }
+                            }
+                            ['input_price', 'input_discount', 'input_seller_price'].forEach(function(id) {
+                                var el = document.getElementById(id);
+                                if (el) {
+                                    el.addEventListener('input', updateAddProfitPreview);
+                                }
+                            });
                         </script>
 
                         <div class="text-center">
