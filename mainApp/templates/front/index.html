@@ -558,209 +558,242 @@
         <!-- BANNER SECTION END -->
 
 
-        <!-- CATEGORY SECTION START (Supercategories with Child Maincategories Hover Dropdown) -->
+        <!-- CATEGORY SECTION START (Supercategories with Full Width Clickable Maincategories Panel) -->
         {% if home_supercategories %}
         <style>
-            .supercat-dropdown-wrapper {
-                position: relative;
-                z-index: 20;
-            }
-            .supercat-dropdown-wrapper:hover {
-                z-index: 999;
-            }
-            .supercat-trigger {
-                cursor: pointer;
-                transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-                background: #ffffff;
-                text-decoration: none;
-            }
-            .supercat-dropdown-wrapper:hover .supercat-trigger {
-                border-color: #EF2853 !important;
-                box-shadow: 0 8px 24px rgba(239, 40, 83, 0.12);
-            }
-            .supercat-dropdown-wrapper:hover .supercat-arrow-icon {
-                transform: rotate(180deg);
-                color: #ffffff;
-            }
-            .supercat-dropdown-wrapper:hover .supercat-badge {
-                color: rgba(255, 255, 255, 0.9) !important;
-            }
-
-            /* Floating Maincategories Dropdown */
-            .supercat-menu {
-                position: absolute;
-                top: calc(100% + 8px);
-                left: 0;
-                width: 100%;
-                min-width: 290px;
-                background: #ffffff;
+            .supercat-pill-tab {
+                border: 2px solid #F8E6E2;
                 border-radius: 14px;
-                box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
-                border: 1px solid #f6dedc;
-                opacity: 0;
-                visibility: hidden;
-                transform: translateY(12px);
-                transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s;
-                z-index: 9999;
-                pointer-events: none;
-                overflow: hidden;
-            }
-            /* Seamless hover bridge */
-            .supercat-menu::before {
-                content: "";
-                position: absolute;
-                top: -10px;
-                left: 0;
-                width: 100%;
-                height: 10px;
-            }
-            .supercat-dropdown-wrapper:hover .supercat-menu,
-            .supercat-dropdown-wrapper:focus-within .supercat-menu,
-            .supercat-dropdown-wrapper.is-open .supercat-menu {
-                opacity: 1;
-                visibility: visible;
-                transform: translateY(0);
-                pointer-events: auto;
-            }
-
-            /* Subitems inside dropdown */
-            .supercat-subitem {
+                padding: clamp(8px, 0.6vw, 12px) clamp(12px, 1vw, 18px);
                 display: flex;
                 align-items: center;
-                justify-content: space-between;
-                padding: 10px 14px;
+                gap: clamp(10px, 0.9vw, 16px);
+                background: #ffffff;
                 text-decoration: none;
-                color: #222222;
-                border-radius: 10px;
-                transition: all 0.2s ease;
-                margin-bottom: 4px;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+                user-select: none;
             }
-            .supercat-subitem:last-child {
-                margin-bottom: 0;
+            .supercat-pill-tab:hover {
+                border-color: #EF2853;
+                background: #fffafa;
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(239, 40, 83, 0.1);
             }
-            .supercat-subitem:hover {
-                background: #fdf2f4 !important;
-                transform: translateX(4px);
-                color: #EF2853 !important;
+            .supercat-pill-tab.is-active {
+                border-color: #EF2853;
+                background: #ffffff;
+                box-shadow: 0 10px 24px rgba(239, 40, 83, 0.15);
             }
-            .supercat-subitem:hover .supercat-subitem-title {
-                color: #EF2853 !important;
-            }
-            .supercat-subitem:hover .supercat-subitem-arrow {
-                color: #EF2853 !important;
-                transform: translateX(3px);
-            }
-            .supercat-subitem-img {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
+            .supercat-pill-tab .supercat-img {
+                width: clamp(42px, 3.2vw, 54px);
+                height: clamp(42px, 3.2vw, 54px);
+                aspect-ratio: 1/1;
                 object-fit: cover;
-                border: 1px solid #f0f0f0;
+                border-radius: 999px;
+                border: 2px solid #f6dedc;
+                background: #fdf2f4;
                 flex-shrink: 0;
             }
-            .supercat-subitem-avatar {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                background: #fdf2f4;
-                color: #EF2853;
-                font-weight: 700;
-                font-size: 14px;
+            .supercat-pill-tab .supercat-txt {
+                flex-grow: 1;
+            }
+            .supercat-pill-tab .supercat-name {
+                font-weight: 600;
+                font-size: clamp(16px, 1.05vw, 19px);
+                color: #222222;
+                line-height: 1.2;
+            }
+            .supercat-pill-tab .supercat-count {
+                font-size: 11px;
+                font-weight: 500;
+                color: #888888;
+                margin-top: 2px;
+            }
+            .supercat-pill-tab .supercat-toggle-btn {
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
+                width: clamp(30px, 2.4vw, 38px);
+                height: clamp(30px, 2.4vw, 38px);
+                border-radius: 50%;
+                background: #fdf2f4;
+                color: #EF2853;
+                transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
                 flex-shrink: 0;
             }
+            .supercat-pill-tab.is-active .supercat-toggle-btn {
+                background: #EF2853;
+                color: #ffffff;
+                transform: rotate(180deg);
+            }
 
-            @media (max-width: 575px) {
-                .supercat-menu {
-                    min-width: 100%;
+            /* Full Width Panel for Child Maincategories */
+            .supercat-fullwidth-panel {
+                display: none;
+                background: #ffffff;
+                border: 1px solid #f2dedb;
+                border-radius: 16px;
+                padding: clamp(16px, 1.6vw, 24px);
+                margin-top: 18px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+                animation: supercatFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            }
+            .supercat-fullwidth-panel.is-open {
+                display: block;
+            }
+            @keyframes supercatFadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-8px);
                 }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .supercat-panel-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 10px;
+                padding-bottom: 14px;
+                margin-bottom: 16px;
+                border-bottom: 1px solid #f6dedc;
+            }
+            .supercat-panel-title {
+                font-weight: 700;
+                font-size: clamp(17px, 1.15vw, 21px);
+                color: #111111;
+                margin: 0;
+            }
+            .supercat-panel-link {
+                color: #EF2853;
+                font-weight: 600;
+                font-size: 13px;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                transition: gap 0.2s ease;
+            }
+            .supercat-panel-link:hover {
+                gap: 7px;
+                color: #d81b44;
             }
         </style>
 
         <div class="ul-container">
             <section class="ul-categories py-3">
                 <div class="ul-inner-container">
+                    <!-- Supercategories Selector Row -->
                     <div class="row row-cols-lg-4 row-cols-md-3 row-cols-2 row-cols-xxs-1 ul-bs-row g-3">
                         {% for item in home_supercategories %}
                         {% if item.active_maincategories|length > 1 %}
-                        <!-- single supercategory with hover dropdown -->
                         <div class="col">
-                            <div class="supercat-dropdown-wrapper">
-                                <a class="ul-category supercat-trigger" href="/{{item.slug}}/" title="Explore {{item.name}}">
-                                    <div class="ul-category-img">
-                                        <img src="{{item.display_image}}" alt="{{item.name}}" onerror="this.onerror=null; this.src='https://image.narifashionstore.com/category/women.webp';">
-                                    </div>
-                                    <div class="ul-category-txt">
-                                        <span class="d-block">{{item.name}}</span>
-                                        <small class="supercat-badge d-block text-muted" style="font-size: 11px; font-weight: 500; transition: color 0.3s ease;">{{item.maincategories_count}} Main Categories</small>
-                                    </div>
-                                    <div class="ul-category-btn">
-                                        <span>
-                                            <svg class="supercat-arrow-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s ease, color 0.3s ease;">
-                                                <polyline points="6 9 12 15 18 9"></polyline>
-                                            </svg>
-                                        </span>
-                                    </div>
-                                </a>
-
-                                <!-- HOVER DROPDOWN: CHILD MAINCATEGORIES -->
-                                <div class="supercat-menu">
-                                    <div class="px-3 pt-3 pb-2 d-flex align-items-center justify-content-between border-bottom" style="border-color: #fceceb !important;">
-                                        <span class="text-uppercase fw-bold text-muted" style="font-size: 10px; letter-spacing: 0.6px;">{{item.name}} Categories</span>
-                                        <a href="/{{item.slug}}/" style="font-size: 11px; color: #EF2853; font-weight: 600; text-decoration: none;">View All &rarr;</a>
-                                    </div>
-                                    <div class="p-2">
-                                        {% for mc in item.active_maincategories %}
-                                        <a href="{% if mc.supercategory %}/{{mc.supercategory.slug}}/{{mc.slug}}/{% else %}/{{mc.slug}}/{% endif %}" class="supercat-subitem">
-                                            <div class="d-flex align-items-center gap-2">
-                                                {% if mc.image %}
-                                                <img src="{{mc.image}}" alt="{{mc.name}}" class="supercat-subitem-img">
-                                                {% else %}
-                                                <span class="supercat-subitem-avatar">{{mc.name|slice:':1'}}</span>
-                                                {% endif %}
-                                                <span class="supercat-subitem-title fw-medium" style="font-size: 14px;">{{mc.name}}</span>
-                                            </div>
-                                            <i class="flaticon-arrow-point-to-right supercat-subitem-arrow text-muted" style="font-size: 12px; transition: transform 0.2s ease;"></i>
-                                        </a>
-                                        {% endfor %}
-                                    </div>
+                            <div class="supercat-pill-tab {% if forloop.first %}is-active{% endif %}" 
+                                 data-target="supercat-panel-{{ item.id }}" 
+                                 role="button" 
+                                 tabindex="0"
+                                 title="Click to view {{ item.name }} categories">
+                                <img src="{% if item.display_image %}{{ item.display_image }}{% else %}{% static 'assets/img/image.png' %}{% endif %}" 
+                                     alt="{{ item.name }}" 
+                                     class="supercat-img"
+                                     onerror="this.onerror=null; this.src='{% static 'assets/img/image.png' %}';">
+                                <div class="supercat-txt">
+                                    <span class="supercat-name d-block">{{ item.name }}</span>
+                                    <span class="supercat-count d-block">{{ item.maincategories_count }} Categories</span>
+                                </div>
+                                <div class="supercat-toggle-btn">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
                                 </div>
                             </div>
                         </div>
                         {% endif %}
                         {% endfor %}
                     </div>
+
+                    <!-- Full Width Maincategories Panels (Expanded below after click) -->
+                    {% for item in home_supercategories %}
+                    {% if item.active_maincategories|length > 1 %}
+                    <div id="supercat-panel-{{ item.id }}" class="supercat-fullwidth-panel {% if forloop.first %}is-open{% endif %}">
+                        <div class="supercat-panel-header">
+                            <div>
+                                <h3 class="supercat-panel-title">{{ item.name }} Collections</h3>
+                                <p class="text-muted small m-0">Click any category below to explore curated {{ item.name }} products</p>
+                            </div>
+                            <a href="/{{ item.slug }}/" class="supercat-panel-link">
+                                View Full {{ item.name }} Section &rarr;
+                            </a>
+                        </div>
+
+                        <!-- Full Width Grid of Child Maincategories -->
+                        <div class="row row-cols-lg-4 row-cols-md-3 row-cols-2 row-cols-xxs-1 ul-bs-row g-3">
+                            {% for mc in item.active_maincategories %}
+                            <div class="col">
+                                <a class="ul-category" href="{% if mc.supercategory %}/{{ mc.supercategory.slug }}/{{ mc.slug }}/{% else %}/{{ mc.slug }}/{% endif %}">
+                                    <div class="ul-category-img">
+                                        <img src="{{ mc.image }}" 
+                                             alt="{{ mc.name }}" 
+                                             onerror="this.onerror=null; this.src='{% static 'assets/img/image.png' %}';">
+                                    </div>
+                                    <div class="ul-category-txt">
+                                        <span>{{ mc.name }}</span>
+                                    </div>
+                                    <div class="ul-category-btn">
+                                        <span><i class="flaticon-arrow-point-to-right"></i></span>
+                                    </div>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
                 </div>
             </section>
         </div>
 
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                document.querySelectorAll('.supercat-dropdown-wrapper').forEach(function (wrapper) {
-                    const btn = wrapper.querySelector('.ul-category-btn');
-                    if (btn) {
-                        btn.addEventListener('click', function (e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            const wasOpen = wrapper.classList.contains('is-open');
-                            document.querySelectorAll('.supercat-dropdown-wrapper.is-open').forEach(function (other) {
-                                other.classList.remove('is-open');
-                            });
-                            if (!wasOpen) {
-                                wrapper.classList.add('is-open');
-                            }
-                        });
-                    }
-                });
+                const tabs = document.querySelectorAll('.supercat-pill-tab');
+                const panels = document.querySelectorAll('.supercat-fullwidth-panel');
 
-                document.addEventListener('click', function (e) {
-                    if (!e.target.closest('.supercat-dropdown-wrapper')) {
-                        document.querySelectorAll('.supercat-dropdown-wrapper.is-open').forEach(function (w) {
-                            w.classList.remove('is-open');
-                        });
-                    }
+                tabs.forEach(function (tab) {
+                    tab.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const targetId = this.getAttribute('data-target');
+                        const targetPanel = document.getElementById(targetId);
+                        if (!targetPanel) return;
+
+                        const isAlreadyActive = this.classList.contains('is-active');
+
+                        // If already active and clicked again, toggle it
+                        if (isAlreadyActive) {
+                            this.classList.remove('is-active');
+                            targetPanel.classList.remove('is-open');
+                        } else {
+                            // Deactivate all others
+                            tabs.forEach(function (t) { t.classList.remove('is-active'); });
+                            panels.forEach(function (p) { p.classList.remove('is-open'); });
+
+                            // Activate clicked tab and panel
+                            this.classList.add('is-active');
+                            targetPanel.classList.add('is-open');
+                        }
+                    });
+
+                    // Keyboard Accessibility (Enter / Space)
+                    tab.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            this.click();
+                        }
+                    });
                 });
             });
         </script>
