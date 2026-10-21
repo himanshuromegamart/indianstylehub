@@ -39,6 +39,19 @@ def home_page(request):
     gallery = Gallery.objects.all().order_by('-id')[:10]
     popular_links = get_home_popular_links()
 
+    # Supercategories that have more than 1 child maincategory (array size > 1)
+    home_supercategories = []
+    for sc in Supercategory.objects.prefetch_related('maincategories').all().order_by('id'):
+        mc_list = list(sc.maincategories.all().order_by('id'))
+        if len(mc_list) > 1:
+            sc.active_maincategories = mc_list
+            sc.maincategories_count = len(mc_list)
+            if not sc.image and mc_list and mc_list[0].image:
+                sc.display_image = mc_list[0].image
+            else:
+                sc.display_image = sc.image or ''
+            home_supercategories.append(sc)
+
     # Dynamic Category Sections (Only categories that have active products!)
     category_sections = []
     seen_category_names = set()
@@ -104,6 +117,7 @@ def home_page(request):
         'gallery': gallery,
         'popular_links': popular_links,
         'category_sections': category_sections,
+        'home_supercategories': home_supercategories,
     }
     return render(request, 'front/index.html', context)
 

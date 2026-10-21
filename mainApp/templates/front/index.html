@@ -558,33 +558,213 @@
         <!-- BANNER SECTION END -->
 
 
-        <!-- CATEGORY SECTION START -->
-        <div class="ul-container">
-            <section class="ul-categories">
-                <div class="ul-inner-container">
-                    <div class="row row-cols-lg-4 row-cols-md-3 row-cols-2 row-cols-xxs-1 ul-bs-row">
-                        {%for item in maincategories%}
-                        <!-- single category -->
-                        <div class="col">
-                            <a class="ul-category" href="/{{item.slug}}">
-                                <div class="ul-category-img">
-                                    <img src="{{item.image}}" alt="Category Image">
-                                </div>
-                                <div class="ul-category-txt">
-                                    <span>{{item.name}}</span>
-                                </div>
-                                <div class="ul-category-btn">
-                                    <span><i class="flaticon-arrow-point-to-right"></i></span>
-                                </div>
-                            </a>
-                        </div>
-                        {%endfor%}
+        <!-- CATEGORY SECTION START (Supercategories with Child Maincategories Hover Dropdown) -->
+        {% if home_supercategories %}
+        <style>
+            .supercat-dropdown-wrapper {
+                position: relative;
+                z-index: 20;
+            }
+            .supercat-dropdown-wrapper:hover {
+                z-index: 999;
+            }
+            .supercat-trigger {
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+                background: #ffffff;
+                text-decoration: none;
+            }
+            .supercat-dropdown-wrapper:hover .supercat-trigger {
+                border-color: #EF2853 !important;
+                box-shadow: 0 8px 24px rgba(239, 40, 83, 0.12);
+            }
+            .supercat-dropdown-wrapper:hover .supercat-arrow-icon {
+                transform: rotate(180deg);
+                color: #ffffff;
+            }
+            .supercat-dropdown-wrapper:hover .supercat-badge {
+                color: rgba(255, 255, 255, 0.9) !important;
+            }
 
-                        
+            /* Floating Maincategories Dropdown */
+            .supercat-menu {
+                position: absolute;
+                top: calc(100% + 8px);
+                left: 0;
+                width: 100%;
+                min-width: 290px;
+                background: #ffffff;
+                border-radius: 14px;
+                box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+                border: 1px solid #f6dedc;
+                opacity: 0;
+                visibility: hidden;
+                transform: translateY(12px);
+                transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s;
+                z-index: 9999;
+                pointer-events: none;
+                overflow: hidden;
+            }
+            /* Seamless hover bridge */
+            .supercat-menu::before {
+                content: "";
+                position: absolute;
+                top: -10px;
+                left: 0;
+                width: 100%;
+                height: 10px;
+            }
+            .supercat-dropdown-wrapper:hover .supercat-menu,
+            .supercat-dropdown-wrapper:focus-within .supercat-menu,
+            .supercat-dropdown-wrapper.is-open .supercat-menu {
+                opacity: 1;
+                visibility: visible;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+
+            /* Subitems inside dropdown */
+            .supercat-subitem {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 10px 14px;
+                text-decoration: none;
+                color: #222222;
+                border-radius: 10px;
+                transition: all 0.2s ease;
+                margin-bottom: 4px;
+            }
+            .supercat-subitem:last-child {
+                margin-bottom: 0;
+            }
+            .supercat-subitem:hover {
+                background: #fdf2f4 !important;
+                transform: translateX(4px);
+                color: #EF2853 !important;
+            }
+            .supercat-subitem:hover .supercat-subitem-title {
+                color: #EF2853 !important;
+            }
+            .supercat-subitem:hover .supercat-subitem-arrow {
+                color: #EF2853 !important;
+                transform: translateX(3px);
+            }
+            .supercat-subitem-img {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 1px solid #f0f0f0;
+                flex-shrink: 0;
+            }
+            .supercat-subitem-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: #fdf2f4;
+                color: #EF2853;
+                font-weight: 700;
+                font-size: 14px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+
+            @media (max-width: 575px) {
+                .supercat-menu {
+                    min-width: 100%;
+                }
+            }
+        </style>
+
+        <div class="ul-container">
+            <section class="ul-categories py-3">
+                <div class="ul-inner-container">
+                    <div class="row row-cols-lg-4 row-cols-md-3 row-cols-2 row-cols-xxs-1 ul-bs-row g-3">
+                        {% for item in home_supercategories %}
+                        {% if item.active_maincategories|length > 1 %}
+                        <!-- single supercategory with hover dropdown -->
+                        <div class="col">
+                            <div class="supercat-dropdown-wrapper">
+                                <a class="ul-category supercat-trigger" href="/{{item.slug}}/" title="Explore {{item.name}}">
+                                    <div class="ul-category-img">
+                                        <img src="{{item.display_image}}" alt="{{item.name}}" onerror="this.onerror=null; this.src='https://image.narifashionstore.com/category/women.webp';">
+                                    </div>
+                                    <div class="ul-category-txt">
+                                        <span class="d-block">{{item.name}}</span>
+                                        <small class="supercat-badge d-block text-muted" style="font-size: 11px; font-weight: 500; transition: color 0.3s ease;">{{item.maincategories_count}} Main Categories</small>
+                                    </div>
+                                    <div class="ul-category-btn">
+                                        <span>
+                                            <svg class="supercat-arrow-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s ease, color 0.3s ease;">
+                                                <polyline points="6 9 12 15 18 9"></polyline>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                </a>
+
+                                <!-- HOVER DROPDOWN: CHILD MAINCATEGORIES -->
+                                <div class="supercat-menu">
+                                    <div class="px-3 pt-3 pb-2 d-flex align-items-center justify-content-between border-bottom" style="border-color: #fceceb !important;">
+                                        <span class="text-uppercase fw-bold text-muted" style="font-size: 10px; letter-spacing: 0.6px;">{{item.name}} Categories</span>
+                                        <a href="/{{item.slug}}/" style="font-size: 11px; color: #EF2853; font-weight: 600; text-decoration: none;">View All &rarr;</a>
+                                    </div>
+                                    <div class="p-2">
+                                        {% for mc in item.active_maincategories %}
+                                        <a href="{% if mc.supercategory %}/{{mc.supercategory.slug}}/{{mc.slug}}/{% else %}/{{mc.slug}}/{% endif %}" class="supercat-subitem">
+                                            <div class="d-flex align-items-center gap-2">
+                                                {% if mc.image %}
+                                                <img src="{{mc.image}}" alt="{{mc.name}}" class="supercat-subitem-img">
+                                                {% else %}
+                                                <span class="supercat-subitem-avatar">{{mc.name|slice:':1'}}</span>
+                                                {% endif %}
+                                                <span class="supercat-subitem-title fw-medium" style="font-size: 14px;">{{mc.name}}</span>
+                                            </div>
+                                            <i class="flaticon-arrow-point-to-right supercat-subitem-arrow text-muted" style="font-size: 12px; transition: transform 0.2s ease;"></i>
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
             </section>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.supercat-dropdown-wrapper').forEach(function (wrapper) {
+                    const btn = wrapper.querySelector('.ul-category-btn');
+                    if (btn) {
+                        btn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const wasOpen = wrapper.classList.contains('is-open');
+                            document.querySelectorAll('.supercat-dropdown-wrapper.is-open').forEach(function (other) {
+                                other.classList.remove('is-open');
+                            });
+                            if (!wasOpen) {
+                                wrapper.classList.add('is-open');
+                            }
+                        });
+                    }
+                });
+
+                document.addEventListener('click', function (e) {
+                    if (!e.target.closest('.supercat-dropdown-wrapper')) {
+                        document.querySelectorAll('.supercat-dropdown-wrapper.is-open').forEach(function (w) {
+                            w.classList.remove('is-open');
+                        });
+                    }
+                });
+            });
+        </script>
+        {% endif %}
         <!-- CATEGORY SECTION END -->
 
 
