@@ -153,6 +153,22 @@ class Product(models.Model):
     sku=models.CharField(max_length=200,default='',null=True,blank=True)
     date=models.DateTimeField(auto_now_add=True)
 
+    # SEO & Search Optimization Fields
+    tags = models.TextField(default='', null=True, blank=True, help_text="Comma-separated SEO tags/keywords (e.g. party wear, luxury handbag, bridal collection)")
+    meta_title = models.CharField(max_length=255, default='', null=True, blank=True, help_text="SEO Meta Title (recommended 50-60 characters)")
+    meta_description = models.TextField(default='', null=True, blank=True, help_text="SEO Meta Description (recommended 150-160 characters)")
+    meta_keywords = models.TextField(default='', null=True, blank=True, help_text="SEO Meta Keywords (comma separated)")
+
+    @property
+    def tags_list(self):
+        """Returns clean list of tags for frontend pills and search filters"""
+        if not self.tags:
+            return []
+        return [t.strip() for t in self.tags.split(',') if t.strip()]
+
+    def get_tags_list(self):
+        return self.tags_list
+
     @property
     def profit(self):
         try:
@@ -365,4 +381,4 @@ class PasswordResetOTP(models.Model):
     def __str__(self):
         return f"{self.email} - {self.otp}"
 
-
+

@@ -2214,9 +2214,12 @@ def search_product(request):
 
     # Filter products based on the search query
     if query:
-        # 1. Exact query match across products, descriptions, categories
+        # 1. Exact query match across products, descriptions, categories, tags, SEO
         data = Product.objects.filter(
             Q(name__icontains=query) |
+            Q(tags__icontains=query) |
+            Q(meta_title__icontains=query) |
+            Q(meta_keywords__icontains=query) |
             Q(description__icontains=query) |
             Q(category__name__icontains=query) |
             Q(subcategory__name__icontains=query)
@@ -2237,6 +2240,9 @@ def search_product(request):
                 stem = w.rstrip('s') if (w.lower().endswith('s') and len(w) > 3) else w
                 q_filter |= (
                     Q(name__icontains=w) | Q(name__icontains=stem) |
+                    Q(tags__icontains=w) | Q(tags__icontains=stem) |
+                    Q(meta_keywords__icontains=w) | Q(meta_keywords__icontains=stem) |
+                    Q(meta_title__icontains=w) | Q(meta_title__icontains=stem) |
                     Q(category__name__icontains=w) | Q(category__name__icontains=stem) |
                     Q(subcategory__name__icontains=w) | Q(subcategory__name__icontains=stem) |
                     Q(description__icontains=w)

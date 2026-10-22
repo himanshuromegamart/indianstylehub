@@ -1005,6 +1005,12 @@ def add_product(request):
             # Handle the error if lengths do not match
             return JsonResponse({'error': 'Mismatched FAQ keys and values'}, status=400)
 
+        # SEO & Search Optimization Fields
+        product.tags = request.POST.get('tags', '').strip()
+        product.meta_title = request.POST.get('meta_title', '').strip()
+        product.meta_description = request.POST.get('meta_description', '').strip()
+        product.meta_keywords = request.POST.get('meta_keywords', '').strip()
+
         # Save product
         product.save()
         return redirect('/product')
@@ -1163,6 +1169,12 @@ def update_product(request,id,pn):
         else:
             # Handle the error if lengths do not match
             return JsonResponse({'error': 'Mismatched FAQ keys and values'}, status=400)
+
+        # SEO & Search Optimization Fields
+        product.tags = request.POST.get('tags', '').strip()
+        product.meta_title = request.POST.get('meta_title', '').strip()
+        product.meta_description = request.POST.get('meta_description', '').strip()
+        product.meta_keywords = request.POST.get('meta_keywords', '').strip()
 
         # Save product
         product.save()
@@ -1331,6 +1343,12 @@ def duplicate_product(request,id,pn):
         else:
             # Handle the error if lengths do not match
             return JsonResponse({'error': 'Mismatched FAQ keys and values'}, status=400)
+
+        # SEO & Search Optimization Fields
+        product.tags = request.POST.get('tags', '').strip()
+        product.meta_title = request.POST.get('meta_title', '').strip()
+        product.meta_description = request.POST.get('meta_description', '').strip()
+        product.meta_keywords = request.POST.get('meta_keywords', '').strip()
 
         # Save product
         product.save()

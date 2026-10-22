@@ -24,7 +24,7 @@ admin.site.register((
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'price', 'seller_price', 'display_profit', 'quantity', 'category', 'brand')
     list_filter = ('supercategory', 'maincategory', 'category', 'brand')
-    search_fields = ('name', 'sku')
+    search_fields = ('name', 'sku', 'tags', 'meta_title')
 
     def display_profit(self, obj):
         if obj.seller_price:

@@ -576,6 +576,136 @@
                                 });
                             </script>
                             
+                                                <!-- SEO & META TAGS SECTION -->
+                        <div class="col-lg-12">
+                            <div class="card border border-primary border-opacity-25 shadow-sm mt-3 mb-4">
+                                <div class="card-header bg-light d-flex align-items-center justify-content-between py-3">
+                                    <h5 class="card-title m-0 text-primary d-flex align-items-center gap-2">
+                                        <i class="bx bx-search-alt"></i> SEO & Meta Tags Configuration
+                                    </h5>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1">Search Engine Optimization</span>
+                                </div>
+                                <div class="card-body p-4">
+                                    <!-- Google Search Result Preview -->
+                                    <div class="mb-4 p-3 rounded-3" style="background: #f8f9fa; border-left: 4px solid #4285f4;">
+                                        <label class="form-label text-muted small fw-semibold text-uppercase mb-1">Google Search Preview</label>
+                                        <div class="google-preview-box">
+                                            <div class="text-truncate small" style="color: #202124; font-size: 13px;">https://narifashionstore.com &gt; product-details &gt; ...</div>
+                                            <div id="seo_preview_title" class="fw-semibold text-truncate" style="color: #1a0dab; font-size: 18px; line-height: 1.3;">{{ data.meta_title|default:data.name }} &mdash; Nari Fashion Store</div>
+                                            <div id="seo_preview_desc" class="text-muted small mt-1" style="color: #4d5156; font-size: 13px; line-height: 1.4;">{{ data.meta_description|default:data.description|striptags|truncatewords:25 }}</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <!-- Meta Title -->
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <label class="form-label fw-semibold m-0">SEO Meta Title</label>
+                                                    <span class="small text-muted" id="meta_title_counter">0 / 60 chars</span>
+                                                </div>
+                                                <input type="text" name="meta_title" id="input_meta_title" class="form-control" placeholder="e.g. Designer Pure Silk Saree with Zari Border" maxlength="70" value="{{ data.meta_title|default:'' }}">
+                                                <small class="form-text text-muted">Recommended: 50-60 characters for best Google display.</small>
+                                            </div>
+                                        </div>
+
+                                        <!-- SEO Tags / Keywords -->
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <label class="form-label fw-semibold m-0">SEO Tags (Comma Separated)</label>
+                                                    <span class="badge bg-info bg-opacity-10 text-info">Product Tags</span>
+                                                </div>
+                                                <input type="text" name="tags" id="input_tags" class="form-control" placeholder="e.g. silk saree, party wear, bridal lehenga, wedding collection" value="{{ data.tags|default:'' }}">
+                                                <small class="form-text text-muted">Separate multiple tags with commas. Displayed as clickable search tags on product page.</small>
+                                                <div id="tags_preview_container" class="mt-2 d-flex flex-wrap gap-1"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Meta Description -->
+                                        <div class="col-md-12">
+                                            <div class="mb-3">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <label class="form-label fw-semibold m-0">SEO Meta Description</label>
+                                                    <span class="small text-muted" id="meta_desc_counter">0 / 160 chars</span>
+                                                </div>
+                                                <textarea name="meta_description" id="input_meta_desc" class="form-control" rows="3" placeholder="Brief compelling summary of the product (recommended 140-160 characters)..." maxlength="200">{{ data.meta_description|default:'' }}</textarea>
+                                                <small class="form-text text-muted">Crucial for Google click-through rate (CTR). Briefly describe fabric, style, and benefits.</small>
+                                            </div>
+                                        </div>
+
+                                        <!-- Meta Keywords -->
+                                        <div class="col-md-12">
+                                            <div class="mb-2">
+                                                <label class="form-label text-muted small fw-semibold">Additional Meta Keywords (Optional)</label>
+                                                <input type="text" name="meta_keywords" id="input_meta_keywords" class="form-control form-control-sm" placeholder="e.g. buy online sarees india, ethnic wear, fast delivery" value="{{ data.meta_keywords|default:'' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <script>
+                            // Real-time SEO Preview & Tag Chips Generator for Edit Page
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const titleInput = document.getElementById('input_meta_title');
+                                const nameInput = document.querySelector('input[name="name"]');
+                                const descInput = document.getElementById('input_meta_desc');
+                                const tagsInput = document.getElementById('input_tags');
+                                const titlePreview = document.getElementById('seo_preview_title');
+                                const descPreview = document.getElementById('seo_preview_desc');
+                                const titleCounter = document.getElementById('meta_title_counter');
+                                const descCounter = document.getElementById('meta_desc_counter');
+                                const tagsContainer = document.getElementById('tags_preview_container');
+
+                                function updateSeoPreview() {
+                                    const metaTitle = (titleInput && titleInput.value.trim()) || (nameInput && nameInput.value.trim()) || 'Product Title Preview';
+                                    if (titlePreview) {
+                                        titlePreview.textContent = metaTitle + ' — Nari Fashion Store';
+                                    }
+                                    if (titleCounter && titleInput) {
+                                        const len = titleInput.value.length;
+                                        titleCounter.textContent = len + ' / 60 chars';
+                                        titleCounter.style.color = (len >= 50 && len <= 60) ? '#198754' : (len > 60 ? '#dc3545' : '#6c757d');
+                                    }
+
+                                    const metaDesc = (descInput && descInput.value.trim()) || 'Product meta description snippet will appear here in Google search results.';
+                                    if (descPreview) {
+                                        descPreview.textContent = metaDesc;
+                                    }
+                                    if (descCounter && descInput) {
+                                        const len = descInput.value.length;
+                                        descCounter.textContent = len + ' / 160 chars';
+                                        descCounter.style.color = (len >= 140 && len <= 160) ? '#198754' : (len > 160 ? '#dc3545' : '#6c757d');
+                                    }
+                                }
+
+                                function updateTagChips() {
+                                    if (!tagsContainer || !tagsInput) return;
+                                    tagsContainer.innerHTML = '';
+                                    const raw = tagsInput.value.trim();
+                                    if (!raw) return;
+                                    const tags = raw.split(',').map(t => t.trim()).filter(t => t.length > 0);
+                                    tags.forEach(function (tag) {
+                                        const chip = document.createElement('span');
+                                        chip.className = 'badge rounded-pill bg-light text-dark border px-2 py-1';
+                                        chip.style.fontSize = '12px';
+                                        chip.innerHTML = '<span class="text-danger fw-bold me-1">#</span>' + tag;
+                                        tagsContainer.appendChild(chip);
+                                    });
+                                }
+
+                                if (titleInput) titleInput.addEventListener('input', updateSeoPreview);
+                                if (nameInput) nameInput.addEventListener('input', updateSeoPreview);
+                                if (descInput) descInput.addEventListener('input', updateSeoPreview);
+                                if (tagsInput) tagsInput.addEventListener('input', updateTagChips);
+
+                                updateSeoPreview();
+                                updateTagChips();
+                            });
+                        </script>
+
                         <div class="text-center">
                                 <button type="submit" class="btn btn-primary text-center mt-4" style="padding:2px 50px;">Update</submit>
                                 </div>
