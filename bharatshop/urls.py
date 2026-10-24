@@ -49,6 +49,7 @@ urlpatterns = [
     path('my-account-edit/',views.my_account_edit),
     path('my-account-orders/',views.my_account_order),
     path('my-account-orders-details/',views.my_account_order_details),
+    path('my-account-orders-details/<int:id>/',views.my_account_order_details),
     path('order-tracking/',views.order_tracking),
     path('payment-confirmation/',views.payment_confirmation),
     path('payment-failure/',views.payment_failure),

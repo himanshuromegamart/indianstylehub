@@ -2188,15 +2188,52 @@ def my_account_order(request):
     if request.user.is_superuser or request.user.is_staff:
         return redirect("/admin-dashboard")
     buyer = Buyer.objects.filter(phone=request.user.username).first() or Buyer.objects.filter(email=request.user.email).first()
-    orders = Order.objects.filter(buyer=buyer).order_by('-id') if buyer else []
+    orders = []
+    if buyer:
+        orders = Order.objects.filter(buyer=buyer).order_by('-id')
+    else:
+        orders = Order.objects.filter(
+            Q(buyer__phone=request.user.username) | Q(buyer__email=request.user.email)
+        ).order_by('-id')
     return render(request, 'front/my-account-orders.html', {'buyer': buyer, 'orders': orders})
 
 
 @login_required(login_url="/login")
-def my_account_order_details(request):
+def my_account_order_details(request, id=None):
     if request.user.is_superuser or request.user.is_staff:
         return redirect("/admin-dashboard")
-    return redirect('/my-account-orders/')
+    
+    order_id = id or request.GET.get('id') or request.GET.get('order_id')
+    if not order_id:
+        return redirect('/my-account-orders/')
+
+    buyer = Buyer.objects.filter(phone=request.user.username).first() or Buyer.objects.filter(email=request.user.email).first()
+    
+    order = None
+    if buyer:
+        order = Order.objects.filter(id=order_id, buyer=buyer).first()
+    if not order:
+        order = Order.objects.filter(
+            Q(id=order_id) & (Q(buyer__phone=request.user.username) | Q(buyer__email=request.user.email))
+        ).first()
+
+    if not order:
+        messages.error(request, "Order not found or you do not have permission to view this order.")
+        return redirect('/my-account-orders/')
+
+    payment = None
+    ord_pid = (order.razorpay_payment_id or order.transactionId or '').strip()
+    ord_oid = (order.razorpay_order_id or '').strip()
+    if ord_pid and not 'COD' in ord_pid:
+        payment = Payment.objects.filter(Q(razorpay_payment_id=ord_pid) | Q(order_number=ord_pid)).first()
+    if not payment and ord_oid:
+        payment = Payment.objects.filter(razorpay_order_id=ord_oid).first()
+
+    return render(request, 'front/my-account-order-details.html', {
+        'buyer': buyer or order.buyer,
+        'order': order,
+        'payment': payment
+    })
 
 def order_tracking(request):
     return redirect('/my-account-orders/')

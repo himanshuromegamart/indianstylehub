@@ -1,0 +1,304 @@
+{% extends "front/index.html" %}
+{% load static %}
+
+{% block title %}Order #{{ order.id }} Details | Nari Fashion Store{% endblock %}
+
+{% block body %}
+<main>
+    <div class="ul-container">
+        <div class="ul-breadcrumb">
+            <h2 class="ul-breadcrumb-title">Order #{{ order.id }} Details</h2>
+            <div class="ul-breadcrumb-nav">
+                <a href="/"><i class="flaticon-home"></i> Home</a>
+                <i class="flaticon-arrow-point-to-right"></i>
+                <a href="/my-account/">My Account</a>
+                <i class="flaticon-arrow-point-to-right"></i>
+                <a href="/my-account-orders/">Orders</a>
+                <i class="flaticon-arrow-point-to-right"></i>
+                <span class="current-page">#{{ order.id }}</span>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .nf-account{display:grid;grid-template-columns:280px 1fr;gap:30px;padding:clamp(25px,4vw,50px) 0}
+        @media(max-width:991px){.nf-account{grid-template-columns:1fr}}
+        .nf-card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.05);border:1px solid #f0f0f0;overflow:hidden}
+        .nf-sidebar-profile{padding:30px 24px;text-align:center;background:linear-gradient(135deg,#FFF5F4 0%,#FFF0EE 100%);border-bottom:1px solid #f0e6e4}
+        .nf-avatar{width:80px;height:80px;margin:0 auto 14px;background:linear-gradient(135deg,#F5224D,#FF941F);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px;font-weight:700;box-shadow:0 6px 20px rgba(245,34,77,.25)}
+        .nf-sidebar-profile h4{font-size:18px;font-weight:700;color:#111827;margin:0 0 3px}
+        .nf-sidebar-profile .nf-phone{font-size:13px;color:#6b7280;margin:0}
+        .nf-sidebar-nav{padding:12px}
+        .nf-sidebar-nav a{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;color:#4b5563;font-size:14px;font-weight:500;text-decoration:none;transition:all .2s;margin-bottom:2px}
+        .nf-sidebar-nav a i{font-size:18px;width:22px;text-align:center}
+        .nf-sidebar-nav a:hover{background:#fef2f2;color:#F5224D}
+        .nf-sidebar-nav a.active{background:linear-gradient(135deg,#F5224D,#FF941F);color:#fff;font-weight:600;box-shadow:0 4px 15px rgba(245,34,77,.2)}
+        .nf-sidebar-nav a.active i{color:#fff}
+        .nf-sidebar-nav .nf-nav-logout{color:#ef4444;margin-top:8px;border-top:1px solid #f3f4f6;padding-top:14px}
+        @media(max-width:991px){
+            .nf-sidebar-profile{padding:18px 20px;display:flex;align-items:center;gap:14px;text-align:left}
+            .nf-avatar{width:52px;height:52px;font-size:22px;margin:0;flex-shrink:0}
+            .nf-sidebar-nav{display:flex;overflow-x:auto;gap:8px;padding:10px 14px;-webkit-overflow-scrolling:touch}
+            .nf-sidebar-nav::-webkit-scrollbar{display:none}
+            .nf-sidebar-nav a{white-space:nowrap;padding:8px 14px;font-size:13px;margin-bottom:0;background:#F9FAFB;flex-shrink:0}
+            .nf-sidebar-nav .nf-nav-logout{margin-top:0;border-top:none;padding-top:8px}
+        }
+
+        /* Order Stepper */
+        .order-stepper { display: flex; justify-content: space-between; position: relative; margin: 30px 10px 40px; }
+        .order-stepper::before { content: ''; position: absolute; top: 16px; left: 30px; right: 30px; height: 3px; background: #e5e7eb; z-index: 1; }
+        .stepper-progress { position: absolute; top: 16px; left: 30px; height: 3px; background: #16a34a; z-index: 2; transition: width 0.3s ease; }
+        .stepper-step { position: relative; z-index: 3; text-align: center; width: 80px; }
+        .stepper-icon { width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 13px; color: #9ca3af; font-weight: 700; transition: all 0.2s; }
+        .stepper-step.completed .stepper-icon { background: #16a34a; border-color: #16a34a; color: #fff; }
+        .stepper-step.active .stepper-icon { background: #F5224D; border-color: #F5224D; color: #fff; box-shadow: 0 0 0 4px rgba(245,34,77,0.2); }
+        .stepper-label { font-size: 12px; font-weight: 600; color: #6b7280; display: block; }
+        .stepper-step.completed .stepper-label { color: #16a34a; }
+        .stepper-step.active .stepper-label { color: #F5224D; }
+
+        .nf-badge{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:12.5px;font-weight:600}
+        .nf-badge-pending{background:#fff7ed;color:#ea580c;border:1px solid #fed7aa}
+        .nf-badge-confirmed{background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe}
+        .nf-badge-shipped{background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe}
+        .nf-badge-delivered{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0}
+        .nf-badge-cancelled{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+    </style>
+
+    <div class="ul-container">
+        <div class="nf-account">
+            <!-- Sidebar -->
+            <div>
+                <div class="nf-card" style="position:sticky;top:100px">
+                    <div class="nf-sidebar-profile">
+                        <div class="nf-avatar">{{ buyer.name|slice:":1"|upper }}</div>
+                        <h4>{{ buyer.name }}</h4>
+                        <p class="nf-phone">📞 {{ buyer.phone }}</p>
+                    </div>
+                    <nav class="nf-sidebar-nav">
+                        <a href="/my-account/"><i class="flaticon-user"></i> Dashboard</a>
+                        <a href="/my-account-orders/" class="active"><i class="flaticon-shopping-bag"></i> My Orders</a>
+                        <a href="/my-account-address/"><i class="flaticon-location"></i> Addresses</a>
+                        <a href="/my-account-edit/"><i class="flaticon-edit"></i> Edit Profile</a>
+                        <a href="/wishlist/"><i class="flaticon-heart"></i> Wishlist</a>
+                        <a href="/logout/" class="nf-nav-logout"><i class="flaticon-close"></i> Sign Out</a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div>
+                <div class="nf-card p-4 p-md-5">
+                    <!-- Top Action Bar -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-center pb-3 border-bottom mb-4 gap-2">
+                        <div>
+                            <a href="/my-account-orders/" class="btn btn-sm btn-outline-secondary mb-2" style="border-radius: 8px;">
+                                &larr; Back to Orders
+                            </a>
+                            <h3 class="fw-bold text-dark mb-1" style="font-size: 1.5rem;">
+                                Order <span class="text-primary font-monospace">#{{ order.id }}</span>
+                            </h3>
+                            <p class="text-muted small mb-0">
+                                Placed on <strong>{{ order.orderDate|default:"Recent Order" }}</strong>
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <span class="nf-badge {% if order.orderStatus|lower == 'delivered' %}nf-badge-delivered{% elif order.orderStatus|lower == 'shipped' %}nf-badge-shipped{% elif order.orderStatus|lower == 'confirmed' %}nf-badge-confirmed{% elif order.orderStatus|lower == 'cancelled' %}nf-badge-cancelled{% else %}nf-badge-pending{% endif %}">
+                                {{ order.orderStatus|title }}
+                            </span>
+                            {% if order.payment_status|lower == 'paid' or order.razorpay_payment_id %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle d-block mt-2 px-2 py-1" style="font-size: 12px;">
+                                <i class="fa fa-check-circle me-1"></i> Paid Online (Razorpay)
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Tracking Stepper (Unless Cancelled) -->
+                    {% if order.orderStatus|lower == 'cancelled' %}
+                    <div class="alert alert-danger d-flex align-items-center rounded-3 p-3 mb-4" role="alert">
+                        <i class="fa fa-times-circle fs-4 me-3"></i>
+                        <div>
+                            <strong>This order was cancelled.</strong>
+                            {% if order.cancelled_by %}
+                            <div class="small text-muted mt-1">Reason / Note: {{ order.cancelled_by }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="bg-light p-3 p-md-4 rounded-4 mb-4 border">
+                        <h6 class="fw-bold text-dark mb-4">Order &amp; Delivery Progress</h6>
+                        <div class="order-stepper">
+                            {% with status=order.orderStatus|lower %}
+                            <div class="stepper-progress" style="width: {% if status == 'delivered' %}100%{% elif status == 'shipped' %}66%{% elif status == 'confirmed' %}33%{% else %}10%{% endif %};"></div>
+
+                            <!-- Step 1: Placed -->
+                            <div class="stepper-step {% if status in 'pending,confirmed,shipped,delivered' %}completed{% endif %}">
+                                <div class="stepper-icon"><i class="fa fa-check"></i></div>
+                                <span class="stepper-label">Placed</span>
+                            </div>
+
+                            <!-- Step 2: Confirmed -->
+                            <div class="stepper-step {% if status in 'confirmed,shipped,delivered' %}completed{% elif status == 'pending' %}active{% endif %}">
+                                <div class="stepper-icon">{% if status in 'confirmed,shipped,delivered' %}<i class="fa fa-check"></i>{% else %}2{% endif %}</div>
+                                <span class="stepper-label">Confirmed</span>
+                            </div>
+
+                            <!-- Step 3: Shipped -->
+                            <div class="stepper-step {% if status in 'shipped,delivered' %}completed{% elif status == 'confirmed' %}active{% endif %}">
+                                <div class="stepper-icon">{% if status in 'shipped,delivered' %}<i class="fa fa-check"></i>{% else %}3{% endif %}</div>
+                                <span class="stepper-label">Shipped</span>
+                            </div>
+
+                            <!-- Step 4: Delivered -->
+                            <div class="stepper-step {% if status == 'delivered' %}completed{% elif status == 'shipped' %}active{% endif %}">
+                                <div class="stepper-icon">{% if status == 'delivered' %}<i class="fa fa-check"></i>{% else %}4{% endif %}</div>
+                                <span class="stepper-label">Delivered</span>
+                            </div>
+                            {% endwith %}
+                        </div>
+
+                        {% if order.waywill %}
+                        <div class="alert alert-info py-2 px-3 mb-0 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2" style="font-size: 13.5px;">
+                            <div>
+                                <i class="fa fa-truck me-2"></i> Courier Waybill / Tracking No:
+                                <strong class="font-monospace text-dark ms-1">{{ order.waywill }}</strong>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Ordered Product Details -->
+                    <div class="card border rounded-4 overflow-hidden mb-4 shadow-none">
+                        <div class="card-header bg-white py-3 border-bottom">
+                            <h6 class="mb-0 fw-bold text-dark">Ordered Item</h6>
+                        </div>
+                        <div class="card-body p-3 p-md-4">
+                            {% if order.product %}
+                            <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    {% if order.product.image1 %}
+                                    <img src="{{ order.product.image1 }}" alt="{{ order.product.name }}" 
+                                         class="rounded-3 object-fit-cover" style="width: 75px; height: 75px; border: 1px solid #f0f0f0;">
+                                    {% else %}
+                                    <div class="rounded-3 bg-light d-flex align-items-center justify-content-center" style="width: 75px; height: 75px; color: #9ca3af;">
+                                        <i class="flaticon-shopping-bag fs-3"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <h5 class="fw-bold mb-1" style="font-size: 1.05rem;">
+                                            <a href="/product-details/{{ order.product.name|slugify }}/{{ order.product.id }}" class="text-dark text-decoration-none">
+                                                {{ order.product.name }}
+                                            </a>
+                                        </h5>
+                                        <div class="text-muted small">
+                                            Unit Price: <strong>₹{{ order.product.price|default:order.finalPrice }}</strong>
+                                        </div>
+                                        <div class="text-muted small">
+                                            Quantity: <span class="badge bg-light text-dark border">{{ order.quantity|default:1 }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-sm-end">
+                                    <span class="text-muted small d-block">Subtotal</span>
+                                    <strong class="text-dark" style="font-size: 1.25rem;">₹{{ order.finalPrice }}</strong>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="p-3 text-muted">Order details available in your invoice.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Details Row: Delivery Address & Payment Summary -->
+                    <div class="row g-3 mb-4">
+                        <!-- Delivery Address -->
+                        <div class="col-md-6 col-12">
+                            <div class="card border rounded-4 h-100 shadow-none">
+                                <div class="card-header bg-white py-3 border-bottom">
+                                    <h6 class="mb-0 fw-bold text-dark"><i class="flaticon-location me-2 text-danger"></i> Delivery Address</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    {% if order.address %}
+                                    <p class="mb-1 fw-bold text-dark">{{ order.buyer.name|default:buyer.name }}</p>
+                                    <p class="mb-1 text-muted small">{{ order.address.address }}</p>
+                                    <p class="mb-1 text-muted small">
+                                        {{ order.address.city }}{% if order.address.state %}, {{ order.address.state }}{% endif %}
+                                        {% if order.address.pin %} - <strong>{{ order.address.pin }}</strong>{% endif %}
+                                    </p>
+                                    <p class="mb-0 text-muted small mt-2">
+                                        <i class="fa fa-phone me-1"></i> Phone: <strong>{{ order.buyer.phone|default:order.address.alternatePhone }}</strong>
+                                    </p>
+                                    {% else %}
+                                    <p class="text-muted small mb-0">Delivery address details saved on account.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment & Price Summary -->
+                        <div class="col-md-6 col-12">
+                            <div class="card border rounded-4 h-100 shadow-none">
+                                <div class="card-header bg-white py-3 border-bottom">
+                                    <h6 class="mb-0 fw-bold text-dark"><i class="fa fa-credit-card me-2 text-primary"></i> Payment Details</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between mb-2 small">
+                                        <span class="text-muted">Payment Method:</span>
+                                        <strong>
+                                            {% if order.razorpay_payment_id or order.payment_status|lower == 'paid' or order.transactionId and not 'COD' in order.transactionId %}
+                                            <span class="text-success"><i class="fa fa-check-circle me-1"></i> Razorpay Online</span>
+                                            {% else %}
+                                            Cash on Delivery (COD)
+                                            {% endif %}
+                                        </strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2 small">
+                                        <span class="text-muted">Payment Status:</span>
+                                        <strong>
+                                            {% if order.payment_status|lower == 'paid' or order.razorpay_payment_id %}
+                                            <span class="badge bg-success">Paid</span>
+                                            {% else %}
+                                            <span class="badge bg-warning text-dark">{{ order.payment_status|default:"Pending" }}</span>
+                                            {% endif %}
+                                        </strong>
+                                    </div>
+                                    {% if order.razorpay_payment_id or order.transactionId %}
+                                    <div class="d-flex justify-content-between mb-2 small">
+                                        <span class="text-muted">Transaction ID:</span>
+                                        <code class="font-monospace text-primary">{{ order.razorpay_payment_id|default:order.transactionId }}</code>
+                                    </div>
+                                    {% endif %}
+                                    <div class="d-flex justify-content-between mb-2 small">
+                                        <span class="text-muted">Shipping Charges:</span>
+                                        <span class="text-success fw-bold">FREE</span>
+                                    </div>
+                                    <div class="border-top pt-2 mt-2 d-flex justify-content-between">
+                                        <span class="fw-bold text-dark">Total Amount Paid:</span>
+                                        <span class="fw-bold text-danger" style="font-size: 1.15rem;">₹{{ order.finalPrice }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Action Buttons -->
+                    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center pt-3 border-top">
+                        <a href="/my-account-orders/" class="btn btn-outline-secondary px-4 py-2 rounded-3 fw-semibold" style="font-size: 14px;">
+                            &larr; Back to Order History
+                        </a>
+                        <div class="d-flex gap-2">
+                            <button onclick="window.print()" class="btn btn-outline-dark px-3 py-2 rounded-3 fw-semibold" style="font-size: 14px;">
+                                <i class="fa fa-print me-1"></i> Print Receipt
+                            </button>
+                            <a href="/all/" class="btn btn-primary px-4 py-2 rounded-3 fw-semibold text-white" style="background: #F5224D; border-color: #F5224D; font-size: 14px;">
+                                Continue Shopping
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
