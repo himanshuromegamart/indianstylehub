@@ -138,6 +138,7 @@ urlpatterns = [
     # Payments Management & Razorpay Logs
     path('admin-payments/', backend.admin_payments_page, name='admin_payments'),
     path('admin-payment-details/<int:id>/', backend.admin_payment_details, name='admin_payment_details'),
+    path('admin-sync-payment/<int:id>/', backend.admin_sync_payment, name='admin_sync_payment'),
     path('admin-delete-payment/<int:id>/', backend.admin_delete_payment, name='admin_delete_payment'),
 
     # Registered Customers / Buyers

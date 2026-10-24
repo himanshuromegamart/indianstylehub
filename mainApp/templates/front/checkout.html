@@ -554,6 +554,8 @@
                     "description": "Order #" + data.order_number,
                     "image": "{% static 'assets/img/image.png' %}",
                     "order_id": data.order_id,
+                    "callback_url": window.location.origin + "/api/verify-razorpay-payment/",
+                    "redirect": false,
                     "handler": function (response) {
                         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Verifying Payment with Bank...';
 
@@ -581,8 +583,8 @@
                             }
                         })
                         .catch(vErr => {
-                            alert('Network error while verifying payment. Please contact support.');
-                            window.location.href = '/payment-failed/?order_number=' + encodeURIComponent(data.order_number);
+                            // If network verification fetch times out, redirect to confirmation page where server auto-syncs with Razorpay
+                            window.location.href = '/order-confirmation/?order_number=' + encodeURIComponent(data.order_number) + '&payment_id=' + encodeURIComponent(response.razorpay_payment_id || '');
                         });
                     },
                     "prefill": {

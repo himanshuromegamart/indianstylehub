@@ -232,6 +232,11 @@
                                         <a href="/admin-payment-details/{{ item.id }}/" class="btn btn-sm btn-outline-primary" title="View Full Log">
                                             <i class="fa fa-eye"></i> Details
                                         </a>
+                                        {% if item.status == 'PENDING' and item.razorpay_order_id %}
+                                        <a href="/admin-sync-payment/{{ item.id }}/" class="btn btn-sm btn-outline-warning" title="Sync with Razorpay API">
+                                            <i class="fa fa-refresh"></i> Sync
+                                        </a>
+                                        {% endif %}
                                         <a href="/admin-delete-payment/{{ item.id }}/" onclick="return confirm('Are you sure you want to delete this payment log record?')" class="btn btn-sm btn-outline-danger" title="Delete Log">
                                             <i class="fa fa-trash"></i>
                                         </a>

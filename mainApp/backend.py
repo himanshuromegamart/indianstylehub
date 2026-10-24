@@ -1773,6 +1773,18 @@ def admin_orders_page(request):
     status_filter = request.GET.get('status', '').strip()
     search_query = request.GET.get('search_query', '').strip()
 
+    # Auto-heal: Ensure any SUCCESS payments have matching Order entries
+    try:
+        success_unlinked = Payment.objects.filter(status='SUCCESS').exclude(
+            razorpay_order_id__in=Order.objects.values_list('razorpay_order_id', flat=True)
+        )
+        if success_unlinked.exists():
+            from .views import confirm_and_create_order
+            for sp in success_unlinked[:10]:
+                confirm_and_create_order(sp, razorpay_payment_id=sp.razorpay_payment_id)
+    except Exception as e:
+        pass
+
     orders_qs = Order.objects.all().order_by('-id')
 
     if status_filter:
@@ -2178,20 +2190,94 @@ def admin_payments_page(request):
 @login_required(login_url='/admin-login/')
 @user_passes_test(is_superuser, login_url='/admin-login/')
 def admin_payment_details(request, id):
-    """View full payment log and associated orders"""
+    """View full payment log and associated orders with automatic Razorpay verification"""
     if not request.user.is_superuser:
         return HttpResponseForbidden("You don't have permission to access this page.")
 
+    from .views import get_razorpay_client, confirm_and_create_order
+
     payment = get_object_or_404(Payment, id=id)
+
+    # Auto-sync with Razorpay if pending or missing payment id
+    if payment.status == 'PENDING' and payment.razorpay_order_id:
+        try:
+            client, key_id, key_secret = get_razorpay_client()
+            rzp_order = client.order.fetch(payment.razorpay_order_id)
+            payments_resp = client.order.payments(payment.razorpay_order_id)
+            items = payments_resp.get('items', []) if isinstance(payments_resp, dict) else []
+
+            captured_p = next((p for p in items if p.get('status') in ['captured', 'authorized']), None)
+            if captured_p:
+                pay_id = captured_p.get('id')
+                confirm_and_create_order(payment, razorpay_payment_id=pay_id)
+                payment.refresh_from_db()
+                messages.success(request, f"Auto-synced with Razorpay! Payment ID '{pay_id}' captured. Order confirmed and added to Admin Orders.")
+            elif rzp_order.get('status') == 'paid' and items:
+                pay_id = items[0].get('id')
+                confirm_and_create_order(payment, razorpay_payment_id=pay_id)
+                payment.refresh_from_db()
+                messages.success(request, f"Auto-synced with Razorpay! Razorpay Order is PAID. Order confirmed and added to Admin Orders.")
+        except Exception as err:
+            print(f"Auto-sync error for payment {id}: {err}")
+
     orders = Order.objects.filter(
         Q(razorpay_payment_id=payment.razorpay_payment_id) |
         Q(razorpay_order_id=payment.razorpay_order_id) |
         Q(transactionId=payment.razorpay_payment_id)
     )
+
+    # If payment is SUCCESS but orders is still empty, auto-create it now
+    if payment.status == 'SUCCESS' and not orders.exists():
+        confirm_and_create_order(payment, razorpay_payment_id=payment.razorpay_payment_id)
+        orders = Order.objects.filter(
+            Q(razorpay_payment_id=payment.razorpay_payment_id) |
+            Q(razorpay_order_id=payment.razorpay_order_id) |
+            Q(transactionId=payment.razorpay_payment_id)
+        )
+
     return render(request, 'backend/payment-details.html', {
         'payment': payment,
         'orders': orders,
     })
+
+
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def admin_sync_payment(request, id):
+    """Manually query Razorpay API to verify payment and generate/confirm orders"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+
+    from .views import get_razorpay_client, confirm_and_create_order
+
+    payment = get_object_or_404(Payment, id=id)
+
+    if not payment.razorpay_order_id:
+        messages.warning(request, f"Payment #{payment.order_number} does not have a Razorpay Order ID to query.")
+        return redirect(f"/admin-payment-details/{payment.id}/")
+
+    try:
+        client, key_id, key_secret = get_razorpay_client()
+        rzp_order = client.order.fetch(payment.razorpay_order_id)
+        payments_resp = client.order.payments(payment.razorpay_order_id)
+        items = payments_resp.get('items', []) if isinstance(payments_resp, dict) else []
+
+        captured_p = next((p for p in items if p.get('status') in ['captured', 'authorized']), None)
+        if captured_p:
+            pay_id = captured_p.get('id')
+            confirm_and_create_order(payment, razorpay_payment_id=pay_id)
+            messages.success(request, f"Synced with Razorpay! Payment ID '{pay_id}' CAPTURED. Order confirmed and added to Admin Orders.")
+        elif rzp_order.get('status') == 'paid':
+            pay_id = items[0].get('id') if items else payment.razorpay_payment_id
+            confirm_and_create_order(payment, razorpay_payment_id=pay_id)
+            messages.success(request, f"Synced with Razorpay! Razorpay Order is PAID. Order confirmed and added to Admin Orders.")
+        else:
+            rzp_st = rzp_order.get('status', 'unknown')
+            messages.info(request, f"Razorpay API reports status '{rzp_st}'. No captured payment was found.")
+    except Exception as e:
+        messages.error(request, f"Error communicating with Razorpay API: {str(e)}")
+
+    return redirect(f"/admin-payment-details/{payment.id}/")
 
 
 @login_required(login_url='/admin-login/')

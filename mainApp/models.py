@@ -302,6 +302,7 @@ class Payment(models.Model):
     error_step = models.CharField(max_length=100, blank=True, default='')
     error_reason = models.CharField(max_length=100, blank=True, default='')
     notes = models.TextField(blank=True, default='')
+    order_items_json = models.TextField(blank=True, default='[]')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

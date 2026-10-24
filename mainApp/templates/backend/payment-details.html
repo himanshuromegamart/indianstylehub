@@ -13,7 +13,7 @@
                     <i class="bx bx-receipt"></i> Transaction Details &mdash; Order #{{ payment.order_number }}
                 </h4>
             </div>
-            <div>
+            <div class="d-flex align-items-center gap-2">
                 {% if payment.status == 'SUCCESS' %}
                 <span class="badge bg-success font-size-14 px-3 py-2">
                     <i class="bx bx-check-circle me-1"></i> PAYMENT SUCCESS
@@ -30,6 +30,12 @@
                 <span class="badge bg-warning text-dark font-size-14 px-3 py-2">
                     <i class="bx bx-time me-1"></i> PENDING
                 </span>
+                {% endif %}
+
+                {% if payment.razorpay_order_id %}
+                <a href="/admin-sync-payment/{{ payment.id }}/" class="btn btn-outline-primary btn-sm" title="Query Razorpay API and sync this order">
+                    <i class="bx bx-sync me-1"></i> Sync with Razorpay
+                </a>
                 {% endif %}
             </div>
         </div>
