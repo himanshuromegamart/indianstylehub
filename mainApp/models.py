@@ -270,9 +270,47 @@ class Order(models.Model):
     orderStatus = models.CharField(max_length=100, default="pending")
     cancelled_by = models.CharField(max_length=100, default="")
     waywill = models.CharField(max_length=100, default="")
+    payment_status = models.CharField(max_length=50, default="Pending")
+    razorpay_order_id = models.CharField(max_length=100, default="", blank=True, null=True)
+    razorpay_payment_id = models.CharField(max_length=100, default="", blank=True, null=True)
+    razorpay_signature = models.TextField(default="", blank=True, null=True)
 
     def __str__(self):
         return f"Order {self.id} - {self.buyer}"
+
+class Payment(models.Model):
+    STATUS_CHOICES = (
+        ('PENDING', 'Pending'),
+        ('SUCCESS', 'Success'),
+        ('FAILED', 'Failed'),
+        ('CANCELLED', 'Cancelled'),
+        ('REFUNDED', 'Refunded'),
+    )
+    id = models.AutoField(primary_key=True)
+    buyer = models.ForeignKey(Buyer, on_delete=models.SET_NULL, null=True, blank=True)
+    order_number = models.CharField(max_length=100, db_index=True)
+    razorpay_order_id = models.CharField(max_length=100, blank=True, default='', db_index=True)
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, default='', db_index=True)
+    razorpay_signature = models.TextField(blank=True, default='')
+    amount = models.FloatField(help_text="Amount in INR Rupees")
+    currency = models.CharField(max_length=10, default='INR')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING', db_index=True)
+    payment_method = models.CharField(max_length=50, default='Razorpay')
+    error_code = models.CharField(max_length=100, blank=True, default='')
+    error_description = models.TextField(blank=True, default='')
+    error_source = models.CharField(max_length=100, blank=True, default='')
+    error_step = models.CharField(max_length=100, blank=True, default='')
+    error_reason = models.CharField(max_length=100, blank=True, default='')
+    notes = models.TextField(blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.order_number} - {self.status} - ₹{self.amount}"
+
 
 
 

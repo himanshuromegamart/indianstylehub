@@ -1,0 +1,293 @@
+{% extends 'backend/index.html' %}
+{% load static %}
+{% block body %}
+
+<div class="row">
+    <div class="col-lg-12">
+        {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Stat Cards Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-xl-3 col-sm-6">
+                <div class="card shadow-sm border-0 mb-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <span class="text-muted small fw-semibold text-uppercase">Total Transactions</span>
+                                <h3 class="mb-0 mt-1 font-weight-bold text-dark">{{ total_count }}</h3>
+                            </div>
+                            <div class="avatar-sm rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                <i class="bx bx-receipt text-primary font-size-24" style="font-size: 24px;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-sm-6">
+                <div class="card shadow-sm border-0 mb-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <span class="text-muted small fw-semibold text-uppercase">Total Volume Paid</span>
+                                <h3 class="mb-0 mt-1 font-weight-bold text-success">&#8377;{{ total_volume|floatformat:2 }}</h3>
+                            </div>
+                            <div class="avatar-sm rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                <i class="bx bx-rupee text-success font-size-24" style="font-size: 24px;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-sm-6">
+                <div class="card shadow-sm border-0 mb-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <span class="text-muted small fw-semibold text-uppercase">Successful Payments</span>
+                                <h3 class="mb-0 mt-1 font-weight-bold text-success">
+                                    {{ success_count }}
+                                    <small class="text-muted font-size-12 fw-normal" style="font-size: 13px;">({{ success_rate }}%)</small>
+                                </h3>
+                            </div>
+                            <div class="avatar-sm rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                <i class="bx bx-check-circle text-success font-size-24" style="font-size: 24px;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-sm-6">
+                <div class="card shadow-sm border-0 mb-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <span class="text-muted small fw-semibold text-uppercase">Failed / Cancelled</span>
+                                <h3 class="mb-0 mt-1 font-weight-bold text-danger">{{ failed_count }}</h3>
+                            </div>
+                            <div class="avatar-sm rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                <i class="bx bx-x-circle text-danger font-size-24" style="font-size: 24px;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+                    <div>
+                        <h4 class="card-title mb-1 text-primary d-flex align-items-center gap-2">
+                            <i class="bx bx-credit-card"></i> Razorpay Online Payments &amp; Logs
+                        </h4>
+                        <p class="text-muted small mb-0">Monitor successful, pending, and failed payment transactions with exact error reasons.</p>
+                    </div>
+                </div>
+
+                <!-- Status Filter Pills -->
+                <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+                    <span class="text-muted small fw-bold me-1">Filter Status:</span>
+                    <a href="/admin-payments/{% if search_query %}?search_query={{ search_query }}{% endif %}" 
+                       class="btn btn-sm {% if not status_filter %}btn-dark{% else %}btn-outline-secondary{% endif %} rounded-pill">
+                        All ({{ total_count }})
+                    </a>
+                    <a href="/admin-payments/?status=SUCCESS{% if search_query %}&search_query={{ search_query }}{% endif %}" 
+                       class="btn btn-sm {% if status_filter == 'SUCCESS' %}btn-success text-white{% else %}btn-outline-success{% endif %} rounded-pill">
+                        Success ({{ success_count }})
+                    </a>
+                    <a href="/admin-payments/?status=FAILED{% if search_query %}&search_query={{ search_query }}{% endif %}" 
+                       class="btn btn-sm {% if status_filter == 'FAILED' %}btn-danger text-white{% else %}btn-outline-danger{% endif %} rounded-pill">
+                        Failed / Cancelled ({{ failed_count }})
+                    </a>
+                    <a href="/admin-payments/?status=PENDING{% if search_query %}&search_query={{ search_query }}{% endif %}" 
+                       class="btn btn-sm {% if status_filter == 'PENDING' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %} rounded-pill">
+                        Pending ({{ pending_count }})
+                    </a>
+                </div>
+
+                <!-- Search Form -->
+                <div class="row mb-3">
+                    <div class="col-md-6 col-lg-5">
+                        <form method="get" action="/admin-payments/" class="d-flex align-items-center">
+                            {% if status_filter %}
+                            <input type="hidden" name="status" value="{{ status_filter }}">
+                            {% endif %}
+                            <div class="input-group">
+                                <input type="text" name="search_query" class="form-control" 
+                                       placeholder="Search Order #, Payment ID, Name, Phone..." 
+                                       value="{{ search_query }}">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fa fa-search"></i> Search
+                                </button>
+                                {% if search_query %}
+                                <a href="/admin-payments/{% if status_filter %}?status={{ status_filter }}{% endif %}" class="btn btn-secondary btn-sm">Clear</a>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Payments Table -->
+                <div class="table-responsive">
+                    <table class="table align-middle table-nowrap table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date &amp; Time</th>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Payment ID</th>
+                                <th>Failure / Log Reason</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if page_posts %}
+                            {% for item in page_posts %}
+                            <tr>
+                                <td>
+                                    <span class="d-block text-dark fw-semibold small">{{ item.created_at|date:"d M Y" }}</span>
+                                    <small class="text-muted">{{ item.created_at|date:"h:i A" }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border font-monospace px-2 py-1">{{ item.order_number }}</span>
+                                </td>
+                                <td>
+                                    {% if item.buyer %}
+                                    <div class="d-flex flex-column">
+                                        <strong class="text-dark small">{{ item.buyer.name|default:"Customer" }}</strong>
+                                        <small class="text-muted">{{ item.buyer.phone }}</small>
+                                        {% if item.buyer.email %}<small class="text-muted font-size-11">{{ item.buyer.email }}</small>{% endif %}
+                                    </div>
+                                    {% else %}
+                                    <span class="text-muted small">Guest Customer</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-dark font-size-14">&#8377;{{ item.amount|floatformat:2 }}</span>
+                                </td>
+                                <td>
+                                    {% if item.status == 'SUCCESS' %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold">
+                                        <i class="bx bx-check-circle me-1"></i> SUCCESS
+                                    </span>
+                                    {% elif item.status == 'FAILED' %}
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 fw-bold">
+                                        <i class="bx bx-x-circle me-1"></i> FAILED
+                                    </span>
+                                    {% elif item.status == 'CANCELLED' %}
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1 fw-bold">
+                                        <i class="bx bx-minus-circle me-1"></i> CANCELLED
+                                    </span>
+                                    {% elif item.status == 'PENDING' %}
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 fw-bold">
+                                        <i class="bx bx-time me-1"></i> PENDING
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 fw-bold">
+                                        {{ item.status }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.razorpay_payment_id %}
+                                    <code class="text-primary fw-semibold">{{ item.razorpay_payment_id }}</code>
+                                    {% else %}
+                                    <span class="text-muted small">&mdash;</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.status == 'FAILED' or item.status == 'CANCELLED' %}
+                                    <div class="text-truncate" style="max-width: 240px;" title="{{ item.error_reason|default:item.error_description }}">
+                                        <span class="badge bg-danger bg-opacity-10 text-danger fw-semibold px-2 py-1">
+                                            {{ item.error_reason|default:item.error_code|default:"Payment Incomplete" }}
+                                        </span>
+                                        {% if item.error_description %}
+                                        <small class="d-block text-muted text-truncate mt-1" style="font-size: 11px;">{{ item.error_description }}</small>
+                                        {% endif %}
+                                    </div>
+                                    {% elif item.status == 'SUCCESS' %}
+                                    <span class="text-success small fw-semibold">
+                                        <i class="bx bx-shield-quarter me-1"></i> Verified Signature
+                                    </span>
+                                    {% else %}
+                                    <span class="text-muted small">Awaiting checkout</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <a href="/admin-payment-details/{{ item.id }}/" class="btn btn-sm btn-outline-primary" title="View Full Log">
+                                            <i class="fa fa-eye"></i> Details
+                                        </a>
+                                        <a href="/admin-delete-payment/{{ item.id }}/" onclick="return confirm('Are you sure you want to delete this payment log record?')" class="btn btn-sm btn-outline-danger" title="Delete Log">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">
+                                    <i class="bx bx-info-circle font-size-24 d-block mb-1"></i>
+                                    No payment transactions found.
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if page_posts.paginator.num_pages > 1 %}
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                    <span class="text-muted small">
+                        Showing page {{ page_posts.number }} of {{ page_posts.paginator.num_pages }}
+                    </span>
+                    <nav aria-label="Payments pagination">
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if page_posts.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_posts.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search_query={{ search_query }}{% endif %}">Prev</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled"><span class="page-link">Prev</span></li>
+                            {% endif %}
+
+                            {% for p in page_range %}
+                            <li class="page-item {% if page_posts.number == p %}active{% endif %}">
+                                <a class="page-link" href="?page={{ p }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search_query={{ search_query }}{% endif %}">{{ p }}</a>
+                            </li>
+                            {% endfor %}
+
+                            {% if page_posts.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_posts.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search_query={{ search_query }}{% endif %}">Next</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled"><span class="page-link">Next</span></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

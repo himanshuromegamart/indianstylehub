@@ -52,6 +52,14 @@ urlpatterns = [
     path('order-tracking/',views.order_tracking),
     path('payment-confirmation/',views.payment_confirmation),
     path('payment-failure/',views.payment_failure),
+    # Razorpay Payment Gateway APIs & Pages
+    path('api/create-razorpay-order/', views.create_razorpay_order, name='create_razorpay_order'),
+    path('api/create-order/', views.create_razorpay_order, name='api_create_order'),
+    path('api/verify-razorpay-payment/', views.verify_razorpay_payment, name='verify_razorpay_payment'),
+    path('api/verify-payment/', views.verify_razorpay_payment, name='api_verify_payment'),
+    path('api/record-razorpay-failure/', views.record_razorpay_failure, name='record_razorpay_failure'),
+    path('order-confirmation/', views.order_confirmation, name='order_confirmation'),
+    path('payment-failed/', views.payment_failed_view, name='payment_failed'),
     path('filter/',views.web_filter),
     path('sitemap.xml/',views.sitemap_page),
     path('robots.txt/',views.robots_txt),
@@ -126,6 +134,10 @@ urlpatterns = [
     path('admin-order/',backend.admin_orders_page),
     path('admin-order-details/<int:id>/',backend.admin_order_details),
     path('admin-delete-order/<int:id>/',backend.admin_delete_order),
+    # Payments Management & Razorpay Logs
+    path('admin-payments/', backend.admin_payments_page, name='admin_payments'),
+    path('admin-payment-details/<int:id>/', backend.admin_payment_details, name='admin_payment_details'),
+    path('admin-delete-payment/<int:id>/', backend.admin_delete_payment, name='admin_delete_payment'),
 
     # Registered Customers / Buyers
     path('admin-buyer/',backend.admin_buyer),

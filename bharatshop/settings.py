@@ -5,6 +5,16 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load .env file if present
+env_path = os.path.join(BASE_DIR, '.env')
+if os.path.exists(env_path):
+    with open(env_path, 'r', encoding='utf-8') as ef:
+        for eline in ef:
+            eline = eline.strip()
+            if eline and not eline.startswith('#') and '=' in eline:
+                ekey, evalue = eline.split('=', 1)
+                os.environ.setdefault(ekey.strip(), evalue.strip())
+
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8mgenveeqn)kfxp(x&6qb)^378#-&e7b#=_!1e5j75bmk')
 
@@ -166,3 +176,8 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'bharat@123')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'bharat@narifashionstore.com')
 
 
+
+# Razorpay Payment Gateway Configuration
+RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', 'rzp_test_TrebS13OjJUAeZ')
+RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', 'cQ2Mt9EhceXPKCGGFZRG7fAD')
+RAZORPAY_CURRENCY = 'INR'

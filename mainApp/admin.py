@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 
 # Register your models here.
 from .models import *
@@ -60,3 +61,39 @@ class PopularLinkAdmin(admin.ModelAdmin):
 
 
 
+
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'order_number', 'buyer_info', 'amount_inr', 'status_badge', 'payment_method', 'razorpay_payment_id', 'razorpay_order_id', 'created_at')
+    list_filter = ('status', 'payment_method', 'created_at')
+    search_fields = ('order_number', 'razorpay_order_id', 'razorpay_payment_id', 'buyer__name', 'buyer__email', 'buyer__phone', 'error_reason', 'error_description')
+    readonly_fields = ('id', 'order_number', 'buyer', 'amount', 'currency', 'status', 'payment_method', 'razorpay_order_id', 'razorpay_payment_id', 'razorpay_signature', 'error_code', 'error_description', 'error_source', 'error_step', 'error_reason', 'notes', 'created_at', 'updated_at')
+    list_per_page = 30
+
+    def buyer_info(self, obj):
+        if obj.buyer:
+            return f"{obj.buyer.name} ({obj.buyer.phone})"
+        return "-"
+    buyer_info.short_description = "Customer"
+
+    def amount_inr(self, obj):
+        return f"₹{obj.amount:.2f}"
+    amount_inr.short_description = "Amount"
+
+    def status_badge(self, obj):
+        colors = {
+            'SUCCESS': '#28a745',
+            'FAILED': '#dc3545',
+            'CANCELLED': '#6c757d',
+            'PENDING': '#ffc107',
+            'REFUNDED': '#17a2b8',
+        }
+        text_colors = {'PENDING': '#000'}
+        bg = colors.get(obj.status, '#6c757d')
+        fg = text_colors.get(obj.status, '#fff')
+        return format_html(
+            '<span style="background-color: {}; color: {}; font-weight: bold; padding: 3px 8px; border-radius: 4px; font-size: 11px;">{}</span>',
+            bg, fg, obj.status
+        )
+    status_badge.short_description = "Status"

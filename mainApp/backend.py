@@ -2073,3 +2073,107 @@ def admin_delete_buyer(request, id):
 
 
 
+
+
+# ==============================================================================
+# ADMIN PAYMENTS & TRANSACTION LOGS MANAGEMENT
+# ==============================================================================
+
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def admin_payments_page(request):
+    """
+    Admin Management Dashboard for All Payments & Razorpay Logs:
+    - Lists all transactions: Success, Failed, Cancelled, Pending
+    - Detailed filtering and search
+    - Revenue and success rate stats
+    """
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+
+    status_filter = request.GET.get('status', '').strip().upper()
+    search_query = request.GET.get('search_query', '').strip()
+
+    payments_qs = Payment.objects.all().order_by('-created_at')
+
+    if status_filter:
+        if status_filter == 'FAILED':
+            payments_qs = payments_qs.filter(status__in=['FAILED', 'CANCELLED'])
+        else:
+            payments_qs = payments_qs.filter(status=status_filter)
+
+    if search_query:
+        payments_qs = payments_qs.filter(
+            Q(order_number__icontains=search_query) |
+            Q(razorpay_order_id__icontains=search_query) |
+            Q(razorpay_payment_id__icontains=search_query) |
+            Q(buyer__name__icontains=search_query) |
+            Q(buyer__phone__icontains=search_query) |
+            Q(buyer__email__icontains=search_query) |
+            Q(error_reason__icontains=search_query) |
+            Q(error_description__icontains=search_query) |
+            Q(error_code__icontains=search_query)
+        )
+
+    total_count = Payment.objects.count()
+    success_count = Payment.objects.filter(status='SUCCESS').count()
+    failed_count = Payment.objects.filter(status__in=['FAILED', 'CANCELLED']).count()
+    pending_count = Payment.objects.filter(status='PENDING').count()
+
+    from django.db.models import Sum
+    total_volume = Payment.objects.filter(status='SUCCESS').aggregate(Sum('amount'))['amount__sum'] or 0.0
+
+    success_rate = round((success_count / total_count * 100), 1) if total_count > 0 else 0.0
+
+    paginator = Paginator(payments_qs, 25)
+    page_number = request.GET.get('page')
+    page_posts = paginator.get_page(page_number)
+    current_page = page_posts.number
+    total_pages = paginator.num_pages
+    page_range = range(max(current_page - 2, 1), min(current_page + 3, total_pages + 1))
+
+    return render(request, 'backend/payments.html', {
+        'page_posts': page_posts,
+        'page_range': page_range,
+        'status_filter': status_filter,
+        'search_query': search_query,
+        'total_count': total_count,
+        'success_count': success_count,
+        'failed_count': failed_count,
+        'pending_count': pending_count,
+        'total_volume': total_volume,
+        'success_rate': success_rate,
+    })
+
+
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def admin_payment_details(request, id):
+    """View full payment log and associated orders"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+
+    payment = get_object_or_404(Payment, id=id)
+    orders = Order.objects.filter(
+        Q(razorpay_payment_id=payment.razorpay_payment_id) |
+        Q(razorpay_order_id=payment.razorpay_order_id) |
+        Q(transactionId=payment.razorpay_payment_id)
+    )
+    return render(request, 'backend/payment-details.html', {
+        'payment': payment,
+        'orders': orders,
+    })
+
+
+@login_required(login_url='/admin-login/')
+@user_passes_test(is_superuser, login_url='/admin-login/')
+def admin_delete_payment(request, id):
+    """Delete a payment log record"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+
+    payment = get_object_or_404(Payment, id=id)
+    ord_num = payment.order_number
+    payment.delete()
+    messages.success(request, f"Payment log for order #{ord_num} deleted successfully.")
+    return redirect('/admin-payments/')

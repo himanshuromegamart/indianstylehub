@@ -12,6 +12,10 @@ from django.contrib.auth.hashers import make_password
 from django.contrib import messages
 from django.db.models import Q
 import os
+import json
+import hmac
+import hashlib
+import razorpay
 from django.conf import settings
 
 
@@ -2365,3 +2369,537 @@ def add_enquiry(request):
             return HttpResponse("Please try after sometime...")
 
     return HttpResponse("Invalid request method.")
+
+
+# ==============================================================================
+# RAZORPAY STANDARD CHECKOUT & PAYMENT INTEGRATION
+# ==============================================================================
+
+def get_razorpay_client():
+    """Initializes and returns the Razorpay client and credentials."""
+    key_id = getattr(settings, 'RAZORPAY_KEY_ID', os.environ.get('RAZORPAY_KEY_ID', 'rzp_test_TrebS13OjJUAeZ')).strip()
+    key_secret = getattr(settings, 'RAZORPAY_KEY_SECRET', os.environ.get('RAZORPAY_KEY_SECRET', 'cQ2Mt9EhceXPKCGGFZRG7fAD')).strip()
+    client = razorpay.Client(auth=(key_id, key_secret))
+    return client, key_id, key_secret
+
+
+@csrf_exempt
+def create_razorpay_order(request):
+    """
+    Step 1: Backend Endpoint to Create Razorpay Order
+    - Validates cart items, delivery address, and email OTP verification
+    - Creates or retrieves Buyer, User, and Address records
+    - Calls Razorpay Orders API: POST https://api.razorpay.com/v1/orders
+    - Generates and stores Payment record with status 'PENDING'
+    - Returns { order_id, amount, currency, key_id, order_number, customer }
+    """
+    if request.method != "POST":
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method. Only POST is allowed.'}, status=405)
+
+    try:
+        cart = request.session.get('cart', {})
+        if not cart:
+            return JsonResponse({'status': 'error', 'message': 'Your shopping cart is empty. Please add products before checking out.'}, status=400)
+
+        # Parse request body (JSON or form-encoded)
+        if request.content_type == 'application/json':
+            try:
+                data = json.loads(request.body.decode('utf-8'))
+            except Exception:
+                data = request.POST
+        else:
+            data = request.POST
+
+        name = data.get('name', '').strip()
+        phone = data.get('phone', '').strip()
+        email = data.get('email', '').strip()
+        address = data.get('address', '').strip()
+        city = data.get('city', '').strip()
+        state = data.get('state', '').strip()
+        pincode = data.get('pincode', '').strip()
+        notes = data.get('notes', '').strip()
+
+        if not all([name, phone, email, address, city, state, pincode]):
+            return JsonResponse({'status': 'error', 'message': 'Please fill in all mandatory delivery address fields.'}, status=400)
+
+        phone_digits = ''.join(filter(str.isdigit, phone))
+        if len(phone_digits) < 10:
+            return JsonResponse({'status': 'error', 'message': 'Please enter a valid 10-digit mobile number.'}, status=400)
+        clean_phone = phone_digits[-10:]
+
+        # Enforce email OTP verification
+        verified_session_email = request.session.get('checkout_verified_email', '').strip().lower()
+        auth_email = (request.user.email or '').strip().lower() if request.user.is_authenticated else ''
+        req_email = email.strip().lower()
+
+        if not (verified_session_email == req_email or (auth_email and auth_email == req_email)):
+            return JsonResponse({'status': 'error', 'message': 'Please verify your email address with the 6-digit OTP before proceeding to payment.'}, status=400)
+
+        # Calculate Cart Items and Subtotal
+        cart_items = []
+        subtotal = 0.0
+        for pid, item in (cart.items() if isinstance(cart, dict) else []):
+            if not isinstance(item, dict):
+                prod = Product.objects.filter(id=pid).first()
+                if prod:
+                    item = {
+                        'name': prod.name,
+                        'price': float(prod.price or 0.0),
+                        'quantity': int(item) if str(item).isdigit() else 1,
+                        'image': prod.image1 or '',
+                    }
+                else:
+                    continue
+            qty = int(item.get('quantity', 1) or 1)
+            price = float(item.get('price', 0.0) or 0.0)
+            item_total = price * qty
+            subtotal += item_total
+            cart_items.append({
+                'id': pid,
+                'name': item.get('name', 'Product'),
+                'price': price,
+                'quantity': qty,
+                'image': item.get('image', ''),
+                'subtotal': item_total,
+            })
+
+        if not cart_items:
+            return JsonResponse({'status': 'error', 'message': 'No valid products found in your cart.'}, status=400)
+
+        shipping = 0.0
+        total = round(subtotal + shipping, 2)
+        amount_paise = int(round(total * 100))
+
+        if amount_paise < 100:
+            return JsonResponse({'status': 'error', 'message': 'Minimum payable amount for online payment is ₹1.00 (100 paise).'}, status=400)
+
+        # Buyer & User Creation / Linking
+        buyer = None
+        if request.user.is_authenticated:
+            buyer = Buyer.objects.filter(phone=request.user.username).first() or Buyer.objects.filter(email=request.user.email).first()
+
+        if not buyer:
+            buyer = Buyer.objects.filter(phone=clean_phone).first()
+            if not buyer:
+                buyer = Buyer.objects.create(
+                    name=name,
+                    phone=clean_phone,
+                    email=email,
+                    password=make_password(clean_phone)
+                )
+            else:
+                if not buyer.name and name:
+                    buyer.name = name
+                buyer.email = email
+                if not buyer.password:
+                    buyer.password = make_password(clean_phone)
+                buyer.save()
+
+        # Link/Login User if not authenticated
+        if not request.user.is_authenticated:
+            try:
+                user = User.objects.filter(username=clean_phone).first()
+                first_name, last_name = name.split(" ", 1) if " " in name else (name, "")
+                if not user:
+                    user = User.objects.create_user(
+                        username=clean_phone,
+                        email=email,
+                        first_name=first_name,
+                        last_name=last_name
+                    )
+                    user.set_password(clean_phone)
+                    user.save()
+                else:
+                    if not user.email:
+                        user.email = email
+                        user.save()
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            except Exception as user_err:
+                print("User linking warning in create_razorpay_order:", user_err)
+
+        # Save/Create Address
+        address_obj = None
+        try:
+            address_obj = Address.objects.create(
+                buyer=buyer,
+                address=address,
+                city=city,
+                state=state,
+                pin=pincode,
+                alternatePhone=clean_phone,
+                addressType='Home'
+            )
+        except Exception:
+            try:
+                address_obj = Address.objects.create(
+                    buyer=buyer,
+                    address=(address or '')[:100],
+                    city=(city or '')[:50],
+                    state=(state or '')[:50],
+                    pin=(pincode or '')[:10],
+                    alternatePhone=(clean_phone or '')[:15],
+                    addressType='Home'
+                )
+            except Exception as addr_err:
+                print("Address save warning:", addr_err)
+
+        # Generate Unique Order Reference
+        rand_suffix = random.randint(1000, 9999)
+        order_number = f"ORD{datetime.now().strftime('%y%m%d')}{rand_suffix}"
+
+        # Initialize Razorpay Client and Create Order on Razorpay
+        try:
+            client, key_id, key_secret = get_razorpay_client()
+            razorpay_order_data = {
+                'amount': amount_paise,
+                'currency': 'INR',
+                'receipt': order_number[:40],
+                'notes': {
+                    'order_number': order_number,
+                    'customer_name': name[:50],
+                    'customer_phone': clean_phone,
+                    'customer_email': email[:50],
+                    'city': city[:30],
+                }
+            }
+            rzp_order = client.order.create(data=razorpay_order_data)
+        except razorpay.errors.BadRequestError as bre:
+            print("Razorpay BadRequestError:", bre)
+            return JsonResponse({'status': 'error', 'message': f"Razorpay order error: {str(bre)}"}, status=400)
+        except (razorpay.errors.GatewayError, razorpay.errors.ServerError) as ge:
+            print("Razorpay Gateway/ServerError:", ge)
+            return JsonResponse({'status': 'error', 'message': f"Payment Gateway server error ({str(ge)}). Please try again later."}, status=502)
+        except Exception as rzp_err:
+            err_str = str(rzp_err)
+            print("Razorpay API Exception:", err_str)
+            if 'unauthorized' in err_str.lower() or 'auth' in err_str.lower():
+                return JsonResponse({'status': 'error', 'message': 'Payment Gateway authentication failed. Please check credentials.'}, status=401)
+            return JsonResponse({'status': 'error', 'message': f"Failed to initialize payment gateway ({err_str}). Please try again."}, status=500)
+
+        # Create Payment Record in Database
+        payment_record = Payment.objects.create(
+            buyer=buyer,
+            order_number=order_number,
+            razorpay_order_id=rzp_order['id'],
+            amount=total,
+            currency='INR',
+            status='PENDING',
+            payment_method='Razorpay',
+            notes=f"Delivery to {city}, {state} ({pincode}). Notes: {notes}"
+        )
+
+        # Store pending order context in session
+        request.session['pending_order'] = {
+            'order_number': order_number,
+            'buyer_id': buyer.id if buyer else None,
+            'address_id': address_obj.id if address_obj else None,
+            'total': total,
+            'cart_items': cart_items,
+            'razorpay_order_id': rzp_order['id'],
+            'notes': notes,
+            'clean_phone': clean_phone,
+            'email': email,
+            'name': name,
+        }
+        request.session.modified = True
+
+        return JsonResponse({
+            'status': 'success',
+            'order_id': rzp_order['id'],
+            'amount': rzp_order['amount'],
+            'currency': rzp_order.get('currency', 'INR'),
+            'key_id': key_id,
+            'order_number': order_number,
+            'customer': {
+                'name': name,
+                'email': email,
+                'contact': clean_phone,
+            }
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'status': 'error', 'message': f'Internal server error while creating order: {str(e)}'}, status=500)
+
+
+@csrf_exempt
+def verify_razorpay_payment(request):
+    """
+    Step 2: Backend Endpoint to Verify Payment Signature
+    - Receives razorpay_order_id, razorpay_payment_id, razorpay_signature
+    - Computes HMAC-SHA256 signature using KEY_SECRET
+    - Compares generated signature with received signature
+    - If valid: marks Payment as 'SUCCESS', creates Order records, clears cart
+    - If invalid: marks Payment as 'FAILED', returns HTTP 400
+    """
+    if request.method != "POST":
+        return JsonResponse({'status': 'error', 'message': 'Only POST requests allowed.'}, status=405)
+
+    try:
+        if request.content_type == 'application/json':
+            try:
+                data = json.loads(request.body.decode('utf-8'))
+            except Exception:
+                data = request.POST
+        else:
+            data = request.POST
+
+        razorpay_order_id = data.get('razorpay_order_id', '').strip()
+        razorpay_payment_id = data.get('razorpay_payment_id', '').strip()
+        razorpay_signature = data.get('razorpay_signature', '').strip()
+        order_number = data.get('order_number', '').strip()
+
+        if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature]):
+            return JsonResponse({'status': 'error', 'message': 'Incomplete payment verification payload.'}, status=400)
+
+        client, key_id, key_secret = get_razorpay_client()
+
+        # Cryptographic Signature Verification
+        # 1. Native HMAC-SHA256
+        msg = f"{razorpay_order_id}|{razorpay_payment_id}"
+        generated_signature = hmac.new(
+            key_secret.encode('utf-8'),
+            msg.encode('utf-8'),
+            hashlib.sha256
+        ).hexdigest()
+
+        is_valid_signature = hmac.compare_digest(generated_signature, razorpay_signature)
+
+        # 2. SDK Utility check as secondary confirmation
+        if not is_valid_signature:
+            try:
+                client.utility.verify_payment_signature({
+                    'razorpay_order_id': razorpay_order_id,
+                    'razorpay_payment_id': razorpay_payment_id,
+                    'razorpay_signature': razorpay_signature
+                })
+                is_valid_signature = True
+            except Exception:
+                is_valid_signature = False
+
+        if not is_valid_signature:
+            # Signature Mismatch - Security Alert
+            payment = Payment.objects.filter(razorpay_order_id=razorpay_order_id).first()
+            if not payment and order_number:
+                payment = Payment.objects.filter(order_number=order_number).first()
+            if payment:
+                payment.status = 'FAILED'
+                payment.error_code = 'SIGNATURE_MISMATCH'
+                payment.error_description = f"Signature verification failed for payment {razorpay_payment_id}"
+                payment.razorpay_payment_id = razorpay_payment_id
+                payment.razorpay_signature = razorpay_signature
+                payment.save()
+
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Payment signature verification failed. The transaction could not be validated.'
+            }, status=400)
+
+        # Payment is Genuine & Verified!
+        payment = Payment.objects.filter(razorpay_order_id=razorpay_order_id).first()
+        if not payment and order_number:
+            payment = Payment.objects.filter(order_number=order_number).first()
+
+        if payment:
+            payment.status = 'SUCCESS'
+            payment.razorpay_payment_id = razorpay_payment_id
+            payment.razorpay_signature = razorpay_signature
+            payment.error_code = ''
+            payment.error_description = ''
+            payment.save()
+            order_number = payment.order_number
+        elif not order_number:
+            order_number = f"ORD{datetime.now().strftime('%y%m%d')}{random.randint(1000, 9999)}"
+
+        # Fetch Pending Order Data from Session or Recreate from Buyer
+        pending_order = request.session.get('pending_order', {})
+        buyer_id = pending_order.get('buyer_id')
+        address_id = pending_order.get('address_id')
+        cart_items = pending_order.get('cart_items', [])
+
+        buyer = Buyer.objects.filter(id=buyer_id).first() if buyer_id else (payment.buyer if payment else None)
+        address_obj = Address.objects.filter(id=address_id).first() if address_id else None
+
+        if not address_obj and buyer:
+            address_obj = Address.objects.filter(buyer=buyer).order_by('-id').first()
+
+        now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
+
+        # If cart_items was in pending_order, use it; otherwise read active cart
+        if not cart_items:
+            cart = request.session.get('cart', {})
+            for pid, item in (cart.items() if isinstance(cart, dict) else []):
+                prod = Product.objects.filter(id=pid).first()
+                if prod:
+                    qty = int(item.get('quantity', 1) or 1) if isinstance(item, dict) else (int(item) if str(item).isdigit() else 1)
+                    price = float(prod.price or 0.0)
+                    cart_items.append({
+                        'id': prod.id,
+                        'name': prod.name,
+                        'price': price,
+                        'quantity': qty,
+                        'subtotal': price * qty,
+                    })
+
+        # Create Order rows for each cart item
+        for item in cart_items:
+            product = None
+            try:
+                product = Product.objects.filter(id=item.get('id')).first()
+            except Exception:
+                pass
+
+            Order.objects.create(
+                buyer=buyer,
+                product=product,
+                address=address_obj,
+                quantity=item.get('quantity', 1),
+                totalPrice=item.get('subtotal', 0.0),
+                shippingPrice=0.0,
+                finalPrice=item.get('subtotal', 0.0),
+                transactionId=razorpay_payment_id,
+                orderDate=now_str,
+                orderStatus="Confirmed",
+                payment_status="Paid",
+                razorpay_order_id=razorpay_order_id,
+                razorpay_payment_id=razorpay_payment_id,
+                razorpay_signature=razorpay_signature,
+                waywill="",
+                cancelled_by=""
+            )
+
+        # Clear Cart & Checkout Sessions
+        request.session['cart'] = {}
+        request.session.pop('pending_order', None)
+        request.session.pop('checkout_verified_email', None)
+        request.session.pop('checkout_otp_code', None)
+        request.session.pop('checkout_otp_email', None)
+        request.session.modified = True
+
+        redirect_url = f"/order-confirmation/?order_number={order_number}&payment_id={razorpay_payment_id}"
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Payment successfully verified!',
+            'order_number': order_number,
+            'payment_id': razorpay_payment_id,
+            'redirect_url': redirect_url
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'status': 'error', 'message': f'Server error during verification: {str(e)}'}, status=500)
+
+
+@csrf_exempt
+def record_razorpay_failure(request):
+    """
+    Step 3: Backend Endpoint to Record Payment Failures & Modal Dismissals
+    Logs error code, description, reason, source, and step for comprehensive admin tracking.
+    """
+    if request.method != "POST":
+        return JsonResponse({'status': 'error', 'message': 'Only POST allowed.'}, status=405)
+
+    try:
+        if request.content_type == 'application/json':
+            try:
+                data = json.loads(request.body.decode('utf-8'))
+            except Exception:
+                data = request.POST
+        else:
+            data = request.POST
+
+        order_number = data.get('order_number', '').strip()
+        razorpay_order_id = data.get('razorpay_order_id', '').strip()
+        razorpay_payment_id = data.get('razorpay_payment_id', '').strip()
+        error_code = data.get('error_code', '').strip()
+        error_description = data.get('error_description', '').strip()
+        error_source = data.get('error_source', '').strip()
+        error_step = data.get('error_step', '').strip()
+        error_reason = data.get('error_reason', '').strip()
+        is_cancelled = data.get('is_cancelled', False)
+
+        payment = None
+        if razorpay_order_id:
+            payment = Payment.objects.filter(razorpay_order_id=razorpay_order_id).first()
+        if not payment and order_number:
+            payment = Payment.objects.filter(order_number=order_number).first()
+
+        if payment:
+            payment.status = 'CANCELLED' if is_cancelled else 'FAILED'
+            if razorpay_payment_id:
+                payment.razorpay_payment_id = razorpay_payment_id
+            if error_code:
+                payment.error_code = str(error_code)[:100]
+            if error_description:
+                payment.error_description = str(error_description)
+            if error_source:
+                payment.error_source = str(error_source)[:100]
+            if error_step:
+                payment.error_step = str(error_step)[:100]
+            if error_reason:
+                payment.error_reason = str(error_reason)[:100]
+            payment.save()
+            return JsonResponse({'status': 'success', 'message': 'Failure logged successfully.'})
+
+        return JsonResponse({'status': 'not_found', 'message': 'Payment record not found.'})
+
+    except Exception as e:
+        print("record_razorpay_failure error:", e)
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+def order_confirmation(request):
+    """Renders the Order Confirmation Page after successful payment."""
+    order_number = request.GET.get('order_number', '').strip()
+    payment_id = request.GET.get('payment_id', '').strip()
+
+    payment = None
+    if payment_id:
+        payment = Payment.objects.filter(razorpay_payment_id=payment_id).first()
+    if not payment and order_number:
+        payment = Payment.objects.filter(order_number=order_number).first()
+
+    orders = []
+    if payment_id:
+        orders = Order.objects.filter(transactionId=payment_id).order_by('-id')
+    if not orders and payment and payment.razorpay_order_id:
+        orders = Order.objects.filter(razorpay_order_id=payment.razorpay_order_id).order_by('-id')
+
+    buyer = payment.buyer if payment else None
+    address = orders.first().address if orders.exists() else None
+    total = payment.amount if payment else (sum(o.finalPrice for o in orders) if orders else 0.0)
+    order_date = orders.first().orderDate if orders.exists() else datetime.now().strftime("%d %b %Y, %I:%M %p")
+
+    return render(request, 'front/confirmation.html', {
+        'order_number': order_number or (payment.order_number if payment else 'CONFIRMED'),
+        'payment': payment,
+        'orders': orders,
+        'buyer': buyer,
+        'address': address,
+        'total': total,
+        'order_date': order_date,
+        'is_paid_online': True,
+    })
+
+
+def payment_failed_view(request):
+    """Renders user-friendly Payment Failed page with details and retry action."""
+    order_number = request.GET.get('order_number', '').strip()
+    razorpay_order_id = request.GET.get('order_id', '').strip()
+
+    payment = None
+    if razorpay_order_id:
+        payment = Payment.objects.filter(razorpay_order_id=razorpay_order_id).first()
+    if not payment and order_number:
+        payment = Payment.objects.filter(order_number=order_number).first()
+
+    return render(request, 'front/payment-failed.html', {
+        'payment': payment,
+        'order_number': order_number,
+        'error_reason': payment.error_reason if payment else 'Transaction was not completed',
+        'error_description': payment.error_description if payment else 'The payment could not be processed.',
+    })
+

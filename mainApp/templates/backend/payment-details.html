@@ -1,0 +1,222 @@
+{% extends 'backend/index.html' %}
+{% load static %}
+{% block body %}
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <div>
+                <a href="/admin-payments/" class="btn btn-outline-secondary btn-sm mb-2">
+                    <i class="fa fa-arrow-left me-1"></i> Back to Payments List
+                </a>
+                <h4 class="card-title text-primary m-0 d-flex align-items-center gap-2">
+                    <i class="bx bx-receipt"></i> Transaction Details &mdash; Order #{{ payment.order_number }}
+                </h4>
+            </div>
+            <div>
+                {% if payment.status == 'SUCCESS' %}
+                <span class="badge bg-success font-size-14 px-3 py-2">
+                    <i class="bx bx-check-circle me-1"></i> PAYMENT SUCCESS
+                </span>
+                {% elif payment.status == 'FAILED' %}
+                <span class="badge bg-danger font-size-14 px-3 py-2">
+                    <i class="bx bx-x-circle me-1"></i> PAYMENT FAILED
+                </span>
+                {% elif payment.status == 'CANCELLED' %}
+                <span class="badge bg-secondary font-size-14 px-3 py-2">
+                    <i class="bx bx-minus-circle me-1"></i> CANCELLED BY USER
+                </span>
+                {% else %}
+                <span class="badge bg-warning text-dark font-size-14 px-3 py-2">
+                    <i class="bx bx-time me-1"></i> PENDING
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <!-- Left: Payment Technical & Gateway Details -->
+            <div class="col-lg-7">
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-light">
+                        <h6 class="m-0 fw-bold text-dark"><i class="bx bx-shield-quarter me-1 text-primary"></i> Gateway &amp; Audit Log</h6>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-sm mb-0">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 35%; background: #fafafa;">Order Number</th>
+                                    <td><strong class="font-monospace text-primary">{{ payment.order_number }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th style="background: #fafafa;">Amount Paid</th>
+                                    <td><strong class="text-success font-size-16">&#8377;{{ payment.amount|floatformat:2 }} {{ payment.currency }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th style="background: #fafafa;">Payment Method</th>
+                                    <td><span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1">{{ payment.payment_method }}</span></td>
+                                </tr>
+                                <tr>
+                                    <th style="background: #fafafa;">Razorpay Order ID</th>
+                                    <td><code>{{ payment.razorpay_order_id|default:"-" }}</code></td>
+                                </tr>
+                                <tr>
+                                    <th style="background: #fafafa;">Razorpay Payment ID</th>
+                                    <td><code class="text-primary">{{ payment.razorpay_payment_id|default:"-" }}</code></td>
+                                </tr>
+                                <tr>
+                                    <th style="background: #fafafa;">Status</th>
+                                    <td>
+                                        {% if payment.status == 'SUCCESS' %}
+                                        <span class="badge bg-success">SUCCESS</span>
+                                        {% elif payment.status == 'FAILED' %}
+                                        <span class="badge bg-danger">FAILED</span>
+                                        {% elif payment.status == 'CANCELLED' %}
+                                        <span class="badge bg-secondary">CANCELLED</span>
+                                        {% else %}
+                                        <span class="badge bg-warning text-dark">PENDING</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th style="background: #fafafa;">Created Timestamp</th>
+                                    <td>{{ payment.created_at|date:"d M Y, h:i:s A" }}</td>
+                                </tr>
+                                <tr>
+                                    <th style="background: #fafafa;">Updated Timestamp</th>
+                                    <td>{{ payment.updated_at|date:"d M Y, h:i:s A" }}</td>
+                                </tr>
+                                {% if payment.notes %}
+                                <tr>
+                                    <th style="background: #fafafa;">Transaction Notes</th>
+                                    <td>{{ payment.notes }}</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+
+                        {% if payment.status == 'FAILED' or payment.status == 'CANCELLED' or payment.error_code or payment.error_description %}
+                        <!-- Failure Diagnostics Box -->
+                        <div class="mt-4 p-3 rounded-3" style="background: #FFF5F5; border: 1.5px solid #FEB2B2;">
+                            <h6 class="fw-bold text-danger mb-2 d-flex align-items-center gap-1">
+                                <i class="bx bx-error-circle"></i> Failure Diagnostics &amp; Razorpay Error Trace
+                            </h6>
+                            <table class="table table-sm table-borderless mb-0" style="font-size: 13px;">
+                                <tbody>
+                                    {% if payment.error_reason %}
+                                    <tr>
+                                        <td style="width: 30%; color: #9B2C2C; font-weight: 600;">Error Reason:</td>
+                                        <td><span class="badge bg-danger">{{ payment.error_reason }}</span></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if payment.error_code %}
+                                    <tr>
+                                        <td style="color: #9B2C2C; font-weight: 600;">Error Code:</td>
+                                        <td><code>{{ payment.error_code }}</code></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if payment.error_description %}
+                                    <tr>
+                                        <td style="color: #9B2C2C; font-weight: 600;">Error Description:</td>
+                                        <td class="text-dark">{{ payment.error_description }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if payment.error_source %}
+                                    <tr>
+                                        <td style="color: #9B2C2C; font-weight: 600;">Error Source:</td>
+                                        <td>{{ payment.error_source }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if payment.error_step %}
+                                    <tr>
+                                        <td style="color: #9B2C2C; font-weight: 600;">Error Step:</td>
+                                        <td>{{ payment.error_step }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+
+                        {% if payment.razorpay_signature %}
+                        <div class="mt-3">
+                            <label class="form-label text-muted small fw-bold">Verified Signature Hash (HMAC-SHA256):</label>
+                            <textarea class="form-control form-control-sm font-monospace text-muted" rows="2" readonly style="font-size: 11px;">{{ payment.razorpay_signature }}</textarea>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Customer & Order Details -->
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-light">
+                        <h6 class="m-0 fw-bold text-dark"><i class="bx bx-user me-1 text-primary"></i> Customer Information</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if payment.buyer %}
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 44px; height: 44px;">
+                                {{ payment.buyer.name|slice:":1"|upper|default:"U" }}
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark">{{ payment.buyer.name }}</h6>
+                                <small class="text-muted"><i class="fa fa-phone me-1"></i> {{ payment.buyer.phone }}</small>
+                            </div>
+                        </div>
+                        <p class="mb-1 small text-muted"><strong>Email:</strong> {{ payment.buyer.email|default:"N/A" }}</p>
+                        <p class="mb-0 small text-muted"><strong>Buyer ID:</strong> #{{ payment.buyer.id }}</p>
+                        {% else %}
+                        <p class="text-muted mb-0 small">No buyer account attached to this record.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-light">
+                        <h6 class="m-0 fw-bold text-dark"><i class="bx bx-shopping-bag me-1 text-primary"></i> Associated Order Items</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if orders %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0" style="font-size: 13px;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Qty</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for o in orders %}
+                                    <tr>
+                                        <td>
+                                            {% if o.product %}
+                                            <a href="/product-details/{{ o.product.name|slugify }}/{{ o.product.id }}" target="_blank" class="text-dark fw-semibold">
+                                                {{ o.product.name|truncatewords:4 }}
+                                            </a>
+                                            {% else %}
+                                            <span class="text-muted">Product #{{ o.id }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ o.quantity }}</td>
+                                        <td class="fw-bold">&#8377;{{ o.finalPrice|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="p-3 text-muted small">
+                            No finalized orders linked (payment may be pending or failed before order creation).
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

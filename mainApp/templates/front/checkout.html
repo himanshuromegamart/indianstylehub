@@ -1,6 +1,8 @@
 {% extends "front/index.html" %}
 {% load static %}
 {% block body %}
+    <!-- Razorpay Standard Web Checkout SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <main style="background: #F9FAFB; padding: 15px 0 40px 0;">
         <div class="container" style="max-width: 1040px; padding: 0 15px;">
             <!-- COMPACT BREADCRUMB / CHECKOUT HEADER -->
@@ -202,24 +204,38 @@
                             </div>
                         </div>
 
-                        <!-- Payment Method Card -->
+                        <!-- Payment Method Card (Razorpay Online Checkout) -->
                         <div class="card border-0 shadow-sm rounded-3 p-3 p-md-4 bg-white" style="border: 1px solid #E5E7EB !important;">
                             <div class="pb-2 border-bottom mb-3">
                                 <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 15px;">
-                                    <span class="d-inline-flex align-items-center justify-content-center text-white rounded-circle" style="width: 22px; height: 22px; background: #28a745; font-size: 11px; font-weight: 700;">2</span>
+                                    <span class="d-inline-flex align-items-center justify-content-center text-white rounded-circle" style="width: 22px; height: 22px; background: #EF2853; font-size: 11px; font-weight: 700;">2</span>
                                     Payment Method
                                 </h6>
                             </div>
 
-                            <div class="p-3 rounded-2 border d-flex align-items-center justify-content-between" style="background: #F9FDFA; border-color: #28A745 !important;">
-                                <div class="d-flex align-items-center gap-3">
-                                    <input class="form-check-input mt-0" type="radio" name="payment_method" id="payCOD" value="COD" checked style="width: 18px; height: 18px; accent-color: #28a745; cursor: pointer;">
-                                    <label class="form-check-label mb-0 cursor-pointer" for="payCOD">
-                                        <span class="d-block fw-bold text-dark" style="font-size: 14px;">Cash on Delivery (COD)</span>
-                                        <small class="text-muted" style="font-size: 12px;">Pay with cash or UPI directly to delivery agent at your doorstep.</small>
-                                    </label>
+                            <div class="p-3 rounded-3 border" style="background: #FFFDFD; border-color: #EF2853 !important; border-width: 1.5px !important;">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input class="form-check-input mt-0" type="radio" name="payment_method" id="payRazorpay" value="Razorpay" checked style="width: 18px; height: 18px; accent-color: #EF2853; cursor: pointer;">
+                                        <label class="form-check-label mb-0 cursor-pointer" for="payRazorpay">
+                                            <span class="d-block fw-bold text-dark" style="font-size: 14.5px;">Razorpay Secure Online Payment</span>
+                                        </label>
+                                    </div>
+                                    <span class="badge text-white px-2 py-1 fw-semibold" style="font-size: 11px; background: #EF2853 !important;">100% Secure</span>
                                 </div>
-                                <span class="badge bg-success-subtle text-success px-2 py-1 fw-semibold" style="font-size: 11px;">Available</span>
+                                <p class="text-muted small mb-2 ps-4" style="font-size: 12px;">
+                                    Instant order confirmation via UPI (Google Pay, PhonePe, Paytm, BHIM), Credit/Debit Cards, NetBanking, and Wallets.
+                                </p>
+                                <div class="d-flex flex-wrap align-items-center gap-2 ps-4 pt-2 border-top">
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 11px;">UPI / QR</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 11px;">Visa / Mastercard / RuPay</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 11px;">NetBanking (50+ Banks)</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 11px;">Paytm &amp; Wallets</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-2 text-muted small d-flex align-items-center gap-2" style="font-size: 11.5px;">
+                                <i class="fa fa-lock text-success"></i> 256-bit Encrypted &bull; PCI-DSS Level 1 Certified via Razorpay
                             </div>
                         </div>
                     </div>
@@ -268,22 +284,22 @@
                                     <span class="fw-bold text-dark" style="font-size: 15px;">Total Payable</span>
                                     <span class="fw-bold text-danger" style="font-size: 19px;">&#8377;{{ total|floatformat:2 }}</span>
                                 </div>
-                                <small class="text-muted d-block text-end mt-1" style="font-size: 11px;">No advance payment required</small>
+                                <small class="text-muted d-block text-end mt-1" style="font-size: 11px;">100% Secure Payment via Razorpay</small>
                             </div>
 
                             <!-- Submit Order Button -->
                             <button type="submit" class="btn w-100 py-2 fw-bold text-uppercase shadow-sm" id="btnPlaceOrder" 
                                     {% if not is_email_verified %}disabled{% endif %}
-                                    style="{% if is_email_verified %}background: #28a745; border-color: #28a745; cursor: pointer;{% else %}background: #9CA3AF; border-color: #9CA3AF; cursor: not-allowed; opacity: 0.85;{% endif %} color: #ffffff; border-radius: 8px; font-size: 13.5px; letter-spacing: 0.3px; transition: all 0.3s ease;">
+                                    style="{% if is_email_verified %}background: #EF2853; border-color: #EF2853; cursor: pointer;{% else %}background: #9CA3AF; border-color: #9CA3AF; cursor: not-allowed; opacity: 0.85;{% endif %} color: #ffffff; border-radius: 8px; font-size: 13.5px; letter-spacing: 0.3px; transition: all 0.3s ease;">
                                 {% if is_email_verified %}
-                                    Place Order (Cash on Delivery) &rarr;
+                                    <i class="fa fa-lock me-1"></i> Pay Now &#8377;{{ total|floatformat:2 }} via Razorpay &rarr;
                                 {% else %}
-                                    <i class="fa fa-lock me-1"></i> Verify Email First to Buy
+                                    <i class="fa fa-lock me-1"></i> Verify Email First to Pay
                                 {% endif %}
                             </button>
 
                             <div class="mt-3 pt-2 text-center text-muted" style="font-size: 11px; border-top: 1px dashed #E5E7EB;">
-                                <span>🔒 100% Verified Order &bull; Pay After Delivery &bull; Free Shipping</span>
+                                <span>🔒 100% Safe Checkout &bull; Razorpay Verified &bull; Instant Confirmation</span>
                             </div>
                         </div>
                     </div>
@@ -424,12 +440,12 @@
             if (!placeBtn) return;
             if (isEmailVerified) {
                 placeBtn.disabled = false;
-                placeBtn.style.background = '#28a745';
-                placeBtn.style.borderColor = '#28a745';
+                placeBtn.style.background = '#EF2853';
+                placeBtn.style.borderColor = '#EF2853';
                 placeBtn.style.color = '#ffffff';
                 placeBtn.style.cursor = 'pointer';
                 placeBtn.style.opacity = '1';
-                placeBtn.innerHTML = 'Place Order (Cash on Delivery) &rarr;';
+                placeBtn.innerHTML = '<i class="fa fa-lock me-1"></i> Pay Now &#8377;{{ total|floatformat:2 }} via Razorpay &rarr;';
             } else {
                 placeBtn.disabled = true;
                 placeBtn.style.background = '#9CA3AF';
@@ -437,7 +453,7 @@
                 placeBtn.style.color = '#ffffff';
                 placeBtn.style.cursor = 'not-allowed';
                 placeBtn.style.opacity = '0.85';
-                placeBtn.innerHTML = '<i class="fa fa-lock me-1"></i> Verify Email First to Buy';
+                placeBtn.innerHTML = '<i class="fa fa-lock me-1"></i> Verify Email First to Pay';
             }
         }
 
@@ -485,21 +501,157 @@
             updatePlaceOrderButton();
         });
 
-        // Form Submit Validation: Enforce Verified Email before placing order
+        // Razorpay Standard Checkout Integration
         document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
             if (!isEmailVerified) {
-                e.preventDefault();
-                e.stopPropagation();
-                alert('Please verify your email address using the OTP code before placing your order.');
+                alert('Please verify your email address with the OTP code before proceeding to payment.');
                 const emailInput = document.getElementById('checkoutEmail');
                 emailInput.focus();
                 emailInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return false;
             }
 
+            const form = document.getElementById('checkoutForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return false;
+            }
+
             const btn = document.getElementById('btnPlaceOrder');
+            const originalBtnText = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = 'Placing Your Order... <span class="spinner-border spinner-border-sm ms-2"></span>';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Initializing Razorpay Payment...';
+
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '';
+            const formData = new FormData(form);
+
+            // Step 1: Create Order on Backend
+            fetch('/api/create-razorpay-order/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status !== 'success') {
+                    btn.disabled = false;
+                    btn.innerHTML = originalBtnText;
+                    alert(data.message || 'Failed to initialize payment order. Please check your delivery details.');
+                    return;
+                }
+
+                // Step 2: Open Razorpay Standard Checkout Modal
+                const options = {
+                    "key": data.key_id,
+                    "amount": data.amount,
+                    "currency": data.currency,
+                    "name": "Nari Fashion Store",
+                    "description": "Order #" + data.order_number,
+                    "image": "{% static 'assets/img/image.png' %}",
+                    "order_id": data.order_id,
+                    "handler": function (response) {
+                        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Verifying Payment with Bank...';
+
+                        // Step 3: Verify Payment Signature on Backend
+                        fetch('/api/verify-razorpay-payment/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken
+                            },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                order_number: data.order_number
+                            })
+                        })
+                        .then(vRes => vRes.json())
+                        .then(vData => {
+                            if (vData.status === 'success') {
+                                window.location.href = vData.redirect_url;
+                            } else {
+                                alert(vData.message || 'Payment signature verification failed.');
+                                window.location.href = '/payment-failed/?order_number=' + encodeURIComponent(data.order_number) + '&order_id=' + encodeURIComponent(data.order_id);
+                            }
+                        })
+                        .catch(vErr => {
+                            alert('Network error while verifying payment. Please contact support.');
+                            window.location.href = '/payment-failed/?order_number=' + encodeURIComponent(data.order_number);
+                        });
+                    },
+                    "prefill": {
+                        "name": data.customer.name,
+                        "email": data.customer.email,
+                        "contact": data.customer.contact
+                    },
+                    "theme": {
+                        "color": "#EF2853"
+                    },
+                    "modal": {
+                        "ondismiss": function() {
+                            btn.disabled = false;
+                            btn.innerHTML = originalBtnText;
+                            // Log cancellation
+                            fetch('/api/record-razorpay-failure/', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': csrfToken
+                                },
+                                body: JSON.stringify({
+                                    order_number: data.order_number,
+                                    razorpay_order_id: data.order_id,
+                                    error_reason: 'User closed payment window before completing payment',
+                                    is_cancelled: true
+                                })
+                            }).catch(e => {});
+                        }
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+
+                rzp.on('payment.failed', function (resp) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalBtnText;
+
+                    // Log failure details to backend
+                    fetch('/api/record-razorpay-failure/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({
+                            order_number: data.order_number,
+                            razorpay_order_id: data.order_id,
+                            razorpay_payment_id: resp.error ? (resp.error.metadata ? resp.error.metadata.payment_id : '') : '',
+                            error_code: resp.error ? resp.error.code : '',
+                            error_description: resp.error ? resp.error.description : '',
+                            error_source: resp.error ? resp.error.source : '',
+                            error_step: resp.error ? resp.error.step : '',
+                            error_reason: resp.error ? resp.error.reason : ''
+                        })
+                    }).catch(e => {});
+
+                    alert('Payment Failed: ' + (resp.error ? resp.error.description : 'Transaction was declined by bank or UPI.'));
+                });
+
+                rzp.open();
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerHTML = originalBtnText;
+                alert('Network error while connecting to payment gateway: ' + err.message);
+            });
+
+            return false;
         });
     </script>
 {% endblock %}

@@ -47,10 +47,15 @@
                             <strong class="text-dark">{{ order_date|default:"Just now" }}</strong>
                         </div>
                         <div class="col-sm-6 col-12">
-                            <span class="text-muted small d-block">Payment Method</span>
-                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-semibold">
-                                Cash on Delivery (COD)
+                            <span class="text-muted small d-block">Payment Method &amp; Status</span>
+                            <span class="badge bg-success text-white px-2 py-1 fw-semibold">
+                                <i class="fa fa-check-circle me-1"></i> Paid Online via Razorpay
                             </span>
+                            {% if payment and payment.razorpay_payment_id %}
+                            <small class="d-block text-muted mt-1 font-monospace" style="font-size: 11px;">Payment ID: {{ payment.razorpay_payment_id }}</small>
+                            {% elif orders.first and orders.first.transactionId %}
+                            <small class="d-block text-muted mt-1 font-monospace" style="font-size: 11px;">Payment ID: {{ orders.first.transactionId }}</small>
+                            {% endif %}
                         </div>
                         <div class="col-sm-6 col-12">
                             <span class="text-muted small d-block">Total Amount</span>
