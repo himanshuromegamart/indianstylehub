@@ -308,6 +308,119 @@
                                 }
                             </style>
 
+                        <!-- Razorpay Online Payment Overview Cards -->
+                        <div class="col-12 mb-2">
+                            <div class="d-flex align-items-center justify-content-between p-2 rounded-2" style="background: #f8f9fa; border-left: 4px solid #EF2853;">
+                                <h6 class="text-uppercase fw-bold text-dark small m-0 d-flex align-items-center gap-2">
+                                    <i class="bx bx-credit-card text-danger font-size-18"></i> Razorpay Payment Gateway &amp; Revenue Overview
+                                </h6>
+                                <a href="/admin-payments/" class="btn btn-sm btn-outline-danger py-0 px-2 fw-semibold" style="font-size: 11px;">
+                                    View Detailed Transactions Log &rarr;
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Revenue Card -->
+                        <div class="col-xl-3 col-sm-6">
+                            <a href="/admin-payments/?status=SUCCESS" class="text-decoration-none">
+                                <div class="card mini-stats-wid shadow-sm border-0" style="border-left: 4px solid #28a745 !important;">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted fw-bold mb-1 small text-uppercase">Revenue Collected</p>
+                                                <h4 class="mb-0 text-success fw-bold">&#8377;{{ total_revenue|floatformat:2|default:"0.00" }}</h4>
+                                                <small class="text-muted" style="font-size: 11px;">Online Verified</small>
+                                            </div>
+                                            <div class="flex-shrink-0">
+                                                <div class="mini-stat-icon avatar-sm rounded-circle bg-success">
+                                                    <span class="avatar-title">
+                                                        <i class="bx bx-rupee font-size-24"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Successful Payments Card -->
+                        <div class="col-xl-3 col-sm-6">
+                            <a href="/admin-payments/?status=SUCCESS" class="text-decoration-none">
+                                <div class="card mini-stats-wid shadow-sm border-0" style="border-left: 4px solid #198754 !important;">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted fw-bold mb-1 small text-uppercase">Payments Passed</p>
+                                                <h4 class="mb-0 text-dark fw-bold">{{ payment_success_count|default:"0" }}</h4>
+                                                <small class="text-success fw-semibold" style="font-size: 11px;">{{ success_rate|default:"0" }}% Success Rate</small>
+                                            </div>
+                                            <div class="flex-shrink-0">
+                                                <div class="mini-stat-icon avatar-sm rounded-circle bg-success bg-opacity-75">
+                                                    <span class="avatar-title">
+                                                        <i class="bx bx-check-double font-size-24"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Failed / Cancelled Card -->
+                        <div class="col-xl-3 col-sm-6">
+                            <a href="/admin-payments/?status=FAILED" class="text-decoration-none">
+                                <div class="card mini-stats-wid shadow-sm border-0" style="border-left: 4px solid #dc3545 !important;">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted fw-bold mb-1 small text-uppercase">Payments Failed</p>
+                                                <h4 class="mb-0 text-danger fw-bold">{{ payment_failed_count|default:"0" }}</h4>
+                                                <small class="text-danger" style="font-size: 11px;">Bank / User Cancelled</small>
+                                            </div>
+                                            <div class="flex-shrink-0">
+                                                <div class="mini-stat-icon avatar-sm rounded-circle bg-danger">
+                                                    <span class="avatar-title">
+                                                        <i class="bx bx-x-circle font-size-24"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Pending Card -->
+                        <div class="col-xl-3 col-sm-6">
+                            <a href="/admin-payments/?status=PENDING" class="text-decoration-none">
+                                <div class="card mini-stats-wid shadow-sm border-0" style="border-left: 4px solid #ffc107 !important;">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted fw-bold mb-1 small text-uppercase">Awaiting / In-Checkout</p>
+                                                <h4 class="mb-0 text-warning-emphasis fw-bold">{{ payment_pending_count|default:"0" }}</h4>
+                                                <small class="text-muted" style="font-size: 11px;">Pending verification</small>
+                                            </div>
+                                            <div class="flex-shrink-0">
+                                                <div class="mini-stat-icon avatar-sm rounded-circle bg-warning">
+                                                    <span class="avatar-title">
+                                                        <i class="bx bx-time-five font-size-24 text-dark"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Store Inventory & Orders Row Header -->
+                        <div class="col-12 mt-2 mb-1">
+                            <h6 class="text-uppercase fw-bold text-muted small m-0">Store Catalog &amp; Operations</h6>
+                        </div>
+
                         <!-- Products Card -->
                         <div class="col-md-4">
                             <a href="/admin-products/all">
@@ -449,6 +562,152 @@
                     </div>
                     
                     {%block body%}
+                    {% if recent_payments or recent_orders %}
+                    <!-- Real-Time Payments & Orders Activity Overview -->
+                    <div class="row g-3 mb-4">
+                        <!-- Recent Razorpay Payment Transactions -->
+                        <div class="col-xl-6 col-12">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-header bg-light d-flex align-items-center justify-content-between py-3">
+                                    <h5 class="card-title m-0 text-primary font-size-15 d-flex align-items-center gap-2">
+                                        <i class="bx bx-credit-card"></i> Live Payment Transactions
+                                    </h5>
+                                    <a href="/admin-payments/" class="text-primary small fw-semibold">View All Payments &rarr;</a>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+                                        <table class="table table-hover align-middle mb-0" style="font-size: 12.5px;">
+                                            <thead class="table-light sticky-top">
+                                                <tr>
+                                                    <th>Order #</th>
+                                                    <th>Customer</th>
+                                                    <th>Amount</th>
+                                                    <th>Status</th>
+                                                    <th>Reason / ID</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for p in recent_payments %}
+                                                <tr>
+                                                    <td>
+                                                        <a href="/admin-payment-details/{{ p.id }}/" class="font-monospace fw-semibold text-primary">
+                                                            {{ p.order_number }}
+                                                        </a>
+                                                        <small class="d-block text-muted" style="font-size: 10.5px;">{{ p.created_at|date:"d M, h:i A" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="d-block fw-semibold text-dark text-truncate" style="max-width: 120px;">{{ p.buyer.name|default:"Customer" }}</span>
+                                                        <small class="text-muted">{{ p.buyer.phone|default:"" }}</small>
+                                                    </td>
+                                                    <td class="fw-bold text-dark">&#8377;{{ p.amount|floatformat:2 }}</td>
+                                                    <td>
+                                                        {% if p.status == 'SUCCESS' %}
+                                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold" style="font-size: 10.5px;">PASS</span>
+                                                        {% elif p.status == 'FAILED' %}
+                                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 fw-bold" style="font-size: 10.5px;">FAILED</span>
+                                                        {% elif p.status == 'CANCELLED' %}
+                                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1 fw-bold" style="font-size: 10.5px;">CANCELLED</span>
+                                                        {% else %}
+                                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 fw-bold" style="font-size: 10.5px;">PENDING</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if p.status == 'SUCCESS' %}
+                                                        <code class="text-success small">{{ p.razorpay_payment_id|slice:":14" }}...</code>
+                                                        {% elif p.error_reason or p.error_description %}
+                                                        <span class="text-danger small fw-semibold text-truncate d-block" style="max-width: 130px;" title="{{ p.error_reason|default:p.error_description }}">
+                                                            {{ p.error_reason|default:p.error_code|default:"Declined" }}
+                                                        </span>
+                                                        {% else %}
+                                                        <span class="text-muted small">In checkout</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="5" class="text-center py-4 text-muted small">No transactions recorded yet.</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Customer Orders -->
+                        <div class="col-xl-6 col-12">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-header bg-light d-flex align-items-center justify-content-between py-3">
+                                    <h5 class="card-title m-0 text-primary font-size-15 d-flex align-items-center gap-2">
+                                        <i class="bx bx-shopping-bag"></i> Recent Customer Orders
+                                    </h5>
+                                    <a href="/admin-order/" class="text-primary small fw-semibold">View All Orders &rarr;</a>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+                                        <table class="table table-hover align-middle mb-0" style="font-size: 12.5px;">
+                                            <thead class="table-light sticky-top">
+                                                <tr>
+                                                    <th>Order ID</th>
+                                                    <th>Product</th>
+                                                    <th>Price</th>
+                                                    <th>Payment</th>
+                                                    <th>Order Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for o in recent_orders %}
+                                                <tr>
+                                                    <td>
+                                                        <a href="/admin-order-details/{{ o.id }}/" class="fw-bold text-dark font-monospace">
+                                                            #{{ o.id }}
+                                                        </a>
+                                                        <small class="d-block text-muted" style="font-size: 10.5px;">{{ o.orderDate|slice:":11" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="d-block fw-semibold text-dark text-truncate" style="max-width: 140px;" title="{{ o.product.name }}">
+                                                            {{ o.product.name|default:"Product" }}
+                                                        </span>
+                                                        <small class="text-muted">Qty: {{ o.quantity }}</small>
+                                                    </td>
+                                                    <td class="fw-bold text-dark">&#8377;{{ o.finalPrice|floatformat:2 }}</td>
+                                                    <td>
+                                                        {% if o.payment_status == 'Paid' or o.transactionId %}
+                                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold" style="font-size: 10.5px;">
+                                                            <i class="bx bx-check-circle me-1"></i> PAID
+                                                        </span>
+                                                        {% else %}
+                                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 fw-bold" style="font-size: 10.5px;">
+                                                            PENDING
+                                                        </span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if o.orderStatus|lower == 'confirmed' %}
+                                                        <span class="badge bg-primary px-2 py-1" style="font-size: 10.5px;">Confirmed</span>
+                                                        {% elif o.orderStatus|lower == 'delivered' %}
+                                                        <span class="badge bg-success px-2 py-1" style="font-size: 10.5px;">Delivered</span>
+                                                        {% elif o.orderStatus|lower == 'cancelled' %}
+                                                        <span class="badge bg-danger px-2 py-1" style="font-size: 10.5px;">Cancelled</span>
+                                                        {% else %}
+                                                        <span class="badge bg-warning text-dark px-2 py-1" style="font-size: 10.5px;">{{ o.orderStatus|default:"Pending" }}</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="5" class="text-center py-4 text-muted small">No customer orders placed yet.</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
 
                     <div class="row">
                         <div class="col-lg-12">

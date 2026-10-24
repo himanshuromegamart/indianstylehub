@@ -2919,3 +2919,105 @@ def payment_failed_view(request):
         'error_description': payment.error_description if payment else 'The payment could not be processed.',
     })
 
+
+
+@csrf_exempt
+def razorpay_webhook(request):
+    """
+    Razorpay Webhook Handler (Fail-safe Server-to-Server Event Processing)
+    - Verifies X-Razorpay-Signature using webhook secret or key secret
+    - Handles:
+      * payment.captured / order.paid: Confirms payment & order even if user closed browser
+      * payment.failed: Logs failure code & reason
+    """
+    if request.method != "POST":
+        return HttpResponse("Method not allowed", status=405)
+
+    webhook_body = request.body.decode('utf-8')
+    received_signature = request.headers.get('X-Razorpay-Signature') or request.META.get('HTTP_X_RAZORPAY_SIGNATURE', '')
+
+    webhook_secret = (
+        getattr(settings, 'RAZORPAY_WEBHOOK_SECRET', None)
+        or os.environ.get('RAZORPAY_WEBHOOK_SECRET')
+        or getattr(settings, 'RAZORPAY_KEY_SECRET', None)
+        or 'cQ2Mt9EhceXPKCGGFZRG7fAD'
+    ).strip()
+
+    # Verify webhook signature
+    client, key_id, key_secret = get_razorpay_client()
+    is_valid_sig = False
+    try:
+        client.utility.verify_webhook_signature(webhook_body, received_signature, webhook_secret)
+        is_valid_sig = True
+    except Exception:
+        expected_sig = hmac.new(
+            webhook_secret.encode('utf-8'),
+            webhook_body.encode('utf-8'),
+            hashlib.sha256
+        ).hexdigest()
+        if hmac.compare_digest(expected_sig, received_signature):
+            is_valid_sig = True
+
+    if not is_valid_sig:
+        print("Razorpay Webhook: Signature verification failed!")
+        return HttpResponse("Invalid signature", status=400)
+
+    try:
+        event_payload = json.loads(webhook_body)
+        event_name = event_payload.get('event')
+        payload = event_payload.get('payload', {})
+        payment_entity = payload.get('payment', {}).get('entity', {})
+        order_entity = payload.get('order', {}).get('entity', {})
+
+        rzp_order_id = payment_entity.get('order_id') or order_entity.get('id', '')
+        rzp_payment_id = payment_entity.get('id', '')
+
+        print(f"Razorpay Webhook: Received '{event_name}' for Order {rzp_order_id}, Payment {rzp_payment_id}")
+
+        if event_name in ['payment.captured', 'order.paid']:
+            payment = Payment.objects.filter(razorpay_order_id=rzp_order_id).first()
+            if not payment and rzp_payment_id:
+                payment = Payment.objects.filter(razorpay_payment_id=rzp_payment_id).first()
+
+            if payment:
+                payment.status = 'SUCCESS'
+                if rzp_payment_id:
+                    payment.razorpay_payment_id = rzp_payment_id
+                payment.error_code = ''
+                payment.error_description = ''
+                payment.save()
+
+                orders = Order.objects.filter(Q(razorpay_order_id=rzp_order_id) | Q(transactionId=rzp_payment_id))
+                for o in orders:
+                    o.payment_status = 'Paid'
+                    if o.orderStatus.lower() == 'pending':
+                        o.orderStatus = 'Confirmed'
+                    if not o.transactionId:
+                        o.transactionId = rzp_payment_id
+                    o.save()
+
+        elif event_name in ['payment.failed']:
+            error_code = payment_entity.get('error_code', '')
+            error_desc = payment_entity.get('error_description', '')
+            error_source = payment_entity.get('error_source', '')
+            error_step = payment_entity.get('error_step', '')
+            error_reason = payment_entity.get('error_reason', '')
+
+            payment = Payment.objects.filter(razorpay_order_id=rzp_order_id).first()
+            if payment:
+                payment.status = 'FAILED'
+                if rzp_payment_id:
+                    payment.razorpay_payment_id = rzp_payment_id
+                payment.error_code = str(error_code)[:100]
+                payment.error_description = str(error_desc)
+                payment.error_source = str(error_source)[:100]
+                payment.error_step = str(error_step)[:100]
+                payment.error_reason = str(error_reason)[:100]
+                payment.save()
+
+        return HttpResponse("Webhook processed successfully", status=200)
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return HttpResponse(f"Webhook error: {str(e)}", status=500)

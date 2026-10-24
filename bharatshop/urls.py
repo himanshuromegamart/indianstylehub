@@ -58,6 +58,7 @@ urlpatterns = [
     path('api/verify-razorpay-payment/', views.verify_razorpay_payment, name='verify_razorpay_payment'),
     path('api/verify-payment/', views.verify_razorpay_payment, name='api_verify_payment'),
     path('api/record-razorpay-failure/', views.record_razorpay_failure, name='record_razorpay_failure'),
+    path('api/razorpay-webhook/', views.razorpay_webhook, name='razorpay_webhook'),
     path('order-confirmation/', views.order_confirmation, name='order_confirmation'),
     path('payment-failed/', views.payment_failed_view, name='payment_failed'),
     path('filter/',views.web_filter),

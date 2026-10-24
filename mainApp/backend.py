@@ -164,32 +164,61 @@ def admin_logout(request):
 
 @login_required(login_url='/admin-login')
 def admin_dashboard(Request):
-  if not Request.user.is_superuser:
-      return HttpResponseForbidden("You don't have permission to access this page.")
-  else:
-    data = Product.objects.all().order_by('-id')
-    offers = Supercategory.objects.all().order_by('-id')
-    prod = Product.objects.count()
-    ord = Order.objects.count()
-    enq = Enquiry.objects.count()
-    buyer_count = Buyer.objects.count()
-    recent_orders = Order.objects.all().order_by('-id')[:8]
-    paginator = Paginator(data, 100)
-    page_number = Request.GET.get('page')
-    page_posts = paginator.get_page(page_number)
-    current_page = page_posts.number
-    total_pages = paginator.num_pages
-    page_range = range(max(current_page - 2, 1), min(current_page + 3, total_pages + 1))
-    return render(Request, 'backend/index.html', {
-        'page_posts': page_posts,
-        'page_range': page_range,
-        'offers': offers,
-        'prod': prod,
-        'ord': ord,
-        'enq': enq,
-        'buyer_count': buyer_count,
-        'recent_orders': recent_orders,
-    })
+    if not Request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+    else:
+        from django.db.models import Sum
+        data = Product.objects.all().order_by('-id')
+        offers = Supercategory.objects.all().order_by('-id')
+        prod = Product.objects.count()
+        ord = Order.objects.count()
+        enq = Enquiry.objects.count()
+        buyer_count = Buyer.objects.count()
+
+        # Product stock breakdown
+        act = Product.objects.filter(quantity__gt=0).count()
+        oos = Product.objects.filter(quantity__lte=0).count()
+        pen = Order.objects.filter(orderStatus__iexact='pending').count()
+
+        # Comprehensive Razorpay Payment Metrics
+        total_payments = Payment.objects.count()
+        payment_success_count = Payment.objects.filter(status='SUCCESS').count()
+        payment_failed_count = Payment.objects.filter(status__in=['FAILED', 'CANCELLED']).count()
+        payment_pending_count = Payment.objects.filter(status='PENDING').count()
+        total_revenue = Payment.objects.filter(status='SUCCESS').aggregate(Sum('amount'))['amount__sum'] or 0.0
+        success_rate = round((payment_success_count / total_payments * 100), 1) if total_payments > 0 else 0.0
+
+        # Recent activities
+        recent_orders = Order.objects.all().order_by('-id')[:8]
+        recent_payments = Payment.objects.all().order_by('-created_at')[:8]
+
+        paginator = Paginator(data, 100)
+        page_number = Request.GET.get('page')
+        page_posts = paginator.get_page(page_number)
+        current_page = page_posts.number
+        total_pages = paginator.num_pages
+        page_range = range(max(current_page - 2, 1), min(current_page + 3, total_pages + 1))
+
+        return render(Request, 'backend/index.html', {
+            'page_posts': page_posts,
+            'page_range': page_range,
+            'offers': offers,
+            'prod': prod,
+            'ord': ord,
+            'enq': enq,
+            'act': act,
+            'oos': oos,
+            'pen': pen,
+            'buyer_count': buyer_count,
+            'recent_orders': recent_orders,
+            'recent_payments': recent_payments,
+            'total_payments': total_payments,
+            'payment_success_count': payment_success_count,
+            'payment_failed_count': payment_failed_count,
+            'payment_pending_count': payment_pending_count,
+            'total_revenue': total_revenue,
+            'success_rate': success_rate,
+        })
 
 
 # Slider
