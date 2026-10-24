@@ -91,12 +91,38 @@
                                     <td>{{ order.orderDate|default:"-" }}</td>
                                 </tr>
                                 <tr>
-                                    <th class="text-muted">Payment:</th>
-                                    <td><span class="badge bg-success-subtle text-success border border-success-subtle">Cash on Delivery (COD)</span></td>
+                                    <th class="text-muted">Payment Method:</th>
+                                    <td>
+                                        {% if order.razorpay_payment_id or order.payment_status|lower == 'paid' or order.transactionId and not 'COD' in order.transactionId %}
+                                            <span class="badge bg-success font-size-13 px-2 py-1">
+                                                <i class="bx bx-check-shield me-1"></i> Paid Online (Razorpay)
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary font-size-13 px-2 py-1">
+                                                Cash on Delivery (COD)
+                                            </span>
+                                        {% endif %}
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <th class="text-muted">Reference No:</th>
-                                    <td><small class="font-monospace">{{ order.transactionId|default:"COD" }}</small></td>
+                                    <th class="text-muted">Payment Status:</th>
+                                    <td>
+                                        {% if order.payment_status|lower == 'paid' or order.razorpay_payment_id %}
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold">
+                                                <i class="bx bx-check-circle me-1"></i> Paid (Captured)
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle fw-bold">
+                                                {{ order.payment_status|default:"Pending" }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Razorpay Payment ID:</th>
+                                    <td>
+                                        <small class="font-monospace text-primary fw-bold">{{ order.razorpay_payment_id|default:order.transactionId|default:"-" }}</small>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>

@@ -1302,7 +1302,7 @@ def checkout_page(request):
                 except Exception:
                     address_obj = None
 
-            now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
+            now_str = timezone.localtime(timezone.now()).strftime("%d %b %Y, %I:%M %p")
             rand_suffix = random.randint(1000, 9999)
             order_number = f"ORD{datetime.now().strftime('%y%m%d')}{rand_suffix}"
 
@@ -2447,7 +2447,7 @@ def confirm_and_create_order(payment, razorpay_payment_id=None, razorpay_signatu
     if buyer:
         address_obj = Address.objects.filter(buyer=buyer).order_by('-id').first()
 
-    now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
+    now_str = timezone.localtime(timezone.now()).strftime("%d %b %Y, %I:%M %p")
 
     # Read cart items
     cart_items = []
@@ -2816,7 +2816,7 @@ def verify_razorpay_payment(request):
         redirect_url = f"/order-confirmation/?order_number={ord_num}&payment_id={razorpay_payment_id}"
 
         if not is_json:
-            return HttpResponseRedirect(redirect_url)
+            return redirect(redirect_url)
 
         return JsonResponse({
             'status': 'success',
