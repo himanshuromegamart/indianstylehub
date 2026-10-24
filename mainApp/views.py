@@ -2921,60 +2921,96 @@ def record_razorpay_failure(request):
 
 def order_confirmation(request):
     """Renders the Order Confirmation Page after successful payment, with auto-healing order creation."""
-    order_number = request.GET.get('order_number', '').strip()
-    payment_id = request.GET.get('payment_id', '').strip()
+    try:
+        order_number = request.GET.get('order_number', '').strip()
+        payment_id = request.GET.get('payment_id', '').strip()
 
-    payment = None
-    if payment_id:
-        payment = Payment.objects.filter(razorpay_payment_id=payment_id).first()
-    if not payment and order_number:
-        payment = Payment.objects.filter(order_number=order_number).first()
+        payment = None
+        if payment_id:
+            payment = Payment.objects.filter(razorpay_payment_id=payment_id).first()
+        if not payment and order_number:
+            payment = Payment.objects.filter(order_number=order_number).first()
 
-    orders = []
-    if payment_id:
-        orders = list(Order.objects.filter(transactionId=payment_id).order_by('-id'))
-    if not orders and payment and payment.razorpay_order_id:
-        orders = list(Order.objects.filter(razorpay_order_id=payment.razorpay_order_id).order_by('-id'))
+        orders = []
+        if payment_id:
+            orders = list(Order.objects.filter(transactionId=payment_id).order_by('-id'))
+        if not orders and payment and payment.razorpay_order_id:
+            orders = list(Order.objects.filter(razorpay_order_id=payment.razorpay_order_id).order_by('-id'))
 
-    needs_auto_heal = False
-    if not orders:
-        needs_auto_heal = True
-    elif any(o.payment_status != 'Paid' or o.orderStatus.lower() == 'pending' for o in orders):
-        needs_auto_heal = True
+        needs_auto_heal = False
+        if not orders:
+            needs_auto_heal = True
+        elif any(o.payment_status != 'Paid' or o.orderStatus.lower() == 'pending' for o in orders):
+            needs_auto_heal = True
 
-    # Auto-healing: If payment exists but orders not paid yet, check Razorpay API & confirm!
-    if needs_auto_heal and payment and payment.razorpay_order_id:
-        try:
-            client, key_id, key_secret = get_razorpay_client()
-            rzp_order = client.order.fetch(payment.razorpay_order_id)
-            payments_resp = client.order.payments(payment.razorpay_order_id)
-            items = payments_resp.get('items', []) if isinstance(payments_resp, dict) else []
-            captured_p = next((p for p in items if p.get('status') in ['captured', 'authorized']), None)
-            
-            if captured_p:
-                created_ords = confirm_and_create_order(payment, razorpay_payment_id=captured_p.get('id'), request=request)
-                orders = created_ords or list(Order.objects.filter(razorpay_order_id=payment.razorpay_order_id).order_by('-id'))
-            elif rzp_order.get('status') == 'paid' and items:
-                created_ords = confirm_and_create_order(payment, razorpay_payment_id=items[0].get('id'), request=request)
-                orders = created_ords or list(Order.objects.filter(razorpay_order_id=payment.razorpay_order_id).order_by('-id'))
-        except Exception as err:
-            print(f"order_confirmation auto-sync error: {err}")
+        # Auto-healing: If payment exists but orders not paid yet, check Razorpay API & confirm!
+        if needs_auto_heal and payment and payment.razorpay_order_id:
+            try:
+                client, key_id, key_secret = get_razorpay_client()
+                rzp_order = client.order.fetch(payment.razorpay_order_id)
+                payments_resp = client.order.payments(payment.razorpay_order_id)
+                items = payments_resp.get('items', []) if isinstance(payments_resp, dict) else []
+                captured_p = next((p for p in items if p.get('status') in ['captured', 'authorized']), None)
+                
+                if captured_p:
+                    created_ords = confirm_and_create_order(payment, razorpay_payment_id=captured_p.get('id'), request=request)
+                    orders = created_ords or list(Order.objects.filter(razorpay_order_id=payment.razorpay_order_id).order_by('-id'))
+                elif rzp_order.get('status') == 'paid' and items:
+                    created_ords = confirm_and_create_order(payment, razorpay_payment_id=items[0].get('id'), request=request)
+                    orders = created_ords or list(Order.objects.filter(razorpay_order_id=payment.razorpay_order_id).order_by('-id'))
+            except Exception as err:
+                print(f"order_confirmation auto-sync error: {err}")
 
-    buyer = payment.buyer if payment else None
-    address = orders.first().address if orders.exists() else None
-    total = payment.amount if payment else (sum(o.finalPrice for o in orders) if orders else 0.0)
-    order_date = orders.first().orderDate if orders.exists() else datetime.now().strftime("%d %b %Y, %I:%M %p")
+        first_order = orders[0] if orders else None
+        buyer = (payment.buyer if payment else None) or (first_order.buyer if first_order else None)
+        address = first_order.address if first_order else (Address.objects.filter(buyer=buyer).order_by('-id').first() if buyer else None)
+        total = payment.amount if payment else (sum(o.finalPrice for o in orders) if orders else 0.0)
+        order_date = first_order.orderDate if (first_order and first_order.orderDate) else timezone.localtime(timezone.now()).strftime("%d %b %Y, %I:%M %p")
 
-    return render(request, 'front/confirmation.html', {
-        'order_number': order_number or (payment.order_number if payment else 'CONFIRMED'),
-        'payment': payment,
-        'orders': orders,
-        'buyer': buyer,
-        'address': address,
-        'total': total,
-        'order_date': order_date,
-        'is_paid_online': True,
-    })
+        # Prepare cart_items for template
+        cart_items = []
+        if payment and getattr(payment, 'order_items_json', None):
+            try:
+                cart_items = json.loads(payment.order_items_json)
+            except Exception:
+                cart_items = []
+        if not cart_items and orders:
+            for ord_item in orders:
+                p = ord_item.product
+                cart_items.append({
+                    'id': p.id if p else None,
+                    'name': p.name if p else 'Ordered Item',
+                    'image': p.image1 if p and getattr(p, 'image1', None) else '',
+                    'quantity': ord_item.quantity,
+                    'price': round(ord_item.finalPrice / (ord_item.quantity or 1), 2) if ord_item.finalPrice else 0,
+                    'subtotal': ord_item.finalPrice,
+                })
+
+        return render(request, 'front/confirmation.html', {
+            'order_number': order_number or (payment.order_number if payment else 'CONFIRMED'),
+            'payment': payment,
+            'orders': orders,
+            'cart_items': cart_items,
+            'buyer': buyer,
+            'address': address,
+            'total': total,
+            'order_date': order_date,
+            'is_paid_online': True,
+        })
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return render(request, 'front/confirmation.html', {
+            'order_number': request.GET.get('order_number', 'CONFIRMED'),
+            'payment': None,
+            'orders': [],
+            'cart_items': [],
+            'buyer': None,
+            'address': None,
+            'total': 0,
+            'order_date': timezone.localtime(timezone.now()).strftime("%d %b %Y, %I:%M %p"),
+            'is_paid_online': True,
+        })
 
 
 def payment_failed_view(request):
