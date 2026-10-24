@@ -17,10 +17,10 @@
 
             <h3 class="fw-bold text-dark mb-1" style="font-size: 1.5rem;">Payment Incomplete</h3>
             <p class="text-muted mb-4 small">
-                Your payment could not be processed, or the transaction was cancelled. Don't worry, your cart items are safe.
+                Your payment could not be processed, or the transaction was cancelled. Don't worry, your order and cart items are safe.
             </p>
 
-            <!-- Failure Details Box -->
+            <!-- Failure Details Box & Diagnostics -->
             <div class="p-3 rounded-3 mb-4 text-start" style="background-color: #FFF5F5; border: 1.5px dashed #FCA5A5;">
                 <div class="row g-2" style="font-size: 13.5px;">
                     {% if order_number %}
@@ -32,24 +32,56 @@
                     {% if payment and payment.amount %}
                     <div class="col-sm-6 col-12">
                         <span class="text-muted small d-block">Attempted Amount:</span>
-                        <strong class="text-danger">&#8377;{{ payment.amount|floatformat:2 }}</strong>
+                        <strong class="text-danger">&#8377;{{ payment.amount|floatformat:2 }} INR</strong>
+                    </div>
+                    {% endif %}
+                    {% if razorpay_order_id %}
+                    <div class="col-sm-6 col-12">
+                        <span class="text-muted small d-block">Razorpay Order ID:</span>
+                        <code class="text-secondary">{{ razorpay_order_id }}</code>
+                    </div>
+                    {% endif %}
+                    {% if payment and payment.razorpay_payment_id %}
+                    <div class="col-sm-6 col-12">
+                        <span class="text-muted small d-block">Razorpay Payment ID:</span>
+                        <code class="text-primary">{{ payment.razorpay_payment_id }}</code>
+                    </div>
+                    {% endif %}
+                    {% if error_code %}
+                    <div class="col-sm-6 col-12">
+                        <span class="text-muted small d-block">Gateway Error Code:</span>
+                        <span class="badge bg-danger">{{ error_code }}</span>
+                    </div>
+                    {% endif %}
+                    {% if error_source or error_step %}
+                    <div class="col-sm-6 col-12">
+                        <span class="text-muted small d-block">Failure Step / Source:</span>
+                        <small class="text-muted">{{ error_source|default:"gateway" }} &bull; {{ error_step|default:"payment_authorization" }}</small>
                     </div>
                     {% endif %}
                     <div class="col-12 mt-2 pt-2 border-top">
-                        <span class="text-muted small d-block">Reason:</span>
-                        <span class="text-danger fw-semibold">
-                            {{ error_reason|default:error_description|default:"Transaction was cancelled or declined by your bank / UPI app." }}
+                        <span class="text-muted small d-block">Failure Reason &amp; Diagnostic:</span>
+                        <span class="text-danger fw-semibold d-block">
+                            {{ error_reason|default:"Transaction was cancelled or declined by your bank / UPI app." }}
                         </span>
+                        {% if error_description and error_description != error_reason %}
+                        <small class="text-muted d-block mt-1">{{ error_description }}</small>
+                        {% endif %}
                     </div>
                 </div>
             </div>
 
             <p class="small text-muted mb-4">
-                If money was deducted from your bank account, it will be automatically refunded by Razorpay/your bank within 3-5 working days.
+                If money was deducted from your bank account, click <strong>"Check Payment Status"</strong> below or rest assured it will be automatically refunded by your bank within 3-5 working days.
             </p>
 
             <!-- Action Buttons -->
             <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                {% if order_number %}
+                <a href="/order-confirmation/?order_number={{ order_number }}" class="btn btn-outline-success py-2 px-3 fw-bold" style="border-radius: 8px; font-size: 14px;">
+                    <i class="fa fa-refresh me-1"></i> Did Money Deduct? Check Status
+                </a>
+                {% endif %}
                 <a href="/checkout/" class="btn btn-danger py-2 px-4 fw-bold shadow-sm" style="background: #EF2853; border-color: #EF2853; border-radius: 8px; font-size: 14px;">
                     <i class="flaticon-sparkle me-1"></i> Try Again / Return to Checkout
                 </a>

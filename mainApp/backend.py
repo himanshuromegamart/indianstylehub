@@ -1773,20 +1773,37 @@ def admin_orders_page(request):
     status_filter = request.GET.get('status', '').strip()
     search_query = request.GET.get('search_query', '').strip()
 
-    # Auto-heal: Ensure ALL successful payments have corresponding Order rows
+    # Auto-heal: Ensure ALL successful payments have corresponding Order rows and sync status
     try:
         from .views import confirm_and_create_order
         for sp in Payment.objects.filter(status='SUCCESS'):
-            has_order = False
             sp_oid = (sp.razorpay_order_id or '').strip()
             sp_pid = (sp.razorpay_payment_id or '').strip()
+            matched_orders = []
             if sp_oid:
-                has_order = Order.objects.filter(razorpay_order_id=sp_oid).exists()
-            if not has_order and sp_pid:
-                has_order = Order.objects.filter(
-                    Q(transactionId=sp_pid) | Q(razorpay_payment_id=sp_pid)
-                ).exists()
-            if not has_order:
+                matched_orders = list(Order.objects.filter(razorpay_order_id=sp_oid))
+            if not matched_orders and sp_pid:
+                matched_orders = list(Order.objects.filter(Q(transactionId=sp_pid) | Q(razorpay_payment_id=sp_pid)))
+            
+            if matched_orders:
+                for mo in matched_orders:
+                    needs_save = False
+                    if mo.payment_status != 'Paid':
+                        mo.payment_status = 'Paid'
+                        needs_save = True
+                    if mo.orderStatus.lower() == 'pending':
+                        mo.orderStatus = 'Confirmed'
+                        needs_save = True
+                    if sp_pid and mo.transactionId != sp_pid:
+                        mo.transactionId = sp_pid
+                        mo.razorpay_payment_id = sp_pid
+                        needs_save = True
+                    if sp_oid and not mo.razorpay_order_id:
+                        mo.razorpay_order_id = sp_oid
+                        needs_save = True
+                    if needs_save:
+                        mo.save()
+            else:
                 confirm_and_create_order(sp, razorpay_payment_id=sp_pid)
     except Exception as e:
         print(f"admin_orders_page auto-heal error: {e}")
@@ -1856,6 +1873,25 @@ def admin_order_details(request, id):
         payment = Payment.objects.filter(razorpay_order_id=ord_oid).first()
     if not payment and order.buyer:
         payment = Payment.objects.filter(buyer=order.buyer).order_by('-id').first()
+
+    # Auto-sync payment status to Order
+    if payment and payment.status == 'SUCCESS':
+        order_dirty = False
+        if order.payment_status != 'Paid':
+            order.payment_status = 'Paid'
+            order_dirty = True
+        if order.orderStatus.lower() == 'pending':
+            order.orderStatus = 'Confirmed'
+            order_dirty = True
+        if payment.razorpay_payment_id and (not order.razorpay_payment_id or not order.transactionId):
+            order.razorpay_payment_id = payment.razorpay_payment_id
+            order.transactionId = payment.razorpay_payment_id
+            order_dirty = True
+        if payment.razorpay_order_id and not order.razorpay_order_id:
+            order.razorpay_order_id = payment.razorpay_order_id
+            order_dirty = True
+        if order_dirty:
+            order.save()
 
     if request.method == 'POST':
         new_status = request.POST.get('orderStatus', '').strip()

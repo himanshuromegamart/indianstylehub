@@ -2692,6 +2692,29 @@ def create_razorpay_order(request):
             notes=f"Delivery to {city}, {state} ({pincode}). Notes: {notes}"
         )
 
+        # Immediately create Order record(s) in Database (Status: pending, transactionId=None until payment is captured)
+        now_str = timezone.localtime(timezone.now()).strftime("%d %b %Y, %I:%M %p")
+        for item in cart_items:
+            prod_obj = Product.objects.filter(id=item.get('id')).first() if item.get('id') else Product.objects.first()
+            Order.objects.create(
+                buyer=buyer,
+                product=prod_obj,
+                address=address_obj,
+                quantity=int(item.get('quantity', 1) or 1),
+                totalPrice=float(item.get('subtotal', total) or total),
+                shippingPrice=0.0,
+                finalPrice=float(item.get('subtotal', total) or total),
+                transactionId=None,
+                orderDate=now_str,
+                orderStatus="pending",
+                payment_status="Pending",
+                razorpay_order_id=rzp_order['id'],
+                razorpay_payment_id=None,
+                razorpay_signature=None,
+                waywill="",
+                cancelled_by=""
+            )
+
         # Store pending order context in session
         request.session['pending_order'] = {
             'order_number': order_number,
@@ -2910,8 +2933,14 @@ def order_confirmation(request):
     if not orders and payment and payment.razorpay_order_id:
         orders = list(Order.objects.filter(razorpay_order_id=payment.razorpay_order_id).order_by('-id'))
 
-    # Auto-healing: If payment exists but orders not created yet, check Razorpay API & confirm!
-    if not orders and payment and payment.razorpay_order_id:
+    needs_auto_heal = False
+    if not orders:
+        needs_auto_heal = True
+    elif any(o.payment_status != 'Paid' or o.orderStatus.lower() == 'pending' for o in orders):
+        needs_auto_heal = True
+
+    # Auto-healing: If payment exists but orders not paid yet, check Razorpay API & confirm!
+    if needs_auto_heal and payment and payment.razorpay_order_id:
         try:
             client, key_id, key_secret = get_razorpay_client()
             rzp_order = client.order.fetch(payment.razorpay_order_id)
@@ -2949,12 +2978,31 @@ def payment_failed_view(request):
     """Renders user-friendly Payment Failed page with auto-healing check against Razorpay API."""
     order_number = request.GET.get('order_number', '').strip()
     razorpay_order_id = request.GET.get('order_id', '').strip()
+    raw_error = request.GET.get('error', '').strip()
 
     payment = None
     if razorpay_order_id:
         payment = Payment.objects.filter(razorpay_order_id=razorpay_order_id).first()
     if not payment and order_number:
         payment = Payment.objects.filter(order_number=order_number).first()
+
+    # Fallback to session pending_order if not found in GET parameters
+    if not payment:
+        pending_order = request.session.get('pending_order', {})
+        if pending_order:
+            order_number = order_number or pending_order.get('order_number', '')
+            razorpay_order_id = razorpay_order_id or pending_order.get('razorpay_order_id', '')
+            if razorpay_order_id:
+                payment = Payment.objects.filter(razorpay_order_id=razorpay_order_id).first()
+            if not payment and order_number:
+                payment = Payment.objects.filter(order_number=order_number).first()
+
+    # Fallback to most recent payment
+    if not payment:
+        payment = Payment.objects.order_by('-id').first()
+        if payment:
+            order_number = order_number or payment.order_number
+            razorpay_order_id = razorpay_order_id or payment.razorpay_order_id
 
     # Auto-healing: If payment was actually captured in Razorpay, auto-confirm and redirect to order-confirmation!
     if payment and payment.razorpay_order_id:
@@ -2973,11 +3021,20 @@ def payment_failed_view(request):
         except Exception as heal_err:
             print(f"payment_failed_view auto-heal error: {heal_err}")
 
+    # Determine informative failure reason & description
+    err_reason = (payment.error_reason if payment and payment.error_reason else '') or raw_error or 'Transaction was not completed'
+    err_desc = (payment.error_description if payment and payment.error_description else '') or raw_error or 'The payment could not be processed.'
+
     return render(request, 'front/payment-failed.html', {
         'payment': payment,
         'order_number': order_number or (payment.order_number if payment else ''),
-        'error_reason': payment.error_reason if payment and payment.error_reason else 'Transaction was not completed',
-        'error_description': payment.error_description if payment and payment.error_description else 'The payment could not be processed.',
+        'razorpay_order_id': razorpay_order_id or (payment.razorpay_order_id if payment else ''),
+        'error_reason': err_reason,
+        'error_description': err_desc,
+        'error_code': payment.error_code if payment else '',
+        'error_source': payment.error_source if payment else '',
+        'error_step': payment.error_step if payment else '',
+        'raw_error': raw_error,
     })
 
 
