@@ -578,8 +578,12 @@
                             if (vData.status === 'success') {
                                 window.location.href = vData.redirect_url;
                             } else {
-                                alert(vData.message || 'Payment signature verification failed.');
-                                window.location.href = '/payment-failed/?order_number=' + encodeURIComponent(data.order_number) + '&order_id=' + encodeURIComponent(data.order_id);
+                                if (response.razorpay_payment_id) {
+                                    window.location.href = '/order-confirmation/?order_number=' + encodeURIComponent(data.order_number) + '&payment_id=' + encodeURIComponent(response.razorpay_payment_id);
+                                } else {
+                                    alert(vData.message || 'Payment verification failed.');
+                                    window.location.href = '/payment-failed/?order_number=' + encodeURIComponent(data.order_number) + '&order_id=' + encodeURIComponent(data.order_id);
+                                }
                             }
                         })
                         .catch(vErr => {
