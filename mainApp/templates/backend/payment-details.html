@@ -180,7 +180,7 @@
                 </div>
 
                 <div class="card shadow-sm border-0 mb-3">
-                    <div class="card-header bg-light">
+                    <div class="card-header bg-light d-flex align-items-center justify-content-between">
                         <h6 class="m-0 fw-bold text-dark"><i class="bx bx-shopping-bag me-1 text-primary"></i> Associated Order Items</h6>
                     </div>
                     <div class="card-body p-0">
@@ -189,14 +189,21 @@
                             <table class="table table-sm table-hover mb-0" style="font-size: 13px;">
                                 <thead class="table-light">
                                     <tr>
+                                        <th>Order</th>
                                         <th>Product</th>
                                         <th>Qty</th>
                                         <th>Total</th>
+                                        <th class="text-end">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for o in orders %}
                                     <tr>
+                                        <td>
+                                            <a href="/admin-order-details/{{ o.id }}/" class="badge bg-primary font-monospace">
+                                                Order #{{ o.id }}
+                                            </a>
+                                        </td>
                                         <td>
                                             {% if o.product %}
                                             <a href="/product-details/{{ o.product.name|slugify }}/{{ o.product.id }}" target="_blank" class="text-dark fw-semibold">
@@ -207,15 +214,25 @@
                                             {% endif %}
                                         </td>
                                         <td>{{ o.quantity }}</td>
-                                        <td class="fw-bold">&#8377;{{ o.finalPrice|floatformat:2 }}</td>
+                                        <td class="fw-bold text-success">&#8377;{{ o.finalPrice|floatformat:2 }}</td>
+                                        <td class="text-end">
+                                            <a href="/admin-order-details/{{ o.id }}/" class="btn btn-sm btn-outline-primary py-0 px-2" title="View Order Details">
+                                                <i class="bx bx-show me-1"></i> View Order
+                                            </a>
+                                        </td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
                         </div>
                         {% else %}
-                        <div class="p-3 text-muted small">
-                            No finalized orders linked (payment may be pending or failed before order creation).
+                        <div class="p-3 text-center text-muted small">
+                            <p class="mb-2">No finalized order linked to this payment record yet.</p>
+                            {% if payment.status == 'SUCCESS' %}
+                            <a href="/admin-sync-payment/{{ payment.id }}/" class="btn btn-sm btn-success text-white">
+                                <i class="bx bx-plus-circle me-1"></i> Generate &amp; Link Order Now
+                            </a>
+                            {% endif %}
                         </div>
                         {% endif %}
                     </div>

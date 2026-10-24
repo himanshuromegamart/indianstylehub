@@ -2411,7 +2411,7 @@ def confirm_and_create_order(payment, razorpay_payment_id=None, razorpay_signatu
     if not payment:
         return []
 
-    # 1. Update Payment record
+    # 1. Update Payment record to SUCCESS
     payment.status = 'SUCCESS'
     if razorpay_payment_id:
         payment.razorpay_payment_id = razorpay_payment_id
@@ -2421,25 +2421,30 @@ def confirm_and_create_order(payment, razorpay_payment_id=None, razorpay_signatu
     payment.error_description = ''
     payment.save()
 
-    # 2. Check if Order already created for this payment
-    created_orders = list(Order.objects.filter(
-        Q(razorpay_order_id=payment.razorpay_order_id) |
-        (Q(transactionId=payment.razorpay_payment_id) if payment.razorpay_payment_id else Q(pk__in=[]))
-    ))
+    # 2. Check if Order already created for this payment (STRICT NON-EMPTY CHECK ONLY)
+    existing_orders = []
+    rzp_oid = (payment.razorpay_order_id or '').strip()
+    rzp_pid = (payment.razorpay_payment_id or '').strip()
 
-    if created_orders:
-        for o in created_orders:
+    if rzp_oid:
+        existing_orders = list(Order.objects.filter(razorpay_order_id=rzp_oid))
+    if not existing_orders and rzp_pid:
+        existing_orders = list(Order.objects.filter(
+            Q(transactionId=rzp_pid) | Q(razorpay_payment_id=rzp_pid)
+        ))
+
+    if existing_orders:
+        for o in existing_orders:
             o.payment_status = 'Paid'
             if o.orderStatus.lower() == 'pending':
                 o.orderStatus = 'Confirmed'
-            if not o.transactionId and payment.razorpay_payment_id:
-                o.transactionId = payment.razorpay_payment_id
-            if not o.razorpay_payment_id and payment.razorpay_payment_id:
-                o.razorpay_payment_id = payment.razorpay_payment_id
-            if not o.razorpay_order_id and payment.razorpay_order_id:
-                o.razorpay_order_id = payment.razorpay_order_id
+            if rzp_pid:
+                o.transactionId = rzp_pid
+                o.razorpay_payment_id = rzp_pid
+            if rzp_oid:
+                o.razorpay_order_id = rzp_oid
             o.save()
-        return created_orders
+        return existing_orders
 
     # 3. Create Orders if none exist
     buyer = payment.buyer
@@ -2458,30 +2463,36 @@ def confirm_and_create_order(payment, razorpay_payment_id=None, razorpay_signatu
             cart_items = []
 
     if not cart_items and request:
-        pending_order = request.session.get('pending_order', {})
-        cart_items = pending_order.get('cart_items', [])
+        try:
+            pending_order = request.session.get('pending_order', {})
+            cart_items = pending_order.get('cart_items', [])
+        except Exception:
+            cart_items = []
 
     if not cart_items and request:
-        cart = request.session.get('cart', {})
-        if isinstance(cart, dict):
-            for pid, item in cart.items():
-                prod = Product.objects.filter(id=pid).first()
-                if prod:
-                    qty = int(item.get('quantity', 1) or 1) if isinstance(item, dict) else (int(item) if str(item).isdigit() else 1)
-                    price = float(prod.price or 0.0)
-                    cart_items.append({
-                        'id': prod.id,
-                        'name': prod.name,
-                        'price': price,
-                        'quantity': qty,
-                        'subtotal': price * qty,
-                    })
+        try:
+            cart = request.session.get('cart', {})
+            if isinstance(cart, dict):
+                for pid, item in cart.items():
+                    prod = Product.objects.filter(id=pid).first()
+                    if prod:
+                        qty = int(item.get('quantity', 1) or 1) if isinstance(item, dict) else (int(item) if str(item).isdigit() else 1)
+                        price = float(prod.price or 0.0)
+                        cart_items.append({
+                            'id': prod.id,
+                            'name': prod.name,
+                            'price': price,
+                            'quantity': qty,
+                            'subtotal': price * qty,
+                        })
+        except Exception:
+            cart_items = []
 
     if not cart_items:
         matching_prod = Product.objects.filter(price=payment.amount).first() or Product.objects.first()
         cart_items = [{
             'id': matching_prod.id if matching_prod else None,
-            'name': matching_prod.name if matching_prod else 'Ordered Item',
+            'name': matching_prod.name if matching_prod else 'Ordered Product',
             'price': payment.amount,
             'quantity': 1,
             'subtotal': payment.amount,
@@ -2489,11 +2500,7 @@ def confirm_and_create_order(payment, razorpay_payment_id=None, razorpay_signatu
 
     new_orders = []
     for item in cart_items:
-        prod_obj = None
-        if item.get('id'):
-            prod_obj = Product.objects.filter(id=item.get('id')).first()
-        if not prod_obj:
-            prod_obj = Product.objects.first()
+        prod_obj = Product.objects.filter(id=item.get('id')).first() if item.get('id') else Product.objects.first()
 
         ord_obj = Order.objects.create(
             buyer=buyer,
@@ -2503,12 +2510,12 @@ def confirm_and_create_order(payment, razorpay_payment_id=None, razorpay_signatu
             totalPrice=float(item.get('subtotal', payment.amount) or payment.amount),
             shippingPrice=0.0,
             finalPrice=float(item.get('subtotal', payment.amount) or payment.amount),
-            transactionId=payment.razorpay_payment_id or payment.order_number,
+            transactionId=rzp_pid or payment.order_number,
             orderDate=now_str,
             orderStatus="Confirmed",
             payment_status="Paid",
-            razorpay_order_id=payment.razorpay_order_id,
-            razorpay_payment_id=payment.razorpay_payment_id,
+            razorpay_order_id=rzp_oid,
+            razorpay_payment_id=rzp_pid,
             razorpay_signature=payment.razorpay_signature,
             waywill="",
             cancelled_by=""

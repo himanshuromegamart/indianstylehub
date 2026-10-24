@@ -1773,17 +1773,23 @@ def admin_orders_page(request):
     status_filter = request.GET.get('status', '').strip()
     search_query = request.GET.get('search_query', '').strip()
 
-    # Auto-heal: Ensure any SUCCESS payments have matching Order entries
+    # Auto-heal: Ensure ALL successful payments have corresponding Order rows
     try:
-        success_unlinked = Payment.objects.filter(status='SUCCESS').exclude(
-            razorpay_order_id__in=Order.objects.values_list('razorpay_order_id', flat=True)
-        )
-        if success_unlinked.exists():
-            from .views import confirm_and_create_order
-            for sp in success_unlinked[:10]:
-                confirm_and_create_order(sp, razorpay_payment_id=sp.razorpay_payment_id)
+        from .views import confirm_and_create_order
+        for sp in Payment.objects.filter(status='SUCCESS'):
+            has_order = False
+            sp_oid = (sp.razorpay_order_id or '').strip()
+            sp_pid = (sp.razorpay_payment_id or '').strip()
+            if sp_oid:
+                has_order = Order.objects.filter(razorpay_order_id=sp_oid).exists()
+            if not has_order and sp_pid:
+                has_order = Order.objects.filter(
+                    Q(transactionId=sp_pid) | Q(razorpay_payment_id=sp_pid)
+                ).exists()
+            if not has_order:
+                confirm_and_create_order(sp, razorpay_payment_id=sp_pid)
     except Exception as e:
-        pass
+        print(f"admin_orders_page auto-heal error: {e}")
 
     orders_qs = Order.objects.all().order_by('-id')
 
@@ -1840,6 +1846,17 @@ def admin_order_details(request, id):
     
     order = get_object_or_404(Order, id=id)
 
+    # Find linked payment record
+    payment = None
+    ord_pid = (order.razorpay_payment_id or order.transactionId or '').strip()
+    ord_oid = (order.razorpay_order_id or '').strip()
+    if ord_pid and not 'COD' in ord_pid:
+        payment = Payment.objects.filter(Q(razorpay_payment_id=ord_pid) | Q(order_number=ord_pid)).first()
+    if not payment and ord_oid:
+        payment = Payment.objects.filter(razorpay_order_id=ord_oid).first()
+    if not payment and order.buyer:
+        payment = Payment.objects.filter(buyer=order.buyer).order_by('-id').first()
+
     if request.method == 'POST':
         new_status = request.POST.get('orderStatus', '').strip()
         new_waybill = request.POST.get('waywill', '').strip()
@@ -1856,6 +1873,7 @@ def admin_order_details(request, id):
 
     return render(request, 'backend/order-details.html', {
         'order': order,
+        'payment': payment,
     })
 
 
@@ -2169,6 +2187,16 @@ def admin_payments_page(request):
     paginator = Paginator(payments_qs, 25)
     page_number = request.GET.get('page')
     page_posts = paginator.get_page(page_number)
+
+    # Link each payment to its corresponding Order for instant cross-navigation
+    for item in page_posts:
+        item.linked_order = None
+        it_pid = (item.razorpay_payment_id or '').strip()
+        it_oid = (item.razorpay_order_id or '').strip()
+        if it_pid:
+            item.linked_order = Order.objects.filter(Q(transactionId=it_pid) | Q(razorpay_payment_id=it_pid)).first()
+        if not item.linked_order and it_oid:
+            item.linked_order = Order.objects.filter(razorpay_order_id=it_oid).first()
     current_page = page_posts.number
     total_pages = paginator.num_pages
     page_range = range(max(current_page - 2, 1), min(current_page + 3, total_pages + 1))

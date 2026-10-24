@@ -101,6 +101,9 @@
                                     <a href="/admin-order-details/{{ item.id }}/" class="fw-bold text-primary font-monospace">
                                         #{{ item.id }}
                                     </a>
+                                    {% if item.razorpay_payment_id %}
+                                    <br><small class="text-muted font-monospace" style="font-size: 10px;">{{ item.razorpay_payment_id }}</small>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     <small class="text-muted">{{ item.orderDate|default:"-"|slice:":16" }}</small>

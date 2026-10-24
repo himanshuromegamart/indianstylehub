@@ -232,6 +232,15 @@
                                         <a href="/admin-payment-details/{{ item.id }}/" class="btn btn-sm btn-outline-primary" title="View Full Log">
                                             <i class="fa fa-eye"></i> Details
                                         </a>
+                                        {% if item.linked_order %}
+                                        <a href="/admin-order-details/{{ item.linked_order.id }}/" class="btn btn-sm btn-success text-white" title="View Associated Order #{{ item.linked_order.id }}">
+                                            <i class="fa fa-shopping-bag"></i> Order #{{ item.linked_order.id }}
+                                        </a>
+                                        {% elif item.status == 'SUCCESS' %}
+                                        <a href="/admin-sync-payment/{{ item.id }}/" class="btn btn-sm btn-outline-success" title="Generate and link Order now">
+                                            <i class="fa fa-plus-circle"></i> Create Order
+                                        </a>
+                                        {% endif %}
                                         {% if item.status == 'PENDING' and item.razorpay_order_id %}
                                         <a href="/admin-sync-payment/{{ item.id }}/" class="btn btn-sm btn-outline-warning" title="Sync with Razorpay API">
                                             <i class="fa fa-refresh"></i> Sync
