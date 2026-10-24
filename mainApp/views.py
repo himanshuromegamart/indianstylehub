@@ -2611,54 +2611,33 @@ def create_razorpay_order(request):
         # Generate Unique Order Number
         order_number = f"ORD{datetime.now().strftime('%y%m%d')}{random.randint(1000, 9999)}"
 
-        # Get or Create User & Buyer
-        user_obj = None
-        if request.user.is_authenticated:
-            user_obj = request.user
-        else:
-            user_obj = User.objects.filter(email=email).first()
-            if not user_obj:
-                user_obj = User.objects.filter(username=email).first()
-            if not user_obj:
-                try:
-                    user_obj = User.objects.create_user(
-                        username=email,
-                        email=email,
-                        first_name=name.split()[0] if name else '',
-                        last_name=' '.join(name.split()[1:]) if len(name.split()) > 1 else ''
-                    )
-                except Exception:
-                    user_obj = User.objects.filter(email=email).first()
-
+        # Get or Create Buyer
         buyer = None
-        if user_obj:
-            buyer = Buyer.objects.filter(user=user_obj).first()
-        if not buyer and email:
-            buyer = Buyer.objects.filter(email=email).first()
+        if email:
+            buyer = Buyer.objects.filter(email__iexact=email).first()
         if not buyer and clean_phone:
             buyer = Buyer.objects.filter(phone=clean_phone).first()
 
         if not buyer:
             buyer = Buyer.objects.create(
-                user=user_obj,
                 name=name,
                 email=email,
                 phone=clean_phone,
-                address=address,
-                city=city,
-                state=state,
-                pin=pincode
+                verification="verified"
             )
         else:
             updated = False
-            if not buyer.name and name: buyer.name = name; updated = True
-            if not buyer.email and email: buyer.email = email; updated = True
-            if not buyer.phone and clean_phone: buyer.phone = clean_phone; updated = True
-            if not buyer.address and address: buyer.address = address; updated = True
-            if not buyer.city and city: buyer.city = city; updated = True
-            if not buyer.state and state: buyer.state = state; updated = True
-            if not buyer.pin and pincode: buyer.pin = pincode; updated = True
-            if updated: buyer.save()
+            if not buyer.name and name:
+                buyer.name = name
+                updated = True
+            if not buyer.email and email:
+                buyer.email = email
+                updated = True
+            if not buyer.phone and clean_phone:
+                buyer.phone = clean_phone
+                updated = True
+            if updated:
+                buyer.save()
 
         # Save Delivery Address
         address_obj = Address.objects.create(
