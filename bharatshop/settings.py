@@ -178,6 +178,8 @@ DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'bharat@narifashionsto
 
 
 # Razorpay Payment Gateway Configuration
-RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', 'rzp_test_TrebS13OjJUAeZ')
-RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', 'cQ2Mt9EhceXPKCGGFZRG7fAD')
+# 1. First check environment variables (if .env or server env is set)
+# 2. If env is not available, take credentials directly from settings
+RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID') or 'rzp_test_TrebS13OjJUAeZ'
+RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET') or 'cQ2Mt9EhceXPKCGGFZRG7fAD'
 RAZORPAY_CURRENCY = 'INR'

@@ -2376,9 +2376,25 @@ def add_enquiry(request):
 # ==============================================================================
 
 def get_razorpay_client():
-    """Initializes and returns the Razorpay client and credentials."""
-    key_id = getattr(settings, 'RAZORPAY_KEY_ID', os.environ.get('RAZORPAY_KEY_ID', 'rzp_test_TrebS13OjJUAeZ')).strip()
-    key_secret = getattr(settings, 'RAZORPAY_KEY_SECRET', os.environ.get('RAZORPAY_KEY_SECRET', 'cQ2Mt9EhceXPKCGGFZRG7fAD')).strip()
+    """
+    Initializes and returns the Razorpay client and credentials.
+    Priority order:
+    1. Django settings (settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+    2. Environment variables (os.environ)
+    3. Direct credentials fallback (if .env is not available)
+    """
+    key_id = (
+        getattr(settings, 'RAZORPAY_KEY_ID', None)
+        or os.environ.get('RAZORPAY_KEY_ID')
+        or 'rzp_test_TrebS13OjJUAeZ'
+    )
+    key_secret = (
+        getattr(settings, 'RAZORPAY_KEY_SECRET', None)
+        or os.environ.get('RAZORPAY_KEY_SECRET')
+        or 'cQ2Mt9EhceXPKCGGFZRG7fAD'
+    )
+    key_id = str(key_id).strip()
+    key_secret = str(key_secret).strip()
     client = razorpay.Client(auth=(key_id, key_secret))
     return client, key_id, key_secret
 
